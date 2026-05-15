@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import shutil
 from pathlib import Path
+from typing import Any, Mapping
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -32,6 +33,20 @@ def get_writable_root() -> Path:
 
 def uses_writable_data_tree() -> bool:
     return get_writable_root().resolve() != REPO_ROOT.resolve()
+
+
+def resolve_inputs_directory(settings: Mapping[str, Any]) -> Path:
+    """Resolve ``inputs.directory`` against the repo or writable root (Vercel / ``/tmp``)."""
+
+    block = settings.get("inputs")
+    if not isinstance(block, dict):
+        block = {}
+    raw = Path(str(block.get("directory", "inputs")))
+    if raw.is_absolute():
+        return raw
+    bootstrap_if_needed()
+    base = get_writable_root() if uses_writable_data_tree() else REPO_ROOT
+    return base / raw
 
 
 def bootstrap_if_needed() -> None:

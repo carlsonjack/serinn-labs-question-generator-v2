@@ -14,6 +14,7 @@ from .declarative import execute_normalization_spec
 from .profiles import load_normalization_spec, save_profile
 from .registry import get_category_normalizer, list_registered_categories
 from .season_merge import infer_merge_profile_options
+from core.data_layout import resolve_inputs_directory
 from core.template_ui import normalize_template_package, package_aliases_for_settings
 
 # Register built-in category normalizers.
@@ -262,7 +263,7 @@ def load_normalized_bundle(
     """Load, detect, and normalize the configured inputs for one category."""
 
     registry_ck = _normalizer_key_for_package(settings, category_key)
-    input_dir = Path(settings.get("inputs", {}).get("directory", "inputs"))
+    input_dir = resolve_inputs_directory(settings)
     files_root = (settings.get("inputs") or {}).get("files") or {}
     matched_pkg_key, file_config = _match_inputs_package(files_root, category_key)
 

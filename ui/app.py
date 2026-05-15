@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 
 from core.config import load_settings, load_settings_disk_only, save_settings_yaml
 from core.csv_export import DEFAULT_OUTPUT_DIR
+from core.data_layout import resolve_inputs_directory
 from core.input_date_range import infer_date_range_from_excel_paths
 from core.input_slots import (
     get_files_map_for_category,
@@ -52,14 +53,6 @@ _ROOT = Path(__file__).resolve().parent.parent
 _LOCK = threading.Lock()
 _JOBS: dict[str, "JobState"] = {}
 _ACTIVE_RUN = False
-
-
-def _data_root() -> Path:
-    """Root for mutable repo-relative paths (e.g. ``inputs/``); uses ``/tmp`` on Vercel."""
-
-    from core.data_layout import get_writable_root, uses_writable_data_tree
-
-    return get_writable_root() if uses_writable_data_tree() else _ROOT
 
 
 def _is_safe_download_name(name: str) -> bool:
@@ -109,8 +102,7 @@ def _template_meta_for_package(
 
 
 def _inputs_directory(settings: dict[str, Any]) -> Path:
-    raw = Path(settings.get("inputs", {}).get("directory", "inputs"))
-    return raw if raw.is_absolute() else _data_root() / raw
+    return resolve_inputs_directory(settings)
 
 
 def _issue_to_api(issue: ValidationIssue) -> dict[str, Any]:

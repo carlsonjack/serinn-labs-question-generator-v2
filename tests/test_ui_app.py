@@ -233,7 +233,7 @@ def test_upload_applies_inferred_date_range_to_settings(client, tmp_path, monkey
 
     root = tmp_path / "root"
     (root / "inputs").mkdir(parents=True)
-    monkeypatch.setattr(ui_app, "_ROOT", root)
+    monkeypatch.setattr(ui_app, "_inputs_directory", lambda _s: root / "inputs")
 
     writes: list[dict] = []
 

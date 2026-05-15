@@ -17,6 +17,17 @@ def test_get_writable_root_uses_tmp_under_vercel(monkeypatch, tmp_path) -> None:
     assert root == (tmp_path / "serinn-labs-data").resolve()
 
 
+def test_resolve_inputs_directory_under_vercel(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    from core.data_layout import bootstrap_if_needed, resolve_inputs_directory
+
+    bootstrap_if_needed()
+    settings = {"inputs": {"directory": "inputs", "files": {"movies": {}}}}
+    p = resolve_inputs_directory(settings)
+    assert p == (tmp_path / "serinn-labs-data" / "inputs").resolve()
+
+
 def test_bootstrap_seeds_settings_and_upload_works_under_vercel(
     monkeypatch, tmp_path
 ) -> None:
