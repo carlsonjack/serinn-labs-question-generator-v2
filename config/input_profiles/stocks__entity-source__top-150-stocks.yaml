@@ -1,0 +1,15 @@
+category_key: stocks
+confidence: 1.0
+field_mappings:
+  company_name: Company Name
+  ticker: Ticker
+  topic_import_id: Topic Import ID
+  topic_name: topic_name
+file_pattern: top-150-stocks.xlsx
+fingerprint: 96c2b718d7effde9a721370a37930f77d6dd518647e105104313c0a949f45406
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: top-150-stocks
+sheet_name: 150 Stocks
+source_role: entity_source

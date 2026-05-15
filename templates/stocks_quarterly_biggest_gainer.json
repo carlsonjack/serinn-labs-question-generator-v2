@@ -1,0 +1,13 @@
+{
+  "id": "stocks_quarterly_biggest_gainer",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "Which of these stocks will gain the most during Q{QUARTER} {YEAR}?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{ASSET_1}||{ASSET_2}||{ASSET_3}||{ASSET_4}||None",
+  "priority": 2,
+  "requires_entities": false,
+  "timeframe": "Quarterly",
+  "template_name": "Quarterly Biggest Gainer",
+  "notes": "Use four randomized stocks from the watchlist. 'None' applies if none of the listed stocks gains during the quarter."
+}

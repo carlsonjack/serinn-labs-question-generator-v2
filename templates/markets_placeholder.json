@@ -1,0 +1,11 @@
+{
+  "id": "markets_placeholder",
+  "subcategory": "Markets",
+  "question_family": "event",
+  "question": "Placeholder question for future markets category.",
+  "answer_type": "yes_no",
+  "answer_options": "Yes||No",
+  "priority": "",
+  "requires_entities": false,
+  "_comment": "extend by adding question and input package definition"
+}

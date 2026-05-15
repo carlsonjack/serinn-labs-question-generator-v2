@@ -1,0 +1,16 @@
+category_key: mls
+confidence: 0.65
+field_mappings:
+  player_name: Name
+  team: Team
+file_pattern: file.xlsx
+fingerprint: 24f82fe1191f7793bdfd824f984cbdd2b66d40d15c733d4cf3f37ad4e6d44382
+format_name: xlsx
+header_row_index: 0
+normalizer_options:
+  association_sheet_name: 2026 Stastics
+  join_strategy: player_name
+  stats_sheet_name: 2025 Statistics
+profile_name: file
+sheet_name: 2026 Stastics
+source_role: metric_source

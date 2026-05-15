@@ -1,0 +1,11 @@
+{
+  "id": "mls_sample_event_mc",
+  "subcategory": "MLS",
+  "question_family": "event",
+  "question": "Who wins {home_team} vs {away_team}?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{home_team}||{away_team}",
+  "priority": 1,
+  "requires_entities": false,
+  "_comment": "Schedule input — multiple choice event"
+}

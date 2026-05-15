@@ -1,0 +1,13 @@
+{
+  "id": "stocks_daily_close_lower",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "Will {ASSET} close lower on {DATE} than its previous closing price during regular trading hours?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "timeframe": "Daily",
+  "template_name": "Daily Close Lower",
+  "notes": "Use for variety. Avoid pairing with Daily Close Higher for the same asset/date unless intentional."
+}

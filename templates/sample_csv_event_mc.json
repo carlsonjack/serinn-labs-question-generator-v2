@@ -1,0 +1,11 @@
+{
+  "id": "sample_csv_event_mc",
+  "subcategory": "MLB",
+  "question_family": "event",
+  "question": "Who wins {home_team} vs {away_team}?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{home_team}||{away_team}",
+  "priority": 1,
+  "requires_entities": false,
+  "_comment": "Sample upload — multiple choice event"
+}

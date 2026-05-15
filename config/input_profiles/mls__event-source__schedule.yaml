@@ -1,0 +1,13 @@
+category_key: mls
+confidence: 0.6666666666666666
+field_mappings:
+  event_date: Date
+  event_time: Time
+file_pattern: schedule.xlsx
+fingerprint: b38f908b6db4acb4a3b83dd8f571517cdce6407fc407783550abf5af7008f04b
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: schedule
+sheet_name: 2026 Schedule
+source_role: event_source

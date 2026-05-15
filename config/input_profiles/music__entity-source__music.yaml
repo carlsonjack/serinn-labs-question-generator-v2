@@ -1,0 +1,15 @@
+category_key: music
+confidence: 1.0
+field_mappings:
+  artist: Artist
+  genre: Genre
+  release_date: Release Date
+  title: Album Title
+file_pattern: music.xlsx
+fingerprint: 29d299707fe13cbdf920c1f625ff825756dcc1f29e1776c127811e0688fdc86a
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: music
+sheet_name: June 2026 Albums
+source_role: entity_source

@@ -1,0 +1,11 @@
+{
+  "id": "f1_race_winner_yes_no",
+  "subcategory": "F1",
+  "question_family": "event",
+  "question": "Will {home_team} win this Grand Prix race?",
+  "answer_type": "yes_no",
+  "answer_options": "Yes||No",
+  "priority": "",
+  "requires_entities": false,
+  "_comment": "Requires home_team to be the driver or constructor the question names; away_team unused for yes/no but may still be set by the normalizer."
+}

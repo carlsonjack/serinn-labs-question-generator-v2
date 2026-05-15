@@ -1,0 +1,11 @@
+{
+  "id": "sample_csv_event_yesno",
+  "subcategory": "MLB",
+  "question_family": "event",
+  "question": "Will the home team score first?",
+  "answer_type": "yes_no",
+  "answer_options": "Yes||No",
+  "priority": "",
+  "requires_entities": false,
+  "_comment": "Sample upload — yes/no event"
+}

@@ -1,0 +1,55 @@
+version: 1
+package_key: movies
+sources:
+  movies.xlsx#Sheet1:
+    source_role: entity_source
+    file_pattern: movies.xlsx
+    sheet_name: Sheet1
+    header_row_index: 0
+    field_mappings:
+      release_date: Date
+      studio: Studio
+      title: Title
+    metric_mappings: {}
+    metadata_mappings:
+      rating: Rating
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+  movies.xlsx#Sheet2:
+    source_role: entity_source
+    file_pattern: movies.xlsx
+    sheet_name: Sheet2
+    header_row_index: 0
+    field_mappings:
+      release_date: Release Date
+      studio: Distributor
+      title: Movie
+    metric_mappings: {}
+    metadata_mappings:
+      domestic: Domestic
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  releases:
+    filename: movies.xlsx
+    sheets:
+    - columns:
+      - Date
+      - Title
+      - Studio
+      - Rating
+      header_row_index: 0
+      sheet_name: Sheet1
+    - columns:
+      - Release Date
+      - Movie
+      - Distributor
+      - Domestic
+      header_row_index: 0
+      sheet_name: Sheet2
+notes: Mapped both sheets as content release sources. Sheet1 uses Title/Date/Studio
+  directly. Sheet2 maps Movie to title, Release Date to release_date, and Distributor
+  to studio; retained Domestic as metadata because sample rows indicate non-title/header-like
+  values may appear in the column and blank/title-less rows exist.

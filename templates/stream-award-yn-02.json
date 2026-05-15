@@ -1,0 +1,34 @@
+{
+  "id": "stream-award-yn-02",
+  "subcategory": "Television",
+  "question_family": "content",
+  "question": "Will [TITLE] be nominated for Best Show in its category at the Golden Globe Awards?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "template_type": "Golden Globe Awards",
+  "required_dataset_fields": "show_title; release_date; estimated_nomination_date; topic_import_id",
+  "placeholder_mappings": {
+    "SHOW_TITLE": {
+      "canonical_placeholder": "TITLE",
+      "target": "question",
+      "confidence": 0.94,
+      "source": "ai",
+      "reason": "The template asks about a television show's title. The available vocabulary does not include SHOW_TITLE or TV-specific series placeholders, so TITLE is the closest canonical placeholder. FILM/MOVIE variants are less appropriate because the subcategory is Television."
+    }
+  },
+  "_comment": null,
+  "resolution_date_rule": "Resolution date should align with Golden Globe nomination announcement date. Resolution date should be December 1 of the calendar year.",
+  "resolution_date_spec": {
+    "kind": "calendar_in_year",
+    "anchor": null,
+    "metadata_key": null,
+    "offset_days": 0,
+    "offset_hours": 0,
+    "calendar_month": 12,
+    "calendar_day": 1,
+    "year_policy": "release_year",
+    "end_offset_days": null
+  }
+}

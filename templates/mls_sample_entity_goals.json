@@ -1,0 +1,13 @@
+{
+  "id": "mls_sample_entity_goals",
+  "subcategory": "MLS",
+  "question_family": "entity_stat",
+  "question": "Who will score a goal in this game?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{entity_options}",
+  "priority": "",
+  "requires_entities": true,
+  "stat_column": "Goals",
+  "top_n_per_team": 3,
+  "_comment": "Stats input — entity stat (goals); stat_column must match keys in player stat records after MLS stats parsing"
+}

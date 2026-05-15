@@ -1,0 +1,13 @@
+{
+  "id": "sample_csv_entity_hr",
+  "subcategory": "MLB",
+  "question_family": "entity_stat",
+  "question": "Who will hit a home run in this game?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{entity_options}",
+  "priority": "",
+  "requires_entities": true,
+  "stat_column": "HR",
+  "top_n_per_team": 3,
+  "_comment": "Sample upload — entity stat (HR)"
+}

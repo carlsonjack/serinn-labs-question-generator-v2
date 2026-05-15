@@ -1,0 +1,13 @@
+{
+  "id": "stocks_monthly_end_higher",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "Will {ASSET} close higher at the end of {MONTH} than at the end of the previous month?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "timeframe": "Monthly",
+  "template_name": "Monthly End Higher",
+  "notes": "Compares the official close on the final regular trading day of the month against the final regular trading day of the prior month."
+}

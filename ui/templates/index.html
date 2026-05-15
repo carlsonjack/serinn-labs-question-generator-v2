@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Serinn Labs — Question Generator</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #fff;
+        --border: #d8ddea;
+        --text: #1a1f2e;
+        --muted: #5c6578;
+        --accent: #1e4d8c;
+        --err: #a42020;
+        --ok: #1a6b3a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 44rem;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 3rem;
+      }
+      h1 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+      }
+      section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+      }
+      section h2 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        margin: 0 0 0.75rem;
+        font-weight: 600;
+      }
+      .workflow-step {
+        margin-top: 1.1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+      .workflow-step:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+      }
+      h3.workflow-step-head {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 0.2rem;
+        letter-spacing: normal;
+        text-transform: none;
+        line-height: 1.35;
+      }
+      .workflow-step-head .w-num {
+        color: var(--accent);
+        font-weight: 700;
+        margin-right: 0.35rem;
+      }
+      .workflow-step-head .w-optional {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        margin-left: 0.4rem;
+        vertical-align: middle;
+      }
+      .workflow-step-one-liner {
+        font-size: 0.88rem;
+        color: var(--muted);
+        margin: 0 0 0.65rem;
+        line-height: 1.45;
+      }
+      label {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+      }
+      input[type="text"],
+      input[type="number"],
+      input[type="date"] {
+        width: 100%;
+        padding: 0.45rem 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font: inherit;
+        margin-bottom: 0.65rem;
+      }
+      .topic-combobox {
+        position: relative;
+        margin-bottom: 0.65rem;
+      }
+      .topic-combobox input {
+        margin-bottom: 0.2rem;
+      }
+      .topic-options {
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        right: 0;
+        top: calc(100% - 0.15rem);
+        max-height: 16rem;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--card);
+        box-shadow: 0 8px 24px rgba(26, 31, 46, 0.12);
+      }
+      .topic-options[hidden] {
+        display: none;
+      }
+      .topic-option {
+        padding: 0.45rem 0.55rem;
+        cursor: pointer;
+        border-bottom: 1px solid #eef1f6;
+      }
+      .topic-option:last-child {
+        border-bottom: none;
+      }
+      .topic-option.active,
+      .topic-option:hover {
+        background: #eef3fb;
+      }
+      .topic-option-id {
+        display: block;
+        font-weight: 600;
+      }
+      .topic-option-label {
+        display: block;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      .topic-import-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: flex-start;
+        margin-bottom: 0.35rem;
+      }
+      .topic-import-row .topic-combobox {
+        flex: 1 1 12rem;
+        margin-bottom: 0;
+      }
+      .topic-import-row .topic-combobox input {
+        margin-bottom: 0.2rem;
+      }
+      .topic-import-row #btn-save-topic-import-catalog {
+        flex: 0 0 auto;
+        margin-top: 0;
+        margin-bottom: 0.2rem;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.88rem;
+      }
+      .row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .drop {
+        border: 2px dashed var(--border);
+        border-radius: 6px;
+        padding: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+      }
+      .drop.dragover {
+        border-color: var(--accent);
+        background: #eef3fb;
+      }
+      .drop strong {
+        color: var(--text);
+      }
+      .drop.has-file {
+        border-style: solid;
+        border-color: #9eb4d6;
+        background: #f8faff;
+      }
+      .drop.saved {
+        border-color: var(--ok);
+        background: #ecf8ef;
+      }
+      .target-name {
+        font-size: 0.8rem;
+        margin-top: 0.35rem;
+      }
+      .slot-line {
+        font-size: 0.82rem;
+        margin: 0.25rem 0 0.65rem;
+        min-height: 1.2rem;
+      }
+      select#input_category_key {
+        width: 100%;
+        padding: 0.45rem 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font: inherit;
+        margin-bottom: 0.75rem;
+      }
+      .tpls {
+        display: grid;
+        gap: 0.35rem;
+        font-size: 0.9rem;
+      }
+      .tpls label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+        font-weight: 400;
+      }
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      button {
+        font: inherit;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        background: var(--accent);
+        color: #fff;
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .status {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.65rem;
+        border-radius: 4px;
+        background: #eef1f6;
+        border: 1px solid var(--border);
+        min-height: 2.5rem;
+      }
+      .status.error {
+        background: #fdecec;
+        border-color: #e8b4b4;
+        color: var(--err);
+      }
+      .status.ok {
+        background: #ecf8ef;
+        border-color: #a8d4b4;
+        color: var(--ok);
+      }
+      .summary {
+        font-size: 0.88rem;
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: #f0f2f6;
+        padding: 0.65rem;
+        border-radius: 4px;
+        margin-top: 0.5rem;
+      }
+      .downloads a {
+        display: inline-block;
+        margin-right: 0.75rem;
+        margin-top: 0.35rem;
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .small {
+        font-size: 0.82rem;
+      }
+      .tpl-upload-feedback {
+        flex: 1;
+        min-width: 0;
+        max-width: 42rem;
+      }
+      .tpl-upload-mapping-details {
+        margin-top: 0.35rem;
+      }
+      .tpl-upload-mapping-details > summary {
+        cursor: pointer;
+        user-select: none;
+        list-style: none;
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .tpl-upload-mapping-details > summary::-webkit-details-marker {
+        display: none;
+      }
+      .tpl-upload-mapping-body {
+        margin-top: 0.35rem;
+        padding: 0.5rem 0.65rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+        background: #f0f2f6;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        max-height: 14rem;
+        overflow: auto;
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .tpl-card {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        margin-bottom: 0.6rem;
+        background: #fafbfc;
+      }
+      .tpl-card summary {
+        cursor: pointer;
+        padding: 0.5rem 0.65rem;
+        font-size: 0.9rem;
+        list-style: none;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .tpl-card summary::-webkit-details-marker {
+        display: none;
+      }
+      .tpl-card .sum-main {
+        flex: 1;
+      }
+      .tpl-card .tpl-meta {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: normal;
+      }
+      .tpl-card .tpl-body {
+        padding: 0 0.65rem 0.65rem 2rem;
+        border-top: 1px solid var(--border);
+      }
+      .templates-collapse {
+        margin-top: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.5rem 0.65rem 0.65rem;
+        background: #fafbfc;
+      }
+      .templates-collapse > summary {
+        cursor: pointer;
+        list-style: none;
+        font-size: 1.05rem;
+        font-weight: 600;
+        padding: 0.25rem 0;
+      }
+      .templates-collapse > summary::before {
+        content: "▸";
+        display: inline-block;
+        margin-right: 0.35rem;
+        color: var(--muted);
+        transition: transform 0.15s ease;
+      }
+      .templates-collapse[open] > summary::before {
+        transform: rotate(90deg);
+      }
+      .templates-collapse > summary::-webkit-details-marker {
+        display: none;
+      }
+      .templates-collapse-body {
+        margin-top: 0.5rem;
+        padding-top: 0.35rem;
+        border-top: 1px solid var(--border);
+      }
+      .templates-collapse-body h3 {
+        margin: 1rem 0 0.35rem;
+        font-size: 1rem;
+      }
+      .preview-q {
+        font-style: italic;
+        margin: 0.5rem 0 0.25rem;
+        font-size: 0.92rem;
+      }
+      .expl {
+        margin: 0.35rem 0;
+        font-size: 0.86rem;
+        color: var(--text);
+      }
+      .tpl-upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        margin-top: 0.35rem;
+        cursor: pointer;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease;
+      }
+      .tpl-upload-zone.has-pending {
+        border-style: solid;
+        border-color: #9eb4d6;
+        background: #f8faff;
+      }
+      .tpl-upload-zone.has-pending strong {
+        color: var(--accent);
+      }
+      #tpl-pending-label {
+        margin-top: 0.35rem;
+        min-height: 1.2rem;
+        font-size: 0.82rem;
+      }
+      button.secondary {
+        background: #5c6578;
+      }
+      button.ghost {
+        background: #eef1f6;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      details.inputs-def {
+        margin-bottom: 0.85rem;
+        padding-bottom: 0.65rem;
+        border-bottom: 1px solid var(--border);
+      }
+      details.inputs-def summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.92rem;
+        margin-bottom: 0.5rem;
+      }
+      .pkg-card {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.65rem 0.75rem;
+        margin-bottom: 0.65rem;
+        background: #fafbfc;
+      }
+      .pkg-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .pkg-head label {
+        margin: 0;
+        font-size: 0.9rem;
+      }
+      .pkg-key-inp {
+        width: auto;
+        min-width: 9rem;
+        margin-bottom: 0;
+        display: inline-block;
+      }
+      .slot-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.4rem;
+      }
+      .slot-row input {
+        margin-bottom: 0;
+      }
+      .slot-row button {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Structured content generation</h1>
+      <p class="sub">
+        Upload the input files defined in <code>config/settings.yaml</code> under
+        <code>inputs.files</code>, then generate. Output files are written to
+        <code>{{ output_dir }}</code>.
+      </p>
+
+      <section>
+        <h2>Input files</h2>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 1</span>Define packages &amp; file slots<span class="w-optional">Optional</span>
+          </h3>
+          <p class="workflow-step-one-liner">
+            Open only when you are changing input types, adding a package, or editing slot mappings; skip
+            to step 2 if the package is already set.
+          </p>
+          <details class="inputs-def">
+            <summary>Define packages &amp; file slots</summary>
+            <p class="muted small" style="margin: 0.35rem 0 0.65rem">
+              Each <strong>package</strong> (e.g. <code>mlb</code>) maps <strong>slot ids</strong> to the
+              filename used under <code>inputs/</code> when you upload. Slot ids should match your input
+              profiles (e.g. <code>event_source</code>, <code>metric_source</code>). You can use any
+              <code>.xlsx</code> basename per slot; common slot names like <code>schedule</code> or
+              <code>stats</code> are auto-mapped to roles when <code>inputs.file_roles</code> omits that
+              package, or use <code>event_source</code> + <code>metric_source</code> for zero-config
+              schedule+stats packages.
+            </p>
+            <div id="inputs-files-root"></div>
+            <div class="actions" style="margin-top: 0.35rem">
+              <button type="button" class="ghost" id="btn-add-input-pkg">Add package</button>
+              <button type="button" id="btn-save-inputs-files">Save definitions</button>
+              <span class="muted" id="inputs-files-msg"></span>
+            </div>
+          </details>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 2</span>Select input package</h3>
+          <p class="workflow-step-one-liner">
+            Choose which package’s slots, normalizer, and template list this run uses.
+          </p>
+          <label for="input_category_key">Input package</label>
+          <select id="input_category_key" autocomplete="off">
+            {% for c in input_categories %}
+            <option value="{{ c }}" {% if c == input_category_key %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 3</span>Upload input files</h3>
+          <p class="workflow-step-one-liner">
+            Drop the required <code>.xlsx</code> files on each slot, then save uploads to refresh parsing
+            and downstream previews.
+          </p>
+          <p class="muted" style="margin-top: -0.35rem; margin-bottom: 0.65rem">
+            Files below follow the package selected in step 2.
+          </p>
+
+        <div id="input-slots-root">
+          {% if not input_slots %}
+          <p class="muted">
+            No input slots — add <code>inputs.files.&lt;package&gt;</code> in settings.
+          </p>
+          {% endif %}
+          {% for s in input_slots %}
+          <div class="input-slot-wrap" data-slot-id="{{ s.slot_id }}">
+            <div
+              class="drop"
+              id="drop-{{ s.slot_id }}"
+              data-input="file-{{ s.slot_id }}"
+              tabindex="0"
+            >
+              <strong>{{ s.label }}</strong> — drop <code>.xlsx</code> here or click
+              <div class="target-name muted">
+                Saved as <code>{{ s.target_filename }}</code>
+              </div>
+            </div>
+            <input
+              type="file"
+              id="file-{{ s.slot_id }}"
+              class="slot-file"
+              data-slot-id="{{ s.slot_id }}"
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            />
+            <div class="slot-line muted" id="line-{{ s.slot_id }}"></div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="actions">
+          <button type="button" id="btn-upload">
+            Save uploads + create normalizer profile
+          </button>
+          <span class="muted" id="upload-msg"></span>
+        </div>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 4</span>Check content preview</h3>
+          <p class="workflow-step-one-liner">
+            After save, scan the normalizer profile preview for layout errors or column mismatches before
+            you continue.
+          </p>
+          <h2>Normalizer profile</h2>
+          <p class="muted small" style="margin-top: -0.25rem">
+            The upload button saves the selected files, analyzes their layout, and saves the
+            best available normalization profile for this package.
+          </p>
+          <div class="muted small" id="normalizer-msg"></div>
+          <div class="summary" id="normalizer-preview" hidden></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Configuration</h2>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 5</span>Confirm date range</h3>
+          <p class="workflow-step-one-liner">
+            Values are taken from your input when possible; adjust the window here if it does not match
+            the period you want to generate.
+          </p>
+          <div class="row2">
+            <div>
+              <label for="date_start">Date start</label>
+              <input type="text" id="date_start" value="{{ settings.date_filter.start }}" placeholder="YYYY-MM-DD" />
+            </div>
+            <div>
+              <label for="date_end">Date end</label>
+              <input type="text" id="date_end" value="{{ settings.date_filter.end }}" placeholder="YYYY-MM-DD" />
+            </div>
+          </div>
+          <p class="muted small" id="date-filter-auto-note" hidden aria-live="polite" style="margin-top: 0.35rem"></p>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 6</span>Topic Import ID</h3>
+          <p class="workflow-step-one-liner">
+            Pick or type the topic import ID that should be stored with this batch’s output.
+          </p>
+        <label for="topic_import_id">Topic Import ID</label>
+        <div class="topic-import-row">
+          <div class="topic-combobox" id="topic_import_id_combo">
+            <input
+              type="text"
+              id="topic_import_id"
+              value="{{ settings.topic_import_id or '' }}"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded="false"
+              aria-controls="topic_import_id_options"
+              autocomplete="off"
+              placeholder="Search the list or type any ID"
+            />
+            <div
+              class="topic-options"
+              id="topic_import_id_options"
+              role="listbox"
+              hidden
+            ></div>
+          </div>
+          <button type="button" class="ghost" id="btn-save-topic-import-catalog">
+            Save ID to pick list
+          </button>
+        </div>
+        <p class="muted small" id="topic-import-catalog-msg" aria-live="polite" style="margin-top: 0"></p>
+        <p class="muted small" style="margin-top: -0.2rem">
+          Use <strong>Save ID to pick list</strong> after typing a new ID so it appears in the dropdown
+          for next time (writes <code>config/topic_import_ids_catalog.json</code>). Generate still saves
+          the active ID in settings.
+        </p>
+        <p class="muted small" style="margin-top: -0.35rem">
+          Choose a suggestion below, or type your own ID — anything you enter is kept for this run,
+          even if it is not in the list yet.
+        </p>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 7</span>Subcategory label</h3>
+          <p class="workflow-step-one-liner">
+            Confirm or edit the label saved with generated rows if it was not auto-filled the way you
+            expect.
+          </p>
+        <label for="subcategory">Subcategory label</label>
+        <input type="text" id="subcategory" value="{{ settings.subcategory or 'MLB' }}" />
+        <p class="muted small" style="margin-top: -0.35rem">
+          This label is saved with generated output. The template list below follows the selected
+          input package.
+        </p>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 8</span>Top N per team (entity questions)<span class="w-optional">Optional</span>
+          </h3>
+          <p class="workflow-step-one-liner">
+            Cap how many entity rows to keep per team when templates need that limit; leave default if
+            unsure.
+          </p>
+        <label for="top_n">
+          Top N per team (entity questions)
+          <span class="muted small" style="font-weight: normal">optional</span>
+        </label>
+        <input type="number" id="top_n" min="1" max="50" value="{{ settings.top_n_per_team or 3 }}" />
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 9</span>Review configuration</h3>
+          <p class="workflow-step-one-liner">
+            Quick pass: dates, topic ID, subcategory, Top N, and the optional max below should match how
+            you intend to run before you pick templates.
+          </p>
+        <label for="max_q">
+          Max questions to generate
+          <span class="muted small" style="font-weight: normal"> (leave blank for no limit)</span>
+        </label>
+        <input
+          type="number"
+          id="max_q"
+          min="1"
+          placeholder="No limit"
+          value="{% if settings.get('max_generated_questions') is not none %}{{ settings.max_generated_questions }}{% endif %}"
+        />
+        <p class="muted small" style="margin-top: -0.35rem">
+          After expanding <em>games × enabled templates</em>, only the first N rows are sent to the
+          API. Leave empty to generate all matching rows. Use this to sample or cap cost.
+        </p>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 10</span>Templates</h3>
+          <p class="workflow-step-one-liner">
+            Enable the templates you want for this run; use Add template below to upload new JSON, CSV,
+            or XLSX definitions.
+          </p>
+        <details class="templates-collapse" open>
+          <summary>
+            <span id="template-heading">Templates ({{ template_subcategory }})</span>
+          </summary>
+          <div class="templates-collapse-body">
+            <p class="muted small" id="template-help" style="margin-top: 0">
+              Only templates matching the selected input package are shown. Open a row for a preview
+              and what enabling it does.
+            </p>
+            <div class="tpls" id="template-checkboxes">
+              {% if not template_meta %}
+              <p class="muted">No templates match the selected input package yet.</p>
+              {% endif %}
+              {% for t in template_meta %}
+              <details class="tpl-card" {% if t.enabled %}open{% endif %}>
+                <summary>
+                  <input
+                    type="checkbox"
+                    data-tid="{{ t.id }}"
+                    {% if t.enabled %}checked{% endif %}
+                    onclick="event.stopPropagation()"
+                    aria-label="Enable {{ t.id }}"
+                  />
+                  <span class="sum-main">
+                    <strong>{{ t.id }}</strong>
+                    <span class="tpl-meta">
+                      {{ t.subcategory }} · {{ t.question_family }} · {{ t.answer_type }}{% if t.line is not none %} · line {{ t.line }}{% endif %}{% if t.stat_column %} · stat {{ t.stat_column }}{% endif %}
+                    </span>
+                  </span>
+                </summary>
+                <div class="tpl-body">
+                  <p class="preview-q">“{{ t.preview_question }}”</p>
+                  <p class="muted small">Answer options pattern: <code>{{ t.preview_answer_options }}</code></p>
+                  {% for line in t.explainer %}
+                  <p class="expl">{{ line }}</p>
+                  {% endfor %}
+                </div>
+              </details>
+              {% endfor %}
+            </div>
+
+            <h3>Add template</h3>
+            <p class="muted small">
+              Upload a template <code>.csv</code>, <code>.xlsx</code>, or <code>.json</code>. CSV/XLSX uploads
+              can contain template tables or repeated 2-row blocks. Valid uploads are
+              saved and enabled automatically; reload is handled for you.
+            </p>
+            <div class="tpl-upload-zone" id="tpl-upload-zone" tabindex="0">
+              <strong>Add template file</strong> — drop CSV, XLSX, or JSON file(s) here or click
+              <div class="muted" id="tpl-pending-label" aria-live="polite"></div>
+            </div>
+            <input type="file" id="tpl-files" accept=".csv,.xlsx,.xls,.json,text/csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" multiple />
+            <div class="actions" style="margin-top: 0.5rem; align-items: flex-start">
+              <button type="button" id="btn-tpl-upload">Upload</button>
+              <div class="tpl-upload-feedback" id="tpl-upload-feedback">
+                <span class="muted" id="tpl-upload-msg"></span>
+                <details id="tpl-upload-mapping-details" class="tpl-upload-mapping-details" hidden>
+                  <summary class="small">See mapping details</summary>
+                  <div class="tpl-upload-mapping-body" id="tpl-upload-mapping-body"></div>
+                </details>
+              </div>
+            </div>
+          </div>
+        </details>
+        </div>
+      </section>
+
+      <section>
+        <h2>Run</h2>
+        <div class="workflow-step">
+          <h3 class="workflow-step-head"><span class="w-num">Step 11</span>Run</h3>
+          <p class="workflow-step-one-liner">
+            Click Generate, wait until the job shows done, then download the CSV from the results area.
+          </p>
+        <div class="actions">
+          <button type="button" id="btn-run">Generate</button>
+          <span class="muted" id="run-hint"></span>
+        </div>
+        <div class="status" id="status-line"></div>
+        <div class="summary" id="summary" hidden></div>
+        <div class="downloads" id="downloads"></div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const $ = (id) => document.getElementById(id);
+
+        function escapeHtml(s) {
+          const d = document.createElement("div");
+          d.textContent = s;
+          return d.innerHTML;
+        }
+
+        let inputsFilesState = {{ inputs_files_map | tojson }};
+        let templatesEnabledState = {{ (settings.get("templates_enabled") or {}) | tojson }};
+        const topicImportCatalog = {{ topic_import_ids_catalog | tojson }};
+        let currentNormalizerSpec = null;
+
+        function isTemplateEnabled(templateMeta) {
+          if (
+            Object.prototype.hasOwnProperty.call(
+              templatesEnabledState,
+              templateMeta.id
+            )
+          ) {
+            return !!templatesEnabledState[templateMeta.id];
+          }
+          return !!templateMeta.enabled;
+        }
+
+        function renderTemplateCards(templateMeta) {
+          if (!templateMeta.length) {
+            return '<p class="muted">No templates match the selected input package yet.</p>';
+          }
+          return templateMeta
+            .map(function (t) {
+              const checked = isTemplateEnabled(t) ? " checked" : "";
+              const open = isTemplateEnabled(t) ? " open" : "";
+              const metaBits = [
+                t.subcategory,
+                t.question_family,
+                t.answer_type,
+              ];
+              if (t.line !== null && t.line !== undefined) metaBits.push("line " + t.line);
+              if (t.stat_column) metaBits.push("stat " + t.stat_column);
+              const explainer = (t.explainer || [])
+                .map(function (line) {
+                  return '<p class="expl">' + escapeHtml(line) + "</p>";
+                })
+                .join("");
+              return (
+                '<details class="tpl-card"' +
+                open +
+                ">" +
+                "<summary>" +
+                '<input type="checkbox" data-tid="' +
+                escapeHtml(t.id) +
+                '"' +
+                checked +
+                ' onclick="event.stopPropagation()" aria-label="Enable ' +
+                escapeHtml(t.id) +
+                '" />' +
+                '<span class="sum-main"><strong>' +
+                escapeHtml(t.id) +
+                '</strong><span class="tpl-meta"> ' +
+                escapeHtml(metaBits.join(" · ")) +
+                "</span></span></summary>" +
+                '<div class="tpl-body"><p class="preview-q">"' +
+                escapeHtml(t.preview_question || "") +
+                '"</p><p class="muted small">Answer options pattern: <code>' +
+                escapeHtml(t.preview_answer_options || "") +
+                "</code></p>" +
+                explainer +
+                "</div></details>"
+              );
+            })
+            .join("");
+        }
+
+        function refreshTemplateSection(templateMeta, templateSubcategory) {
+          const heading = $("template-heading");
+          const subcategoryInput = $("subcategory");
+          const root = $("template-checkboxes");
+          if (heading) {
+            heading.textContent =
+              "Templates (" + (templateSubcategory || "Selected package") + ")";
+          }
+          if (subcategoryInput && templateSubcategory) {
+            subcategoryInput.value = templateSubcategory;
+          }
+          if (root) {
+            root.innerHTML = renderTemplateCards(templateMeta || []);
+          }
+        }
+
+        function initTopicImportCombobox() {
+          const combo = $("topic_import_id_combo");
+          const input = $("topic_import_id");
+          const list = $("topic_import_id_options");
+          if (!combo || !input || !list || !Array.isArray(topicImportCatalog)) return;
+
+          let matches = [];
+          let activeIndex = -1;
+
+          function optionId(index) {
+            return "topic_import_id_option_" + index;
+          }
+
+          function searchableText(entry) {
+            return (entry.id + " " + (entry.label || "")).toLowerCase();
+          }
+
+          function closeList() {
+            list.hidden = true;
+            list.innerHTML = "";
+            input.setAttribute("aria-expanded", "false");
+            input.removeAttribute("aria-activedescendant");
+            activeIndex = -1;
+          }
+
+          function choose(index) {
+            const entry = matches[index];
+            if (!entry) return;
+            input.value = entry.id;
+            closeList();
+            input.focus();
+          }
+
+          function renderMatches() {
+            const query = input.value.trim().toLowerCase();
+            matches = topicImportCatalog.filter(function (entry) {
+              return !query || searchableText(entry).indexOf(query) >= 0;
+            });
+
+            if (!matches.length) {
+              closeList();
+              return;
+            }
+
+            list.innerHTML = matches
+              .map(function (entry, index) {
+                const active = index === activeIndex ? " active" : "";
+                const label = entry.label
+                  ? '<span class="topic-option-label">' +
+                    escapeHtml(entry.label) +
+                    "</span>"
+                  : "";
+                return (
+                  '<div class="topic-option' +
+                  active +
+                  '" id="' +
+                  optionId(index) +
+                  '" role="option" aria-selected="' +
+                  (index === activeIndex ? "true" : "false") +
+                  '" data-index="' +
+                  index +
+                  '">' +
+                  '<span class="topic-option-id">' +
+                  escapeHtml(entry.id) +
+                  "</span>" +
+                  label +
+                  "</div>"
+                );
+              })
+              .join("");
+            list.hidden = false;
+            input.setAttribute("aria-expanded", "true");
+            if (activeIndex >= 0) {
+              input.setAttribute("aria-activedescendant", optionId(activeIndex));
+            } else {
+              input.removeAttribute("aria-activedescendant");
+            }
+          }
+
+          input.addEventListener("focus", renderMatches);
+          input.addEventListener("input", function () {
+            activeIndex = -1;
+            renderMatches();
+          });
+          input.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+              closeList();
+              return;
+            }
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              if (list.hidden) renderMatches();
+              activeIndex = Math.min(activeIndex + 1, matches.length - 1);
+              renderMatches();
+              return;
+            }
+            if (e.key === "ArrowUp") {
+              e.preventDefault();
+              if (list.hidden) renderMatches();
+              activeIndex =
+                activeIndex <= 0 ? matches.length - 1 : activeIndex - 1;
+              renderMatches();
+              return;
+            }
+            if (e.key === "Enter" && !list.hidden && activeIndex >= 0) {
+              e.preventDefault();
+              choose(activeIndex);
+            }
+          });
+          list.addEventListener("mousedown", function (e) {
+            const option = e.target.closest(".topic-option");
+            if (!option) return;
+            e.preventDefault();
+            choose(parseInt(option.dataset.index, 10));
+          });
+          document.addEventListener("click", function (e) {
+            if (!combo.contains(e.target)) closeList();
+          });
+        }
+
+        async function fetchAndRenderInputSlots(cat, options) {
+          options = options || {};
+          const root = $("input-slots-root");
+          if (!options.keepUploadMsg) {
+            $("upload-msg").textContent = "";
+          }
+          root.innerHTML = "<p class=\"muted\">Loading…</p>";
+          const r = await fetch(
+            "/api/input-slots?category=" + encodeURIComponent(cat)
+          );
+          const j = await r.json();
+          if (!r.ok) {
+            root.innerHTML =
+              "<p class=\"muted\">" +
+              escapeHtml(j.error || "Could not load slots") +
+              "</p>";
+            return { ok: false, error: j.error || "Could not load slots" };
+          }
+          root.innerHTML = j.slots
+            .map(function (s) {
+              return (
+                '<div class="input-slot-wrap" data-slot-id="' +
+                escapeHtml(s.slot_id) +
+                '">' +
+                '<div class="drop" id="drop-' +
+                escapeHtml(s.slot_id) +
+                '" data-input="file-' +
+                escapeHtml(s.slot_id) +
+                '" tabindex="0">' +
+                "<strong>" +
+                escapeHtml(s.label) +
+                "</strong> — drop <code>.xlsx</code> here or click" +
+                '<div class="target-name muted">Saved as <code>' +
+                escapeHtml(s.target_filename) +
+                "</code></div></div>" +
+                '<input type="file" id="file-' +
+                escapeHtml(s.slot_id) +
+                '" class="slot-file" data-slot-id="' +
+                escapeHtml(s.slot_id) +
+                '" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />' +
+                '<div class="slot-line muted" id="line-' +
+                escapeHtml(s.slot_id) +
+                '"></div></div>'
+              );
+            })
+            .join("");
+          j.slots.forEach(function (s) {
+            wireSlot(s.slot_id);
+          });
+          refreshTemplateSection(
+            j.template_meta || [],
+            j.template_subcategory || cat
+          );
+          return { ok: true, j: j };
+        }
+
+        function gatherInputsFilesFromDom() {
+          const out = {};
+          document.querySelectorAll("#inputs-files-root .pkg-card").forEach(function (card) {
+            const pkgInput = card.querySelector(".pkg-key-inp");
+            const pkg = pkgInput ? pkgInput.value.trim() : "";
+            if (!pkg) return;
+            out[pkg] = out[pkg] || {};
+            card.querySelectorAll(".slot-row").forEach(function (row) {
+              const sidInp = row.querySelector(".slot-id-inp");
+              const fnInp = row.querySelector(".slot-file-inp");
+              const sid = sidInp ? sidInp.value.trim() : "";
+              const fn = fnInp ? fnInp.value.trim() : "";
+              if (sid && fn) out[pkg][sid] = fn;
+            });
+          });
+          return out;
+        }
+
+        function mergeDomIntoInputsState() {
+          const g = gatherInputsFilesFromDom();
+          if (Object.keys(g).length) inputsFilesState = g;
+        }
+
+        function renderInputsFilesEditor() {
+          const root = $("inputs-files-root");
+          if (!root) return;
+          const pkgs = Object.keys(inputsFilesState).sort();
+          if (pkgs.length === 0) {
+            root.innerHTML =
+              '<p class="muted">No packages yet. Click <strong>Add package</strong>, then <strong>Save definitions</strong>.</p>';
+            return;
+          }
+          root.innerHTML = pkgs
+            .map(function (pkg) {
+              const slots = inputsFilesState[pkg] || {};
+              const slotIds = Object.keys(slots).sort();
+              const rows = slotIds
+                .map(function (sid) {
+                  return (
+                    '<div class="slot-row">' +
+                    '<input type="text" class="slot-id-inp" value="' +
+                    escapeHtml(sid) +
+                    '" placeholder="event_source, schedule, …" />' +
+                    '<input type="text" class="slot-file-inp" value="' +
+                    escapeHtml(slots[sid]) +
+                    '" placeholder="schedule.xlsx" />' +
+                    '<button type="button" class="ghost btn-remove-slot">Remove</button></div>'
+                  );
+                })
+                .join("");
+              return (
+                '<div class="pkg-card">' +
+                '<div class="pkg-head">' +
+                '<label>Package <input type="text" class="pkg-key-inp" value="' +
+                escapeHtml(pkg) +
+                '" placeholder="mlb" /></label>' +
+                '<button type="button" class="ghost btn-remove-pkg">Remove package</button></div>' +
+                rows +
+                '<button type="button" class="ghost btn-add-slot" style="margin-top:0.25rem">Add slot</button>' +
+                "</div>"
+              );
+            })
+            .join("");
+          root.querySelectorAll(".btn-remove-pkg").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              mergeDomIntoInputsState();
+              const card = btn.closest(".pkg-card");
+              const keyInp = card.querySelector(".pkg-key-inp");
+              const k = keyInp ? keyInp.value.trim() : "";
+              if (k && inputsFilesState[k]) delete inputsFilesState[k];
+              renderInputsFilesEditor();
+            });
+          });
+          root.querySelectorAll(".btn-add-slot").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              mergeDomIntoInputsState();
+              const card = btn.closest(".pkg-card");
+              const keyInp = card.querySelector(".pkg-key-inp");
+              const k = keyInp ? keyInp.value.trim() : "";
+              if (!k) return;
+              if (!inputsFilesState[k]) inputsFilesState[k] = {};
+              let n = Object.keys(inputsFilesState[k]).length + 1;
+              let sid = "slot_" + n;
+              while (inputsFilesState[k][sid]) {
+                n++;
+                sid = "slot_" + n;
+              }
+              inputsFilesState[k][sid] = "file.xlsx";
+              renderInputsFilesEditor();
+            });
+          });
+          root.querySelectorAll(".btn-remove-slot").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              mergeDomIntoInputsState();
+              const row = btn.closest(".slot-row");
+              const card = btn.closest(".pkg-card");
+              const keyInp = card.querySelector(".pkg-key-inp");
+              const k = keyInp ? keyInp.value.trim() : "";
+              const sidInp = row.querySelector(".slot-id-inp");
+              const sid = sidInp ? sidInp.value.trim() : "";
+              if (k && inputsFilesState[k] && sid) delete inputsFilesState[k][sid];
+              if (k && inputsFilesState[k] && !Object.keys(inputsFilesState[k]).length) {
+                delete inputsFilesState[k];
+              }
+              renderInputsFilesEditor();
+            });
+          });
+        }
+
+        function refreshInputCategoryDropdown(preferredCat, packageKeys) {
+          const sel = $("input_category_key");
+          if (!sel) return;
+          const keys = packageKeys.slice().sort();
+          sel.innerHTML = keys
+            .map(function (k) {
+              return (
+                '<option value="' +
+                escapeHtml(k) +
+                '">' +
+                escapeHtml(k) +
+                "</option>"
+              );
+            })
+            .join("");
+          if (keys.indexOf(preferredCat) >= 0) sel.value = preferredCat;
+          else if (keys.length) sel.value = keys[0];
+        }
+
+        function setSlotLine(slotId, text, tone) {
+          const line = $("line-" + slotId);
+          if (!line) return;
+          line.textContent = text;
+          line.className = "slot-line " + (tone || "muted");
+        }
+
+        function wireSlot(slotId) {
+          const zone = $("drop-" + slotId);
+          const input = $("file-" + slotId);
+          if (!zone || !input) return;
+          zone.addEventListener("click", () => input.click());
+          zone.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              input.click();
+            }
+          });
+          ["dragenter", "dragover"].forEach((ev) =>
+            zone.addEventListener(ev, (e) => {
+              e.preventDefault();
+              zone.classList.add("dragover");
+            })
+          );
+          zone.addEventListener("dragleave", () =>
+            zone.classList.remove("dragover")
+          );
+          zone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            zone.classList.remove("dragover");
+            if (e.dataTransfer.files.length) {
+              input.files = e.dataTransfer.files;
+              input.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+          });
+          input.addEventListener("change", () => {
+            zone.classList.remove("saved");
+            const f = input.files[0];
+            if (f) {
+              zone.classList.add("has-file");
+              setSlotLine(
+                slotId,
+                "Selected: " + f.name + " (not saved yet)",
+                "muted"
+              );
+            } else {
+              zone.classList.remove("has-file");
+              setSlotLine(slotId, "", "muted");
+            }
+          });
+        }
+
+        function wireAllSlots() {
+          document.querySelectorAll(".slot-file").forEach((inp) => {
+            wireSlot(inp.dataset.slotId);
+          });
+        }
+        initTopicImportCombobox();
+        const btnSaveTopicCatalog = $("btn-save-topic-import-catalog");
+        const topicCatalogMsg = $("topic-import-catalog-msg");
+        if (btnSaveTopicCatalog) {
+          btnSaveTopicCatalog.addEventListener("click", async function () {
+            const inp = $("topic_import_id");
+            const raw = inp ? inp.value.trim() : "";
+            if (!raw) {
+              if (topicCatalogMsg) topicCatalogMsg.textContent = "Enter a topic import ID first.";
+              return;
+            }
+            btnSaveTopicCatalog.disabled = true;
+            if (topicCatalogMsg) topicCatalogMsg.textContent = "Saving…";
+            try {
+              const r = await fetch("/api/topic-import-ids/catalog", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ topic_import_id: raw }),
+              });
+              const j = await r.json();
+              if (!r.ok) {
+                if (topicCatalogMsg) topicCatalogMsg.textContent = j.error || "Save failed";
+                return;
+              }
+              if (j.already_exists) {
+                if (topicCatalogMsg) {
+                  topicCatalogMsg.textContent = "That ID is already in the pick list.";
+                }
+                return;
+              }
+              if (Array.isArray(topicImportCatalog)) {
+                const lower = raw.toLowerCase();
+                const exists = topicImportCatalog.some(function (e) {
+                  return (e.id || "").toLowerCase() === lower;
+                });
+                if (!exists) {
+                  topicImportCatalog.push({ id: j.id || raw, label: "" });
+                  topicImportCatalog.sort(function (a, b) {
+                    return (a.id || "")
+                      .toLowerCase()
+                      .localeCompare((b.id || "").toLowerCase());
+                  });
+                }
+              }
+              if (topicCatalogMsg) {
+                topicCatalogMsg.textContent =
+                  "Saved to pick list. It stays in the dropdown after you reload the page.";
+              }
+            } catch (e) {
+              if (topicCatalogMsg) topicCatalogMsg.textContent = String(e);
+            } finally {
+              btnSaveTopicCatalog.disabled = false;
+            }
+          });
+        }
+        wireAllSlots();
+
+        renderInputsFilesEditor();
+        $("template-checkboxes").addEventListener("change", function (e) {
+          if (
+            e.target &&
+            e.target.matches &&
+            e.target.matches('input[type="checkbox"][data-tid]')
+          ) {
+            templatesEnabledState[e.target.dataset.tid] = e.target.checked;
+          }
+        });
+
+        $("btn-add-input-pkg").addEventListener("click", function () {
+          mergeDomIntoInputsState();
+          let i = 1;
+          let name = "package";
+          while (inputsFilesState[name]) {
+            name = "package_" + i;
+            i++;
+          }
+          inputsFilesState[name] = {
+            event_source: "schedule.xlsx",
+            metric_source: "stats.xlsx",
+          };
+          renderInputsFilesEditor();
+        });
+
+        $("btn-save-inputs-files").addEventListener("click", async function () {
+          mergeDomIntoInputsState();
+          const msg = $("inputs-files-msg");
+          msg.textContent = "Saving…";
+          try {
+            const r = await fetch("/api/inputs-files", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ files: inputsFilesState }),
+            });
+            const j = await r.json();
+            if (!r.ok) {
+              msg.textContent = j.error || "Save failed";
+              return;
+            }
+            inputsFilesState = j.files || inputsFilesState;
+            msg.textContent = "Saved.";
+            refreshInputCategoryDropdown(
+              j.category_key,
+              Object.keys(j.files || {})
+            );
+            $("input_category_key").dispatchEvent(new Event("change"));
+          } catch (e) {
+            msg.textContent = String(e);
+          }
+        });
+
+        $("input_category_key").addEventListener("change", async () => {
+          const cat = $("input_category_key").value;
+          currentNormalizerSpec = null;
+          $("normalizer-preview").hidden = true;
+          $("normalizer-msg").textContent = "";
+          try {
+            const res = await fetchAndRenderInputSlots(cat);
+            if (!res.ok) return;
+            const pr = await fetch("/api/input-category", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                category_key: res.j.category_key || cat,
+              }),
+            });
+            const pj = await pr.json();
+            if (!pr.ok) {
+              $("upload-msg").textContent =
+                pj.error || "Could not save selected input package to settings.";
+              return;
+            }
+            if (pj.category_key && $("input_category_key").value !== pj.category_key) {
+              $("input_category_key").value = pj.category_key;
+            }
+          } catch (e) {
+            $("input-slots-root").innerHTML =
+              '<p class="muted">' + escapeHtml(String(e)) + "</p>";
+          }
+        });
+
+        async function uploadSelectedInputFiles() {
+          const fd = new FormData();
+          fd.append("category_key", $("input_category_key").value);
+          let n = 0;
+          document.querySelectorAll(".slot-file").forEach((inp) => {
+            const f = inp.files[0];
+            if (f) {
+              fd.append(inp.dataset.slotId, f);
+              n++;
+            }
+          });
+          if (n === 0) {
+            throw new Error("Choose at least one file.");
+          }
+          $("upload-msg").textContent = "Uploading…";
+          const r = await fetch("/upload", { method: "POST", body: fd });
+          const j = await r.json();
+          if (!r.ok) {
+            throw new Error(j.error || "Upload failed");
+          }
+          const names = (j.saved || []).map(function (x) {
+            return x.filename;
+          });
+          $("upload-msg").textContent =
+            "Saved " + names.length + " file(s): " + names.join(", ");
+          const dfAuto = j.date_filter_auto || {};
+          const dateNote = $("date-filter-auto-note");
+          if (dfAuto.applied && dfAuto.start && dfAuto.end) {
+            $("date_start").value = dfAuto.start;
+            $("date_end").value = dfAuto.end;
+            if (dateNote) {
+              dateNote.hidden = false;
+              dateNote.textContent =
+                "Date start and end were set from date columns in the file(s) you just saved (and written to settings). Adjust them if you need a different window before Generate.";
+            }
+          } else if (dateNote) {
+            dateNote.hidden = true;
+            dateNote.textContent = "";
+          }
+          (j.saved || []).forEach(function (item) {
+            const z = $("drop-" + item.slot_id);
+            if (z) {
+              z.classList.add("saved");
+              z.classList.add("has-file");
+              setSlotLine(
+                item.slot_id,
+                "Saved as " + item.filename,
+                "muted"
+              );
+            }
+          });
+          return j;
+        }
+
+        async function analyzeInputNormalizer() {
+          const r = await fetch("/api/normalizer/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              category_key: $("input_category_key").value,
+              use_ai: true,
+            }),
+          });
+          const j = await r.json();
+          if (!r.ok) {
+            throw new Error(j.error || "Analyze failed");
+          }
+          currentNormalizerSpec = j.spec;
+          renderNormalizerPreview(j);
+          return j;
+        }
+
+        async function saveCurrentNormalizerProfile() {
+          if (!currentNormalizerSpec) {
+            throw new Error("Analyze inputs first.");
+          }
+          const r = await fetch("/api/normalizer/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ spec: currentNormalizerSpec }),
+          });
+          const j = await r.json();
+          if (!r.ok) {
+            throw new Error(j.error || "Save failed");
+          }
+          return j;
+        }
+
+        $("btn-upload").addEventListener("click", async () => {
+          const button = $("btn-upload");
+          const uploadMsg = $("upload-msg");
+          const normalizerMsg = $("normalizer-msg");
+          currentNormalizerSpec = null;
+          $("normalizer-preview").hidden = true;
+          button.disabled = true;
+          normalizerMsg.textContent = "";
+          try {
+            await uploadSelectedInputFiles();
+            normalizerMsg.textContent = "Analyzing saved inputs…";
+            const proposal = await analyzeInputNormalizer();
+            normalizerMsg.textContent = "Saving normalizer profile…";
+            await saveCurrentNormalizerProfile();
+            normalizerMsg.textContent = proposal.used_ai
+              ? "AI normalizer profile saved."
+              : "Deterministic normalizer profile saved.";
+          } catch (e) {
+            const message = String(e && e.message ? e.message : e);
+            uploadMsg.textContent = message;
+            normalizerMsg.textContent = message;
+          } finally {
+            button.disabled = false;
+          }
+        });
+
+        function renderNormalizerPreview(data) {
+          const box = $("normalizer-preview");
+          if (!box) return;
+          const preview = data.preview || {};
+          const spec = data.spec || {};
+          const category = String(spec.package_key || $("input_category_key").value || "").toLowerCase();
+          const hasEntities = (preview.entity_count || 0) > 0 || (preview.entities || []).length > 0;
+          const hasEvents = (preview.event_count || 0) > 0 || (preview.events || []).length > 0;
+          const hasPlayerStats = (preview.player_stat_count || 0) > 0 || (preview.player_stats || []).length > 0;
+          const issueLines = (preview.issues || []).map(function (issue) {
+            return (
+              "- " +
+              (issue.severity || "issue") +
+              ": " +
+              (issue.code || "") +
+              " " +
+              (issue.message || "")
+            );
+          });
+          const events = (preview.events || []).slice(0, 5).map(function (e) {
+            return (
+              "- " +
+              e.event_id +
+              ": " +
+              e.home_team +
+              " vs " +
+              e.away_team +
+              " @ " +
+              e.event_datetime
+            );
+          });
+          const players = (preview.player_stats || []).slice(0, 10).map(function (p) {
+            return (
+              "- " +
+              p.player_name +
+              " (" +
+              p.team +
+              "): " +
+              Object.keys(p.stat_values || {}).join(", ")
+            );
+          });
+          const entities = (preview.entities || []).slice(0, 10).map(function (e) {
+            return "- " + (e.display_name || e.entity_id || "entity");
+          });
+          const summaryBits = [];
+          if (hasEvents || (!hasEntities && !hasPlayerStats)) {
+            summaryBits.push("Content units: " + (preview.event_count || 0));
+          }
+          if (hasEntities || category === "stocks") {
+            summaryBits.push("Entities: " + (preview.entity_count || 0));
+          }
+          if (hasPlayerStats) {
+            summaryBits.push("Metric records: " + (preview.player_stat_count || 0));
+          }
+          const previewSections = [];
+          if (hasEvents) {
+            previewSections.push("\n\nContent unit preview:\n" + (events.join("\n") || "- none"));
+          }
+          if (hasEntities || category === "stocks") {
+            previewSections.push("\n\nEntity preview:\n" + (entities.join("\n") || "- none"));
+          }
+          if (hasPlayerStats) {
+            previewSections.push("\n\nMetric record preview:\n" + (players.join("\n") || "- none"));
+          }
+          box.hidden = false;
+          box.textContent =
+            "Proposed profile for " +
+            (spec.package_key || $("input_category_key").value) +
+            "\n" +
+            (summaryBits.join(" | ") || "No normalized records yet") +
+            previewSections.join("") +
+            "\n\nIssues:\n" +
+            (issueLines.join("\n") || "- none");
+        }
+
+        function maxGeneratedQuestionsPayload() {
+          const raw = $("max_q").value.trim();
+          if (raw === "") return null;
+          const n = parseInt(raw, 10);
+          if (!Number.isFinite(n) || n < 1) return null;
+          return n;
+        }
+
+        function collectPayload() {
+          mergeDomIntoInputsState();
+          return {
+            topic_import_id: $("topic_import_id").value.trim(),
+            subcategory: $("subcategory").value.trim() || "MLB",
+            top_n_per_team: parseInt($("top_n").value, 10) || 3,
+            date_start: $("date_start").value.trim(),
+            date_end: $("date_end").value.trim(),
+            templates_enabled: templatesEnabledState,
+            input_category_key: $("input_category_key").value.trim() || "mlb",
+            max_generated_questions: maxGeneratedQuestionsPayload(),
+            _inputs_files: inputsFilesState,
+          };
+        }
+
+        const tplZone = $("tpl-upload-zone");
+        const tplFiles = $("tpl-files");
+        const tplPendingLabel = $("tpl-pending-label");
+
+        function updateTplPendingVisual() {
+          if (!tplZone || !tplFiles) return;
+          const n = tplFiles.files.length;
+          if (n === 0) {
+            tplZone.classList.remove("has-pending");
+            if (tplPendingLabel) tplPendingLabel.textContent = "";
+            return;
+          }
+          tplZone.classList.add("has-pending");
+          if (tplPendingLabel) {
+            const names = Array.from(tplFiles.files)
+              .map(function (f) {
+                return f.name;
+              })
+              .join(", ");
+            tplPendingLabel.textContent =
+              n === 1
+                ? "Selected: " + names + " — click Upload to save."
+                : n + " files selected: " + names + " — click Upload to save.";
+          }
+        }
+
+        tplZone.addEventListener("click", () => tplFiles.click());
+        tplZone.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            tplFiles.click();
+          }
+        });
+        ["dragenter", "dragover"].forEach((ev) =>
+          tplZone.addEventListener(ev, (e) => {
+            e.preventDefault();
+            tplZone.style.background = "#eef3fb";
+          })
+        );
+        tplZone.addEventListener("dragleave", () => {
+          tplZone.style.background = "";
+        });
+        tplZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          tplZone.style.background = "";
+          if (e.dataTransfer.files.length) {
+            tplFiles.files = e.dataTransfer.files;
+            tplFiles.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+        tplFiles.addEventListener("change", updateTplPendingVisual);
+
+        function setTplUploadFeedback(summaryText, mappingDetailText) {
+          const msg = $("tpl-upload-msg");
+          const det = $("tpl-upload-mapping-details");
+          const body = $("tpl-upload-mapping-body");
+          msg.textContent = summaryText || "";
+          if (mappingDetailText) {
+            det.hidden = false;
+            body.textContent = mappingDetailText;
+            det.open = false;
+          } else {
+            det.hidden = true;
+            body.textContent = "";
+            det.open = false;
+          }
+        }
+
+        $("btn-tpl-upload").addEventListener("click", async () => {
+          if (!tplFiles.files.length) {
+            setTplUploadFeedback(
+              "Choose one or more .csv, .xlsx, or .json files.",
+              ""
+            );
+            return;
+          }
+          const buildTplFd = function (replaceExisting) {
+            const f = new FormData();
+            for (let i = 0; i < tplFiles.files.length; i++) {
+              f.append("files", tplFiles.files[i]);
+            }
+            if (replaceExisting) {
+              f.append("replace_existing", "1");
+            }
+            return f;
+          };
+          setTplUploadFeedback("Uploading…", "");
+          try {
+            let fd = buildTplFd(false);
+            let r = await fetch("/upload/templates", { method: "POST", body: fd });
+            let j = await r.json();
+            if (r.status === 409 && j.conflict) {
+              const lines = (j.conflicts || []).map(function (c) {
+                return (
+                  c.template_id +
+                  " → " +
+                  c.save_as +
+                  " (already in: " +
+                  (c.existing_files || []).join(", ") +
+                  ")"
+                );
+              });
+              const msg =
+                (j.message ||
+                  "These template ids already exist in other .json files.") +
+                "\n\n" +
+                lines.join("\n") +
+                "\n\nReplace those files with this upload?";
+              if (!window.confirm(msg)) {
+                setTplUploadFeedback("Upload canceled — no files changed.", "");
+                return;
+              }
+              fd = buildTplFd(true);
+              setTplUploadFeedback("Uploading (replacing duplicates)…", "");
+              r = await fetch("/upload/templates", { method: "POST", body: fd });
+              j = await r.json();
+            }
+            if (!r.ok) {
+              setTplUploadFeedback(
+                j.error || j.message || "Upload failed",
+                ""
+              );
+              return;
+            }
+            const errTxt = (j.errors || [])
+              .map(function (e) {
+                return e.filename + ": " + e.error;
+              })
+              .join("; ");
+            const mappingBody =
+              j.warnings && j.warnings.length
+                ? j.warnings
+                    .map(function (e) {
+                      return e.filename + ": " + e.warning;
+                    })
+                    .join("\n")
+                : "";
+            if (j.saved && j.saved.length) {
+              (j.saved || []).forEach(function (x) {
+                templatesEnabledState[x.id] = true;
+              });
+              const cat = $("input_category_key").value;
+              const slotRes = await fetchAndRenderInputSlots(cat, {
+                keepUploadMsg: true,
+              });
+              const savedIds = j.saved
+                .map(function (x) {
+                  return x.id;
+                })
+                .join(", ");
+              const errPart = errTxt ? " — errors: " + errTxt : "";
+              let summary;
+              if (!slotRes.ok) {
+                summary =
+                  "Templates saved; refresh the page to reload slots. " +
+                  (slotRes.error || "") +
+                  errPart;
+              } else {
+                summary = "Saved " + savedIds + "." + errPart;
+              }
+              setTplUploadFeedback(summary, mappingBody);
+              try {
+                tplFiles.value = "";
+              } catch (_e) {
+                /* ignore */
+              }
+              updateTplPendingVisual();
+            } else {
+              setTplUploadFeedback(errTxt || "Nothing saved.", mappingBody);
+            }
+          } catch (e) {
+            setTplUploadFeedback(String(e), "");
+          }
+        });
+
+        $("btn-run").addEventListener("click", async () => {
+          const btn = $("btn-run");
+          const status = $("status-line");
+          const summary = $("summary");
+          const downloads = $("downloads");
+          summary.hidden = true;
+          downloads.innerHTML = "";
+          status.className = "status";
+          status.textContent = "";
+          $("run-hint").textContent = "";
+
+          btn.disabled = true;
+          try {
+            const r = await fetch("/run", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(collectPayload()),
+            });
+            const j = await r.json();
+            if (r.status === 409) {
+              status.className = "status error";
+              status.textContent = j.error || "A job is already running.";
+              return;
+            }
+            if (!r.ok) {
+              status.className = "status error";
+              status.textContent = j.error || "Failed to start.";
+              return;
+            }
+            const jobId = j.job_id;
+            $("run-hint").textContent = "Job " + jobId.slice(0, 8) + "…";
+
+            poll: while (true) {
+              await new Promise((x) => setTimeout(x, 1000));
+              const sr = await fetch("/run/status/" + jobId);
+              const sj = await sr.json();
+              if (!sr.ok) {
+                status.className = "status error";
+                status.textContent = sj.error || "Status poll failed";
+                break poll;
+              }
+              status.textContent =
+                sj.phase +
+                (sj.total_steps
+                  ? " (" + sj.current_step + "/" + sj.total_steps + ")"
+                  : "");
+              if (sj.state === "succeeded" || sj.state === "failed") {
+                if (sj.error && sj.state === "failed") {
+                  status.className = "status error";
+                  status.textContent = sj.error;
+                } else {
+                  status.className = "status ok";
+                  status.textContent = sj.phase || "Done";
+                }
+                if (sj.qa_summary) {
+                  const q = sj.qa_summary;
+                  summary.hidden = false;
+                  summary.textContent =
+                    "Total rows: " +
+                    q.total_rows_generated +
+                    "\nPassed validation: " +
+                    q.rows_passed_validation +
+                    "\nErrors CSV rows: " +
+                    q.rows_failed_validation +
+                    "\nNear-duplicate flagged: " +
+                    q.rows_flagged_near_duplicate +
+                    "\nExact duplicates removed: " +
+                    q.exact_duplicates_removed +
+                    "\nEst. cost: " +
+                    (q.has_cost
+                      ? "$" + Number(q.estimated_cost_usd).toFixed(4) + " USD"
+                      : "N/A");
+                }
+                downloads.innerHTML = "";
+                if (sj.output_csv) {
+                  const a = document.createElement("a");
+                  a.href = "/download/" + encodeURIComponent(sj.output_csv);
+                  a.textContent = "Download " + sj.output_csv;
+                  a.download = sj.output_csv;
+                  downloads.appendChild(a);
+                }
+                if (sj.errors_csv && (sj.rows_failed_validation || 0) > 0) {
+                  const a = document.createElement("a");
+                  a.href = "/download/" + encodeURIComponent(sj.errors_csv);
+                  a.textContent = "Download " + sj.errors_csv;
+                  a.download = sj.errors_csv;
+                  downloads.appendChild(a);
+                }
+                if (sj.flagged_csv) {
+                  const a = document.createElement("a");
+                  a.href = "/download/" + encodeURIComponent(sj.flagged_csv);
+                  a.textContent = "Download " + sj.flagged_csv;
+                  downloads.appendChild(a);
+                }
+                break poll;
+              }
+            }
+          } catch (e) {
+            status.className = "status error";
+            status.textContent = String(e);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

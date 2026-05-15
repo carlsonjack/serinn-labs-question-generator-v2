@@ -1,0 +1,11 @@
+{
+  "id": "f1_race_winner_flag",
+  "subcategory": "F1",
+  "question_family": "event",
+  "question": "Which driver takes the chequered flag first: {home_team} or {away_team}?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{home_team}||{away_team}",
+  "priority": 1,
+  "requires_entities": false,
+  "_comment": "Same mapping as f1_race_winner_head_to_head; wording variant for race winner."
+}

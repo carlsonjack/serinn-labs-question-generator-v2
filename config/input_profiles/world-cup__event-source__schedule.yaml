@@ -1,0 +1,13 @@
+category_key: world_cup
+confidence: 0.2857142857142857
+field_mappings:
+  event_date: Date
+  event_name: Matchup
+file_pattern: schedule.xlsx
+fingerprint: 0498099deda30ea0065911fc20c39f712e8f9cc1cc5c3f00cc11628c34a20acc
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: schedule
+sheet_name: World Cup Round 1 Schedule
+source_role: event_source

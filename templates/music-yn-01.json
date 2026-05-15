@@ -1,0 +1,34 @@
+{
+  "id": "music-yn-01",
+  "subcategory": "Music",
+  "question_family": "content",
+  "question": "Will [ALBUM_OR_RELEASE] debut on the Billboard 200?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 1,
+  "requires_entities": false,
+  "template_type": "Album Debut Ranking",
+  "required_dataset_fields": "album_or_artist; release_date; topic_import_id",
+  "placeholder_mappings": {
+    "ALBUM_OR_RELEASE": {
+      "canonical_placeholder": "ALBUM_OR_RELEASE",
+      "target": "album_or_release",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    }
+  },
+  "_comment": null,
+  "resolution_date_rule": "Resolution date should be start_date + 1 days.",
+  "resolution_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": 1,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "year_policy": null,
+    "end_offset_days": null
+  }
+}

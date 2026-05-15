@@ -1,0 +1,148 @@
+openai_api_key: ''
+model: gpt-5.4
+topic_import_id: mlb-mlb-season-2026
+topic_import_ids:
+  mlb: mlb-regular-season
+  f1: f1-race-winner
+  music: music-new-releases-us-2026-06
+  stocks: stocks-us-market
+subcategory: MLB
+top_n_per_team: 3
+templates_directory: templates
+templates_enabled:
+  entertainment_placeholder: false
+  markets_placeholder: false
+  mlb_game_winner: true
+  mlb_home_run: false
+  mlb_rbi: false
+  mlb_steal_base: false
+  mlb_total_runs_over_8_5: false
+  mlb_win_margin_2: false
+  news_placeholder: false
+  sample_csv_event_yesno: true
+  sample_csv_event_mc: true
+  sample_csv_entity_hr: true
+  f1_race_winner_head_to_head: true
+  f1_race_winner_flag: true
+  f1_race_winner_yes_no: true
+  f1_race_finish_ahead_yes_no: true
+  mls_sample_event_yesno: false
+  mls_sample_event_mc: true
+  mls_sample_entity_goals: true
+  music-award-01: true
+  music-mc-01: true
+  music-mc-02: true
+  music-mc-03: true
+  music-mc-04: true
+  music-tour-mc-01: true
+  music-yn-01: true
+  music-yn-02: true
+  world_cup_event_winner_mc: true
+  world_cup_entity_goal_prob: true
+  stream-yn-01: true
+  stream-yn-02: true
+  stream-yn-03: true
+  stream-yn-04: true
+  stream-award-yn-01: true
+  stream-award-yn-02: true
+  stream-award-yn-03: true
+  stream-award-yn-04: true
+  stream-award-mc-01: true
+  stream-award-mc-02: true
+  movie-yn-01: true
+  movie-yn-02: true
+  movie-mc-01: true
+  movie-mc-02: true
+  movie-yn-03: true
+  movie-yn-04: true
+  movie-award-01: true
+  manual-mc-01: true
+date_filter:
+  start: '2026-05-15'
+  end: '2026-09-27'
+date_rules:
+  default:
+    start_offset_hours: -24
+    expiration_offset_hours: 0
+    resolution_offset_hours: 4
+  mlb:
+    start_offset_hours: -24
+    expiration_offset_hours: 0
+    resolution_offset_hours: 4
+  f1:
+    start_offset_hours: -24
+    expiration_offset_hours: 0
+    resolution_offset_hours: 4
+  mls:
+    start_offset_hours: -24
+    expiration_offset_hours: 0
+    resolution_offset_hours: 4
+    resolution_offset_anchor: expiration
+batch_size: 100
+max_generated_questions: 20
+stocks:
+  questions_per_day: 50
+content:
+  static_values:
+    artist_a: Taylor Swift
+    artist_b: Bad Bunny
+    artist_c: Beyonce
+    artist_d: Coldplay
+    tour_chart_source: Pollstar
+  static_start_date: '2026-06-01'
+  static_expiration_date: '2026-07-31'
+  static_resolution_date: '2027-01-10'
+model_pricing:
+  gpt-4o:
+    input: 2.5
+    output: 10.0
+  gpt-4o-mini:
+    input: 0.15
+    output: 0.6
+  gpt-5.4:
+    input: 2.5
+    output: 10.0
+inputs:
+  directory: inputs
+  category_key: mlb
+  files:
+    F1:
+      schedule: f1_schedule.xlsx
+    mlb:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+    mls:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+    movies:
+      releases: movies.xlsx
+    music:
+      releases: music.xlsx
+    stocks:
+      metric_source: top-150-stocks.xlsx
+    television:
+      event_source: television.xlsx
+    world_cup:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+  file_roles:
+    F1:
+      schedule: event_source
+    stocks:
+      asset_source: entity_source
+      metric_source: entity_source
+    music:
+      releases: entity_source
+  packages:
+    f1:
+      race_session_values:
+      - Race
+      placeholder_home_team: Driver_A
+      placeholder_away_team: Driver_B
+  package_aliases:
+    music:
+    - Music
+parsing:
+  persist_profiles: true
+  auto_detect_headers: true
+  min_confidence: 0.5

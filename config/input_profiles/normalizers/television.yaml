@@ -1,0 +1,36 @@
+version: 1
+package_key: television
+sources:
+  television.xlsx#Streaming Jun-Jul 2026:
+    source_role: entity_source
+    file_pattern: television.xlsx
+    sheet_name: Streaming Jun-Jul 2026
+    header_row_index: 1
+    field_mappings:
+      content_type: TV Show or Movie
+      platform: Streaming Service
+      release_date: Release Date
+      title: Show / Movie Title
+    metric_mappings: {}
+    metadata_mappings:
+      premiere_status: Premiere Status
+      release_format: Release Format
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  event_source:
+    filename: television.xlsx
+    sheets:
+    - columns:
+      - Show / Movie Title
+      - Streaming Service
+      - Release Date
+      - Release Format
+      - TV Show or Movie
+      - Premiere Status
+      header_row_index: 1
+      sheet_name: Streaming Jun-Jul 2026
+notes: Content release list detected. Mapped primary title to title and release date
+  to release_date; preserved platform, content type, release format, and premiere
+  status as canonical/metadata fields.

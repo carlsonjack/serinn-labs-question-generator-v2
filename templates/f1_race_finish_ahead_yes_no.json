@@ -1,0 +1,11 @@
+{
+  "id": "f1_race_finish_ahead_yes_no",
+  "subcategory": "F1",
+  "question_family": "event",
+  "question": "Will {home_team} finish ahead of {away_team} in this race?",
+  "answer_type": "yes_no",
+  "answer_options": "Yes||No",
+  "priority": "",
+  "requires_entities": false,
+  "_comment": "Head-to-head race outcome; both placeholders should be drivers (or comparable entities) for the same Race event."
+}

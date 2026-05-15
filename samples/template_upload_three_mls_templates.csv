@@ -1,0 +1,6 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+mls_sample_event_yesno,MLS,event,Will {home_team} score first?,yes_no,Yes||No,,false,Schedule input — yes/no event
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+mls_sample_event_mc,MLS,event,Who wins {home_team} vs {away_team}?,multiple_choice,{home_team}||{away_team},1,false,Schedule input — multiple choice event
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,stat_column,top_n_per_team,_comment
+mls_sample_entity_goals,MLS,entity_stat,Who will score a goal in this game?,multiple_choice,{entity_options},,true,Goals,3,Stats input — entity stat (goals); stat_column must match keys in player stat records after MLS stats parsing

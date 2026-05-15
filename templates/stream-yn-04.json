@@ -1,0 +1,34 @@
+{
+  "id": "stream-yn-04",
+  "subcategory": "Television",
+  "question_family": "content",
+  "question": "Will [TITLE] be ranked in the Top 10 during its second week after release?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "template_type": "Streaming Retention",
+  "required_dataset_fields": "show_title; release_date; topic_import_id",
+  "placeholder_mappings": {
+    "SHOW_TITLE": {
+      "canonical_placeholder": "TITLE",
+      "target": "question",
+      "confidence": 0.96,
+      "source": "ai",
+      "reason": "The template uses [SHOW_TITLE] for a television program title. The available canonical vocabulary does not include SHOW_TITLE or TV-specific series title, so TITLE is the closest general title placeholder. Required dataset field 'show_title' confirms this refers to the content title."
+    }
+  },
+  "_comment": null,
+  "resolution_date_rule": "Resolution should evaluate days 8-14 after start_date.",
+  "resolution_date_spec": {
+    "kind": "window_end",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": 0,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "year_policy": null,
+    "end_offset_days": 14
+  }
+}

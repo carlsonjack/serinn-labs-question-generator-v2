@@ -1,0 +1,4 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+world_cup_event_winner_mc,World Cup,event,Who wins {home_team} vs {away_team}?,multiple_choice,{home_team}||{away_team},1,false,Schedule — match winner (home vs away)
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,stat_column,top_n_per_team,_comment
+world_cup_entity_goal_prob,World Cup,entity_stat,Who is most likely to score in this match (by goal probability)?,multiple_choice,{entity_options},,true,GOAL_PROBABILITY,3,Player pool — stat_column matches GOAL_PROBABILITY from the world_cup normalizer / stats.xlsx

@@ -1,0 +1,11 @@
+{
+  "id": "entertainment_placeholder",
+  "subcategory": "Entertainment",
+  "question_family": "event",
+  "question": "Placeholder question for future entertainment category.",
+  "answer_type": "yes_no",
+  "answer_options": "Yes||No",
+  "priority": "",
+  "requires_entities": false,
+  "_comment": "extend by adding question and input package definition"
+}

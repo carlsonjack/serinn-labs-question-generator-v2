@@ -1,0 +1,93 @@
+version: 1
+package_key: mls
+sources:
+  event_source:
+    source_role: event_source
+    file_pattern: schedule.xlsx
+    sheet_name: 2026 Schedule
+    header_row_index: 0
+    field_mappings:
+      event_date: Date
+      event_time: Time
+    metric_mappings: {}
+    metadata_mappings: {}
+    matchup_split:
+      source_column: Match
+      delimiter_pattern: \s+vs\.\s+
+      left_team_field: home_team
+      right_team_field: away_team
+    event_datetime:
+      datetime_column: null
+      date_column: Date
+      time_column: Time
+      timezone: null
+    event_id:
+      source_columns:
+      - Date
+      - Match
+      - Time
+      strategy: concat
+  metric_source_2025:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: 2025 Statistics
+    header_row_index: 0
+    field_mappings:
+      player_name: Name
+      team: Team
+    metric_mappings:
+      APPEARANCES: P
+      GOALS: G
+    metadata_mappings:
+      rank: RK
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+  metric_source_2026:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: 2026 Stastics
+    header_row_index: 0
+    field_mappings:
+      player_name: Name
+      team: Team
+    metric_mappings:
+      APPEARANCES: P
+      GOALS: G
+    metadata_mappings:
+      rank: RK
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  event_source:
+    filename: schedule.xlsx
+    sheets:
+    - columns:
+      - Date
+      - Match
+      - Time
+      header_row_index: 0
+      sheet_name: 2026 Schedule
+  metric_source:
+    filename: stats.xlsx
+    sheets:
+    - columns:
+      - RK
+      - Name
+      - Team
+      - P
+      - G
+      header_row_index: 0
+      sheet_name: 2025 Statistics
+    - columns:
+      - RK
+      - Name
+      - Team
+      - P
+      - G
+      header_row_index: 0
+      sheet_name: 2026 Stastics
+notes: Mapped MLS schedule as event source using matchup split on Match. Mapped player
+  statistics sheets separately by season; preserved RK as metadata and mapped P/G
+  to APPEARANCES/GOALS.

@@ -1,0 +1,10 @@
+{
+  "id": "mlb_win_margin_2",
+  "subcategory": "MLB",
+  "question_family": "event",
+  "question": "Will {home_team} vs {away_team} be decided by more than 2 runs?",
+  "answer_type": "yes_no",
+  "answer_options": "Yes||No",
+  "priority": "",
+  "requires_entities": false
+}

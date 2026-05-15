@@ -1,0 +1,786 @@
+[
+  {
+    "id": "atp-atp-finals-2026",
+    "label": "TENNIS | ATP | ATP Finals 2026"
+  },
+  {
+    "id": "atp-australian-open-2026",
+    "label": "TENNIS | ATP | Australian Open 2026"
+  },
+  {
+    "id": "atp-canadian-open-2026",
+    "label": "TENNIS | ATP | Canadian Open 2026"
+  },
+  {
+    "id": "atp-cincinnati-masters-2026",
+    "label": "TENNIS | ATP | Cincinnati Masters 2026"
+  },
+  {
+    "id": "atp-french-open-2026",
+    "label": "TENNIS | ATP | French Open 2026"
+  },
+  {
+    "id": "atp-indian-wells-masters-2026",
+    "label": "TENNIS | ATP | Indian Wells Masters 2026"
+  },
+  {
+    "id": "atp-italian-open-2026",
+    "label": "TENNIS | ATP | Italian Open 2026"
+  },
+  {
+    "id": "atp-madrid-open-2026",
+    "label": "TENNIS | ATP | Madrid Open 2026"
+  },
+  {
+    "id": "atp-miami-open-2026",
+    "label": "TENNIS | ATP | Miami Open 2026"
+  },
+  {
+    "id": "atp-monte-carlo-masters-2026",
+    "label": "TENNIS | ATP | Monte Carlo Masters 2026"
+  },
+  {
+    "id": "atp-paris-masters-2026",
+    "label": "TENNIS | ATP | Paris Masters 2026"
+  },
+  {
+    "id": "atp-shanghai-masters-2026",
+    "label": "TENNIS | ATP | Shanghai Masters 2026"
+  },
+  {
+    "id": "atp-us-open-2026",
+    "label": "TENNIS | ATP | US Open 2026"
+  },
+  {
+    "id": "atp-wimbledon-2026",
+    "label": "TENNIS | ATP | Wimbledon 2026"
+  },
+  {
+    "id": "f1-abu-dhabi-grand-prix-2026-qualifying",
+    "label": "F1 | Abu Dhabi Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-abu-dhabi-grand-prix-2026-race",
+    "label": "F1 | Abu Dhabi Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-australian-grand-prix-2026-qualifying",
+    "label": "F1 | Australian Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-australian-grand-prix-2026-race",
+    "label": "F1 | Australian Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-austrian-grand-prix-2026-qualifying",
+    "label": "F1 | Austrian Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-austrian-grand-prix-2026-race",
+    "label": "F1 | Austrian Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-azerbaijan-grand-prix-2026-qualifying",
+    "label": "F1 | Azerbaijan Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-azerbaijan-grand-prix-2026-race",
+    "label": "F1 | Azerbaijan Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-bahrain-grand-prix-2026-qualifying",
+    "label": "F1 | Bahrain Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-bahrain-grand-prix-2026-race",
+    "label": "F1 | Bahrain Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-belgian-grand-prix-2026-qualifying",
+    "label": "F1 | Belgian Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-belgian-grand-prix-2026-race",
+    "label": "F1 | Belgian Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-british-grand-prix-2026-qualifying",
+    "label": "F1 | British Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-british-grand-prix-2026-race",
+    "label": "F1 | British Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-british-grand-prix-2026-sprint-qualifying",
+    "label": "F1 | British Grand Prix 2026 - Sprint Qualifying"
+  },
+  {
+    "id": "f1-british-grand-prix-2026-sprint-race",
+    "label": "F1 | British Grand Prix 2026 - Sprint Race"
+  },
+  {
+    "id": "f1-canadian-grand-prix-2026-qualifying",
+    "label": "F1 | Canadian Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-canadian-grand-prix-2026-race",
+    "label": "F1 | Canadian Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-canadian-grand-prix-2026-sprint-qualifying",
+    "label": "F1 | Canadian Grand Prix 2026 - Sprint Qualifying"
+  },
+  {
+    "id": "f1-canadian-grand-prix-2026-sprint-race",
+    "label": "F1 | Canadian Grand Prix 2026 - Sprint Race"
+  },
+  {
+    "id": "f1-chinese-grand-prix-2026-qualifying",
+    "label": "F1 | Chinese Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-chinese-grand-prix-2026-race",
+    "label": "F1 | Chinese Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-chinese-grand-prix-2026-sprint-qualifying",
+    "label": "F1 | Chinese Grand Prix 2026 - Sprint Qualifying"
+  },
+  {
+    "id": "f1-chinese-grand-prix-2026-sprint-race",
+    "label": "F1 | Chinese Grand Prix 2026 - Sprint Race"
+  },
+  {
+    "id": "f1-dutch-grand-prix-2026-qualifying",
+    "label": "F1 | Dutch Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-dutch-grand-prix-2026-race",
+    "label": "F1 | Dutch Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-dutch-grand-prix-2026-sprint-qualifying",
+    "label": "F1 | Dutch Grand Prix 2026 - Sprint Qualifying"
+  },
+  {
+    "id": "f1-dutch-grand-prix-2026-sprint-race",
+    "label": "F1 | Dutch Grand Prix 2026 - Sprint Race"
+  },
+  {
+    "id": "f1-hungarian-grand-prix-2026-qualifying",
+    "label": "F1 | Hungarian Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-hungarian-grand-prix-2026-race",
+    "label": "F1 | Hungarian Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-italian-grand-prix-2026-qualifying",
+    "label": "F1 | Italian Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-italian-grand-prix-2026-race",
+    "label": "F1 | Italian Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-japanese-grand-prix-2026-qualifying",
+    "label": "F1 | Japanese Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-japanese-grand-prix-2026-race",
+    "label": "F1 | Japanese Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-las-vegas-grand-prix-2026-qualifying",
+    "label": "F1 | Las Vegas Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-las-vegas-grand-prix-2026-race",
+    "label": "F1 | Las Vegas Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-mexico-city-grand-prix-2026-qualifying",
+    "label": "F1 | Mexico City Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-mexico-city-grand-prix-2026-race",
+    "label": "F1 | Mexico City Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-miami-grand-prix-2026-qualifying",
+    "label": "F1 | Miami Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-miami-grand-prix-2026-race",
+    "label": "F1 | Miami Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-miami-grand-prix-2026-sprint-qualifying",
+    "label": "F1 | Miami Grand Prix 2026 - Sprint Qualifying"
+  },
+  {
+    "id": "f1-miami-grand-prix-2026-sprint-race",
+    "label": "F1 | Miami Grand Prix 2026 - Sprint Race"
+  },
+  {
+    "id": "f1-monaco-grand-prix-2026-qualifying",
+    "label": "F1 | Monaco Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-monaco-grand-prix-2026-race",
+    "label": "F1 | Monaco Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-qatar-grand-prix-2026-qualifying",
+    "label": "F1 | Qatar Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-qatar-grand-prix-2026-race",
+    "label": "F1 | Qatar Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-s-o-paulo-grand-prix-2026-qualifying",
+    "label": "F1 | S\u00e3o Paulo Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-s-o-paulo-grand-prix-2026-race",
+    "label": "F1 | S\u00e3o Paulo Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-saudi-arabian-grand-prix-2026-qualifying",
+    "label": "F1 | Saudi Arabian Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-saudi-arabian-grand-prix-2026-race",
+    "label": "F1 | Saudi Arabian Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-singapore-grand-prix-2026-qualifying",
+    "label": "F1 | Singapore Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-singapore-grand-prix-2026-race",
+    "label": "F1 | Singapore Grand Prix 2026 - Race"
+  },
+  {
+    "id": "f1-singapore-grand-prix-2026-sprint-qualifying",
+    "label": "F1 | Singapore Grand Prix 2026 - Sprint Qualifying"
+  },
+  {
+    "id": "f1-singapore-grand-prix-2026-sprint-race",
+    "label": "F1 | Singapore Grand Prix 2026 - Sprint Race"
+  },
+  {
+    "id": "f1-spanish-grand-prix-barcelona-2026-catalunya-qualifying",
+    "label": "F1 | Spanish Grand Prix (Barcelona 2026 - Catalunya) - Qualifying"
+  },
+  {
+    "id": "f1-spanish-grand-prix-barcelona-2026-catalunya-race",
+    "label": "F1 | Spanish Grand Prix (Barcelona 2026 - Catalunya) - Race"
+  },
+  {
+    "id": "f1-spanish-grand-prix-madrid-2026-qualifying",
+    "label": "F1 | Spanish Grand Prix (Madrid) 2026 - Qualifying"
+  },
+  {
+    "id": "f1-spanish-grand-prix-madrid-2026-race",
+    "label": "F1 | Spanish Grand Prix (Madrid) 2026 - Race"
+  },
+  {
+    "id": "f1-united-states-grand-prix-2026-qualifying",
+    "label": "F1 | United States Grand Prix 2026 - Qualifying"
+  },
+  {
+    "id": "f1-united-states-grand-prix-2026-race",
+    "label": "F1 | United States Grand Prix 2026 - Race"
+  },
+  {
+    "id": "fifa-world-cup-fifa-world-cup-2026-final",
+    "label": "FIFA World Cup | FIFA World Cup 2026 - Final"
+  },
+  {
+    "id": "fifa-world-cup-fifa-world-cup-2026-group-stage",
+    "label": "FIFA World Cup | FIFA World Cup 2026 - Group Stage"
+  },
+  {
+    "id": "fifa-world-cup-fifa-world-cup-2026-quarterfinals",
+    "label": "FIFA World Cup | FIFA World Cup 2026 - Quarterfinals"
+  },
+  {
+    "id": "fifa-world-cup-fifa-world-cup-2026-round-of-16",
+    "label": "FIFA World Cup | FIFA World Cup 2026 - Round of 16"
+  },
+  {
+    "id": "fifa-world-cup-fifa-world-cup-2026-semifinals",
+    "label": "FIFA World Cup | FIFA World Cup 2026 - Semifinals"
+  },
+  {
+    "id": "french-ligue-1-french-ligue-1-season-2026-2027",
+    "label": "French Ligue 1 | French Ligue 1 Season 2026\u20132027"
+  },
+  {
+    "id": "german-bundesliga-german-bundesliga-season-2026-2027",
+    "label": "German Bundesliga | German Bundesliga Season 2026\u20132027"
+  },
+  {
+    "id": "italian-serie-a-italian-serie-a-season-2026-2027",
+    "label": "Italian Serie A | Italian Serie A Season 2026\u20132027"
+  },
+  {
+    "id": "lpga-aramco-championship-2026",
+    "label": "GOLF | LPGA | Aramco Championship 2026"
+  },
+  {
+    "id": "lpga-blue-bay-lpga-2026",
+    "label": "GOLF | LPGA | Blue Bay LPGA 2026"
+  },
+  {
+    "id": "lpga-dow-championship-2026",
+    "label": "GOLF | LPGA | Dow Championship 2026"
+  },
+  {
+    "id": "lpga-ford-championship-2026",
+    "label": "GOLF | LPGA | Ford Championship 2026"
+  },
+  {
+    "id": "lpga-fortinet-founders-cup-2026",
+    "label": "GOLF | LPGA | Fortinet Founders Cup 2026"
+  },
+  {
+    "id": "lpga-hilton-grand-vacations-tournament-of-champions-2026",
+    "label": "GOLF | LPGA | Hilton Grand Vacations Tournament of Champions 2026"
+  },
+  {
+    "id": "lpga-honda-lpga-thailand-2026",
+    "label": "GOLF | LPGA | Honda LPGA Thailand 2026"
+  },
+  {
+    "id": "lpga-hsbc-womens-world-championship-2026",
+    "label": "GOLF | LPGA | HSBC Women\u2019s World Championship 2026"
+  },
+  {
+    "id": "lpga-isps-handa-womens-scottish-open-2026",
+    "label": "GOLF | LPGA | ISPS Handa Women\u2019s Scottish Open 2026"
+  },
+  {
+    "id": "lpga-jm-eagle-la-championship-presented-by-plastpro-2026",
+    "label": "GOLF | LPGA | JM Eagle LA Championship presented by Plastpro 2026"
+  },
+  {
+    "id": "lpga-kpmg-womens-pga-championship-2026",
+    "label": "GOLF | LPGA | KPMG Women\u2019s PGA Championship 2026"
+  },
+  {
+    "id": "lpga-kroger-queen-city-championship-presented-by-p-g-2026",
+    "label": "GOLF | LPGA | Kroger Queen City Championship presented by P&G 2026"
+  },
+  {
+    "id": "lpga-meijer-lpga-classic-for-simply-give-2026",
+    "label": "GOLF | LPGA | Meijer LPGA Classic for Simply Give 2026"
+  },
+  {
+    "id": "lpga-mexico-riviera-maya-open-at-mayakoba-2026",
+    "label": "GOLF | LPGA | Mexico Riviera Maya Open at Mayakoba 2026"
+  },
+  {
+    "id": "lpga-mizuho-americas-open-2026",
+    "label": "GOLF | LPGA | Mizuho Americas Open 2026"
+  },
+  {
+    "id": "lpga-shoprite-lpga-powered-by-wakefern-2026",
+    "label": "GOLF | LPGA | ShopRite LPGA powered by Wakefern 2026"
+  },
+  {
+    "id": "lpga-the-amundi-evian-championship-2026",
+    "label": "GOLF | LPGA | The Amundi Evian Championship 2026"
+  },
+  {
+    "id": "lpga-the-chevron-championship-2026",
+    "label": "GOLF | LPGA | The Chevron Championship 2026"
+  },
+  {
+    "id": "lpga-u-s-womens-open-presented-by-ally-2026",
+    "label": "GOLF | LPGA | U.S. Women\u2019s Open presented by Ally 2026"
+  },
+  {
+    "id": "mlb-mlb-playoffs-2026",
+    "label": "MLB | MLB Playoffs 2026"
+  },
+  {
+    "id": "mlb-mlb-season-2026",
+    "label": "MLB | MLB Season 2026"
+  },
+  {
+    "id": "mlb-world-series-2026",
+    "label": "MLB | World Series 2026"
+  },
+  {
+    "id": "mls-mls-cup-2026",
+    "label": "MLS | MLS Cup 2026"
+  },
+  {
+    "id": "mls-mls-playoffs-2026",
+    "label": "MLS | MLS Playoffs 2026"
+  },
+  {
+    "id": "mls-mls-season-2026",
+    "label": "MLS | MLS Season 2026"
+  },
+  {
+    "id": "movies-boxoffice-us-2026-05",
+    "label": ""
+  },
+  {
+    "id": "movies-boxoffice-us-2026-06",
+    "label": ""
+  },
+  {
+    "id": "music-new-releases-us-2026-06",
+    "label": ""
+  },
+  {
+    "id": "nba-nba-finals-2026",
+    "label": "NBA | NBA Finals 2026"
+  },
+  {
+    "id": "nba-nba-playoffs-2026",
+    "label": "NBA | NBA Playoffs 2026"
+  },
+  {
+    "id": "nba-nba-season-2025-2026",
+    "label": "NBA | NBA Season 2025\u20132026"
+  },
+  {
+    "id": "ncaambb-final-four-2026",
+    "label": "NCAAMBB | Final Four 2026"
+  },
+  {
+    "id": "ncaambb-ncaa-mens-basketball-national-championship-2026",
+    "label": "NCAAMBB | NCAA Men's Basketball National Championship 2026"
+  },
+  {
+    "id": "ncaambb-ncaa-tournament-2026",
+    "label": "NCAAMBB | NCAA Tournament 2026"
+  },
+  {
+    "id": "ncaambb-ncaambb-season-2026-2027",
+    "label": "NCAAMBB | NCAAMBB Season 2026\u20132027"
+  },
+  {
+    "id": "ncaamf-college-football-playoff-2026",
+    "label": "NCAAMF | College Football Playoff 2026"
+  },
+  {
+    "id": "ncaamf-college-football-playoff-national-championship-2026",
+    "label": "NCAAMF | College Football Playoff National Championship 2026"
+  },
+  {
+    "id": "ncaamf-ncaamf-season-2026-2027",
+    "label": "NCAAMF | NCAAMF Season 2026\u20132027"
+  },
+  {
+    "id": "ncaawbb-final-four-2026",
+    "label": "NCAAWBB | Final Four 2026"
+  },
+  {
+    "id": "ncaawbb-ncaa-tournament-2026",
+    "label": "NCAAWBB | NCAA Tournament 2026"
+  },
+  {
+    "id": "ncaawbb-ncaa-womens-basketball-national-championship-2026",
+    "label": "NCAAWBB | NCAA Women's Basketball National Championship 2026"
+  },
+  {
+    "id": "ncaawbb-ncaawbb-season-2026-2027",
+    "label": "NCAAWBB | NCAAWBB Season 2026\u20132027"
+  },
+  {
+    "id": "nfl-nfl-playoffs-2026",
+    "label": "NFL | NFL Playoffs 2026"
+  },
+  {
+    "id": "nfl-nfl-season-2026-2027",
+    "label": "NFL | NFL Season 2026\u20132027"
+  },
+  {
+    "id": "nfl-super-bowl-2026",
+    "label": "NFL | Super Bowl 2026"
+  },
+  {
+    "id": "nhl-nhl-playoffs-2026",
+    "label": "NHL | NHL Playoffs 2026"
+  },
+  {
+    "id": "nhl-nhl-season-2026-2027",
+    "label": "NHL | NHL Season 2026\u20132027"
+  },
+  {
+    "id": "nhl-stanley-cup-final-2026",
+    "label": "NHL | Stanley Cup Final 2026"
+  },
+  {
+    "id": "nwls-nwls-season-2026-2027",
+    "label": "NWLS | NWLS Season 2026\u20132027"
+  },
+  {
+    "id": "nwls-nwsl-championship-2026",
+    "label": "NWLS | NWSL Championship 2026"
+  },
+  {
+    "id": "nwls-nwsl-playoffs-2026",
+    "label": "NWLS | NWSL Playoffs 2026"
+  },
+  {
+    "id": "pga-3m-open-2026",
+    "label": "GOLF | PGA | 3M Open 2026"
+  },
+  {
+    "id": "pga-arnold-palmer-invitational-presented-by-mastercard-2026",
+    "label": "GOLF | PGA | Arnold Palmer Invitational presented by Mastercard 2026"
+  },
+  {
+    "id": "pga-at-t-pebble-beach-pro-2026-am",
+    "label": "GOLF | PGA | AT&T Pebble Beach Pro 2026 - Am"
+  },
+  {
+    "id": "pga-bmw-championship-2026",
+    "label": "GOLF | PGA | BMW Championship 2026"
+  },
+  {
+    "id": "pga-cadillac-championship-2026",
+    "label": "GOLF | PGA | Cadillac Championship 2026"
+  },
+  {
+    "id": "pga-charles-schwab-challenge-2026",
+    "label": "GOLF | PGA | Charles Schwab Challenge 2026"
+  },
+  {
+    "id": "pga-cognizant-classic-2026",
+    "label": "GOLF | PGA | Cognizant Classic 2026"
+  },
+  {
+    "id": "pga-corales-puntacana-championship-2026",
+    "label": "GOLF | PGA | Corales Puntacana Championship 2026"
+  },
+  {
+    "id": "pga-farmers-insurance-open-2026",
+    "label": "GOLF | PGA | Farmers Insurance Open 2026"
+  },
+  {
+    "id": "pga-fedex-st-jude-championship-2026",
+    "label": "GOLF | PGA | FedEx St. Jude Championship 2026"
+  },
+  {
+    "id": "pga-genesis-scottish-open-2026",
+    "label": "GOLF | PGA | Genesis Scottish Open 2026"
+  },
+  {
+    "id": "pga-isco-championship-2026",
+    "label": "GOLF | PGA | ISCO Championship 2026"
+  },
+  {
+    "id": "pga-john-deere-classic-2026",
+    "label": "GOLF | PGA | John Deere Classic 2026"
+  },
+  {
+    "id": "pga-masters-tournament-2026",
+    "label": "GOLF | PGA | Masters Tournament 2026"
+  },
+  {
+    "id": "pga-oneflight-myrtle-beach-classic-2026",
+    "label": "GOLF | PGA | ONEflight Myrtle Beach Classic 2026"
+  },
+  {
+    "id": "pga-pga-championship-2026",
+    "label": "GOLF | PGA | PGA Championship 2026"
+  },
+  {
+    "id": "pga-puerto-rico-open-2026",
+    "label": "GOLF | PGA | Puerto Rico Open 2026"
+  },
+  {
+    "id": "pga-rbc-canadian-open-2026",
+    "label": "GOLF | PGA | RBC Canadian Open 2026"
+  },
+  {
+    "id": "pga-rbc-heritage-2026",
+    "label": "GOLF | PGA | RBC Heritage 2026"
+  },
+  {
+    "id": "pga-rocket-classic-2026",
+    "label": "GOLF | PGA | Rocket Classic 2026"
+  },
+  {
+    "id": "pga-sony-open-in-hawaii-2026",
+    "label": "GOLF | PGA | Sony Open in Hawaii 2026"
+  },
+  {
+    "id": "pga-texas-childrens-houston-open-2026",
+    "label": "GOLF | PGA | Texas Children\u2019s Houston Open 2026"
+  },
+  {
+    "id": "pga-the-american-express-2026",
+    "label": "GOLF | PGA | The American Express 2026"
+  },
+  {
+    "id": "pga-the-cj-cup-byron-nelson-2026",
+    "label": "GOLF | PGA | THE CJ Cup Byron Nelson 2026"
+  },
+  {
+    "id": "pga-the-genesis-invitational-2026",
+    "label": "GOLF | PGA | The Genesis Invitational 2026"
+  },
+  {
+    "id": "pga-the-memorial-tournament-presented-by-workday-2026",
+    "label": "GOLF | PGA | the Memorial Tournament presented by Workday 2026"
+  },
+  {
+    "id": "pga-the-open-championship-2026",
+    "label": "GOLF | PGA | The Open Championship 2026"
+  },
+  {
+    "id": "pga-the-players-championship-2026",
+    "label": "GOLF | PGA | THE PLAYERS Championship 2026"
+  },
+  {
+    "id": "pga-the-sentry-2026",
+    "label": "GOLF | PGA | The Sentry 2026"
+  },
+  {
+    "id": "pga-tour-championship-2026",
+    "label": "GOLF | PGA | Tour Championship 2026"
+  },
+  {
+    "id": "pga-travelers-championship-2026",
+    "label": "GOLF | PGA | Travelers Championship 2026"
+  },
+  {
+    "id": "pga-truist-championship-2026",
+    "label": "GOLF | PGA | Truist Championship 2026"
+  },
+  {
+    "id": "pga-us-open-2026",
+    "label": "GOLF | PGA | US Open 2026"
+  },
+  {
+    "id": "pga-valero-texas-open-2026",
+    "label": "GOLF | PGA | Valero Texas Open 2026"
+  },
+  {
+    "id": "pga-valspar-championship-2026",
+    "label": "GOLF | PGA | Valspar Championship 2026"
+  },
+  {
+    "id": "pga-wm-phoenix-open-2026",
+    "label": "GOLF | PGA | WM Phoenix Open 2026"
+  },
+  {
+    "id": "pga-wyndham-championship-2026",
+    "label": "GOLF | PGA | Wyndham Championship 2026"
+  },
+  {
+    "id": "pga-zurich-classic-of-new-orleans-2026",
+    "label": "GOLF | PGA | Zurich Classic of New Orleans 2026"
+  },
+  {
+    "id": "premier-league-premier-league-season-2026-2027",
+    "label": "PREMIER LEAGUE | PREMIER LEAGUE Season 2026\u20132027"
+  },
+  {
+    "id": "spanish-laliga-spanish-laliga-season-2026-2027",
+    "label": "Spanish LALIGA | Spanish LALIGA Season 2026\u20132027"
+  },
+  {
+    "id": "stocks-us-market",
+    "label": ""
+  },
+  {
+    "id": "tv-streaming-rankings-us-2026-05",
+    "label": ""
+  },
+  {
+    "id": "tv-streaming-rankings-us-2026-06",
+    "label": ""
+  },
+  {
+    "id": "uefa-champions-leauge-uefa-champions-league-final-2026",
+    "label": "UEFA CHAMPIONS LEAUGE | UEFA Champions League Final 2026"
+  },
+  {
+    "id": "uefa-champions-leauge-uefa-champions-league-knockout-stage-2026",
+    "label": "UEFA CHAMPIONS LEAUGE | UEFA Champions League Knockout Stage 2026"
+  },
+  {
+    "id": "uefa-champions-leauge-uefa-champions-leauge-season-2026-2027",
+    "label": "UEFA CHAMPIONS LEAUGE | UEFA CHAMPIONS LEAUGE Season 2026\u20132027"
+  },
+  {
+    "id": "wnba-wnba-finals-2026",
+    "label": "WNBA | WNBA Finals 2026"
+  },
+  {
+    "id": "wnba-wnba-playoffs-2026",
+    "label": "WNBA | WNBA Playoffs 2026"
+  },
+  {
+    "id": "wnba-wnba-season-2026-2027",
+    "label": "WNBA | WNBA Season 2026\u20132027"
+  },
+  {
+    "id": "wta-australian-open-2026",
+    "label": "TENNIS | WTA | Australian Open 2026"
+  },
+  {
+    "id": "wta-canadian-open-2026",
+    "label": "TENNIS | WTA | Canadian Open 2026"
+  },
+  {
+    "id": "wta-china-open-beijing-2026",
+    "label": "TENNIS | WTA | China Open (Beijing) 2026"
+  },
+  {
+    "id": "wta-cincinnati-open-2026",
+    "label": "TENNIS | WTA | Cincinnati Open 2026"
+  },
+  {
+    "id": "wta-dubai-tennis-championships-2026",
+    "label": "TENNIS | WTA | Dubai Tennis Championships 2026"
+  },
+  {
+    "id": "wta-french-open-2026",
+    "label": "TENNIS | WTA | French Open 2026"
+  },
+  {
+    "id": "wta-indian-wells-2026",
+    "label": "TENNIS | WTA | Indian Wells 2026"
+  },
+  {
+    "id": "wta-italian-open-rome-2026",
+    "label": "TENNIS | WTA | Italian Open (Rome) 2026"
+  },
+  {
+    "id": "wta-madrid-open-2026",
+    "label": "TENNIS | WTA | Madrid Open 2026"
+  },
+  {
+    "id": "wta-miami-open-2026",
+    "label": "TENNIS | WTA | Miami Open 2026"
+  },
+  {
+    "id": "wta-us-open-2026",
+    "label": "TENNIS | WTA | US Open 2026"
+  },
+  {
+    "id": "wta-wimbledon-2026",
+    "label": "TENNIS | WTA | Wimbledon 2026"
+  },
+  {
+    "id": "wta-wta-finals-2026",
+    "label": "TENNIS | WTA | WTA Finals 2026"
+  },
+  {
+    "id": "wta-wuhan-open-2026",
+    "label": "TENNIS | WTA | Wuhan Open 2026"
+  }
+]

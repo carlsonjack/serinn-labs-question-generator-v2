@@ -1,0 +1,11 @@
+{
+  "id": "mlb_total_runs_over_8_5",
+  "subcategory": "MLB",
+  "question_family": "event",
+  "question": "Will total runs in {home_team} vs {away_team} exceed {line}?",
+  "answer_type": "yes_no",
+  "answer_options": "Yes||No",
+  "priority": "",
+  "requires_entities": false,
+  "line": 8.5
+}

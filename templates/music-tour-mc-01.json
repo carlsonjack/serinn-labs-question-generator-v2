@@ -1,0 +1,69 @@
+{
+  "id": "music-tour-mc-01",
+  "subcategory": "Music",
+  "question_family": "content",
+  "question": "Which artist will have the highest-grossing tour of [YEAR] according to [TOUR_CHART_SOURCE]?",
+  "answer_type": "multiple_choice",
+  "answer_options": "[ARTIST_A]||[ARTIST_B]||[ARTIST_C]||[ARTIST_D]",
+  "priority": 1,
+  "requires_entities": false,
+  "template_type": "Concert Tour Gross",
+  "required_dataset_fields": "year; tour_chart_source; artist_a; artist_b; artist_c; artist_d; topic_import_id",
+  "placeholder_mappings": {
+    "ARTIST_A": {
+      "canonical_placeholder": "ARTIST_A",
+      "target": "selected_entities[0].artist",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    },
+    "ARTIST_B": {
+      "canonical_placeholder": "ARTIST_B",
+      "target": "selected_entities[1].artist",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    },
+    "ARTIST_C": {
+      "canonical_placeholder": "ARTIST_C",
+      "target": "selected_entities[2].artist",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    },
+    "ARTIST_D": {
+      "canonical_placeholder": "ARTIST_D",
+      "target": "selected_entities[3].artist",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    },
+    "TOUR_CHART_SOURCE": {
+      "canonical_placeholder": "TOUR_CHART_SOURCE",
+      "target": "tour_chart_source",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    },
+    "YEAR": {
+      "canonical_placeholder": "YEAR",
+      "target": "year",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    }
+  },
+  "_comment": null,
+  "resolution_date_rule": "Long-horizon question. Use Pollstar Year-End or Billboard Boxscore as source. Start can be launch date; expiration can be 60 days later or before year-end; resolution should be early January following the chart year.",
+  "resolution_date_spec": {
+    "kind": "calendar_in_year",
+    "anchor": null,
+    "metadata_key": null,
+    "offset_days": 0,
+    "offset_hours": 0,
+    "calendar_month": 1,
+    "calendar_day": 10,
+    "year_policy": "release_year_plus_1",
+    "end_offset_days": null
+  }
+}

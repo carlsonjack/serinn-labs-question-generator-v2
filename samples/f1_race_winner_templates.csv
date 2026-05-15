@@ -1,0 +1,8 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+f1_race_winner_head_to_head,F1,event,Who will win this Formula 1 race: {home_team} or {away_team}?,multiple_choice,{home_team}||{away_team},1,false,F1 Race sessions — normalized events must set home_team/away_team to the two answer identities (e.g. drivers or constructors). Filter to session_type Race in the parser.
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+f1_race_winner_flag,F1,event,Which driver takes the chequered flag first: {home_team} or {away_team}?,multiple_choice,{home_team}||{away_team},1,false,Same mapping as f1_race_winner_head_to_head; wording variant for race winner.
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+f1_race_winner_yes_no,F1,event,Will {home_team} win this Grand Prix race?,yes_no,Yes||No,,false,Requires home_team to be the driver or constructor the question names; away_team unused for yes/no but may still be set by the normalizer.
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+f1_race_finish_ahead_yes_no,F1,event,Will {home_team} finish ahead of {away_team} in this race?,yes_no,Yes||No,,false,Head-to-head race outcome; both placeholders should be drivers (or comparable entities) for the same Race event.

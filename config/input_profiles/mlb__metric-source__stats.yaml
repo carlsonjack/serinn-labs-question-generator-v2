@@ -1,0 +1,21 @@
+category_key: mlb
+confidence: 0.46212121212121215
+field_mappings:
+  hr: HR
+  league: Lg
+  player_name: Player
+  rbi: RBI
+  sb: SB
+  team: Team
+  war: WAR
+file_pattern: stats.xlsx
+fingerprint: 4c17465a8a91460391922104beca297dc924eed2a25b79c1e0373d46c9bff8bc
+format_name: xlsx
+header_row_index: 0
+normalizer_options:
+  association_sheet_name: 2026 MLB Statistics
+  join_strategy: player_name
+  stats_sheet_name: 2025 MLB Statistics
+profile_name: stats
+sheet_name: 2026 MLB Statistics
+source_role: metric_source

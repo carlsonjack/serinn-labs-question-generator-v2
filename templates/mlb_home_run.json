@@ -1,0 +1,12 @@
+{
+  "id": "mlb_home_run",
+  "subcategory": "MLB",
+  "question_family": "entity_stat",
+  "question": "Who will hit a home run?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{entity_options}",
+  "priority": "",
+  "requires_entities": true,
+  "stat_column": "HR",
+  "top_n_per_team": 2
+}

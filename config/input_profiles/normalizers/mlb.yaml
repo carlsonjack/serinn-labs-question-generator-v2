@@ -1,0 +1,206 @@
+version: 1
+package_key: mlb
+sources:
+  event_source:
+    source_role: event_source
+    file_pattern: schedule.xlsx
+    sheet_name: MLB 2026
+    header_row_index: 0
+    field_mappings:
+      away_team: away_team
+      event_display: event_name
+      event_id: event_id
+      home_team: home_team
+    metric_mappings: {}
+    metadata_mappings:
+      location: location
+    matchup_split: null
+    event_datetime:
+      datetime_column: null
+      date_column: event_date
+      time_column: Event_time
+      timezone: null
+    event_id:
+      source_columns:
+      - event_id
+      strategy: source_column
+  metric_source_2025:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: 2025 MLB Statistics
+    header_row_index: 0
+    field_mappings:
+      player_name: Player
+      team: Team
+    metric_mappings:
+      AT_BATS: AB
+      BATTING_AVERAGE: BA
+      CAUGHT_STEALING: CS
+      DOUBLES: 2B
+      GAMES: G
+      GROUNDED_INTO_DOUBLE_PLAY: GIDP
+      HITS: H
+      HIT_BY_PITCH: HBP
+      HOME_RUNS: HR
+      INTENTIONAL_WALKS: IBB
+      ON_BASE_PERCENTAGE: OBP
+      OPS: OPS
+      OPS_PLUS: OPS+
+      PLATE_APPEARANCES: PA
+      RBAT_PLUS: Rbat+
+      ROBA: rOBA
+      RUNS: R
+      RUNS_BATTED_IN: RBI
+      SACRIFICE_FLIES: SF
+      SACRIFICE_HITS: SH
+      SLUGGING_PERCENTAGE: SLG
+      STOLEN_BASES: SB
+      STRIKEOUTS: SO
+      TOTAL_BASES: TB
+      TRIPLES: 3B
+      WALKS: BB
+      WAR: WAR
+    metadata_mappings:
+      age: Age
+      league: Lg
+      position: Pos
+      rank: Rk
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+  metric_source_2026:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: 2026 MLB Statistics
+    header_row_index: 0
+    field_mappings:
+      player_name: Player
+      team: Team
+    metric_mappings:
+      AT_BATS: AB
+      BATTING_AVERAGE: BA
+      CAUGHT_STEALING: CS
+      DOUBLES: 2B
+      GAMES: G
+      GROUNDED_INTO_DOUBLE_PLAY: GIDP
+      HITS: H
+      HIT_BY_PITCH: HBP
+      HOME_RUNS: HR
+      INTENTIONAL_WALKS: IBB
+      ON_BASE_PERCENTAGE: OBP
+      OPS: OPS
+      OPS_PLUS: OPS+
+      PLATE_APPEARANCES: PA
+      RBAT_PLUS: Rbat+
+      ROBA: rOBA
+      RUNS: R
+      RUNS_BATTED_IN: RBI
+      SACRIFICE_FLIES: SF
+      SACRIFICE_HITS: SH
+      SLUGGING_PERCENTAGE: SLG
+      STOLEN_BASES: SB
+      STRIKEOUTS: SO
+      TOTAL_BASES: TB
+      TRIPLES: 3B
+      WALKS: BB
+      WAR: WAR
+    metadata_mappings:
+      age: Age
+      league: Lg
+      position: Pos
+      rank: Rk
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  event_source:
+    filename: schedule.xlsx
+    sheets:
+    - columns:
+      - event_id
+      - event_name
+      - event_date
+      - home_team
+      - away_team
+      - Event_time
+      - location
+      header_row_index: 0
+      sheet_name: MLB 2026
+  metric_source:
+    filename: stats.xlsx
+    sheets:
+    - columns:
+      - Rk
+      - Player
+      - Age
+      - Team
+      - Lg
+      - WAR
+      - G
+      - PA
+      - AB
+      - R
+      - H
+      - 2B
+      - 3B
+      - HR
+      - RBI
+      - SB
+      - CS
+      - BB
+      - SO
+      - BA
+      - OBP
+      - SLG
+      - OPS
+      - OPS+
+      - rOBA
+      - Rbat+
+      - TB
+      - GIDP
+      - HBP
+      - SH
+      - SF
+      - IBB
+      - Pos
+      header_row_index: 0
+      sheet_name: 2025 MLB Statistics
+    - columns:
+      - Rk
+      - Player
+      - Age
+      - Team
+      - Lg
+      - WAR
+      - G
+      - PA
+      - AB
+      - R
+      - H
+      - 2B
+      - 3B
+      - HR
+      - RBI
+      - SB
+      - CS
+      - BB
+      - SO
+      - BA
+      - OBP
+      - SLG
+      - OPS
+      - OPS+
+      - rOBA
+      - Rbat+
+      - TB
+      - GIDP
+      - HBP
+      - SH
+      - SF
+      - IBB
+      - Pos
+      header_row_index: 0
+      sheet_name: 2026 MLB Statistics
+notes: Event schedule uses separate date and time columns. Stats workbook contains
+  two metric sheets split by season; both are mapped as player metric sources. No
+  timezone was provided in the snapshot.

@@ -1,0 +1,82 @@
+version: 1
+package_key: world_cup
+sources:
+  event_source:
+    source_role: event_source
+    file_pattern: schedule.xlsx
+    sheet_name: World Cup Round 1 Schedule
+    header_row_index: 0
+    field_mappings:
+      event_display: Matchup
+    metric_mappings: {}
+    metadata_mappings:
+      City: City
+      Group: Group
+      TIME_LOCAL: Time (Local)
+      Venue: Venue
+    matchup_split:
+      source_column: Matchup
+      delimiter_pattern: \s+v\s+
+      left_team_field: home_team
+      right_team_field: away_team
+    event_datetime:
+      datetime_column: null
+      date_column: Date
+      time_column: Time (EST)
+      timezone: EST
+    event_id:
+      source_columns:
+      - Date
+      - Time (EST)
+      - Matchup
+      strategy: concat
+  metric_source:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: WorldCup_Player_Pool
+    header_row_index: 0
+    field_mappings:
+      player_name: Player
+      team: Team
+    metric_mappings:
+      ASSIST_PROBABILITY: Assist Probability
+      GOAL_PROBABILITY: Goal Probability
+    metadata_mappings:
+      Archetype: Archetype
+      Group: Group
+      Star Power: Star Power
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  event_source:
+    filename: schedule.xlsx
+    sheets:
+    - columns:
+      - Date
+      - Time (EST)
+      - Time (Local)
+      - Matchup
+      - Group
+      - Venue
+      - City
+      header_row_index: 0
+      sheet_name: World Cup Round 1 Schedule
+  metric_source:
+    filename: stats.xlsx
+    sheets:
+    - columns:
+      - Group
+      - Team
+      - Player
+      - Archetype
+      - Goal Probability
+      - Assist Probability
+      - Star Power
+      header_row_index: 0
+      sheet_name: WorldCup_Player_Pool
+notes: Event records should split Matchup into home_team and away_team using the '
+  v ' delimiter. Use Date + Time (EST) as the canonical event datetime components.
+  Preserve Group, Venue, City, and local time as event metadata. Player metric records
+  map Team and Player directly, with probability columns normalized to uppercase stat
+  keys.

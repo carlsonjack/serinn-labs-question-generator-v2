@@ -1,0 +1,17 @@
+category_key: f1
+confidence: 1.0
+field_mappings:
+  away_participant: away_participant
+  event_date: event_date
+  event_id: event_id
+  event_name: event_name
+  home_participant: home_participant
+  session_type: session_type
+file_pattern: f1_schedule.xlsx
+fingerprint: null
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: f1_schedule
+sheet_name: F1 Schedule
+source_role: event_source

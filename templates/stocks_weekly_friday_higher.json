@@ -1,0 +1,13 @@
+{
+  "id": "stocks_weekly_friday_higher",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "Will {ASSET} close higher on Friday than its prior Friday close?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "timeframe": "Weekly",
+  "template_name": "Weekly Friday Close Higher",
+  "notes": "For shortened holiday weeks, use the last regular trading day of the week as Friday."
+}

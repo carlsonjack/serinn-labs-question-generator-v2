@@ -1,0 +1,6 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+sample_csv_event_yesno,MLB,event,Will the home team score first?,yes_no,Yes||No,,false,Sample upload — yes/no event
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,_comment
+sample_csv_event_mc,MLB,event,Who wins {home_team} vs {away_team}?,multiple_choice,{home_team}||{away_team},1,false,Sample upload — multiple choice event
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,stat_column,top_n_per_team,_comment
+sample_csv_entity_hr,MLB,entity_stat,Who will hit a home run in this game?,multiple_choice,{entity_options},,true,HR,3,Sample upload — entity stat (HR)

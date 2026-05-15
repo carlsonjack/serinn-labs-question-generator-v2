@@ -1,0 +1,34 @@
+{
+  "id": "movie-yn-02",
+  "subcategory": "Movies",
+  "question_family": "content",
+  "question": "Will [TITLE] finish in the Top 3 at the US box office this weekend?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "template_type": "Top 3 Placement",
+  "required_dataset_fields": "movie_title; release_date; topic_import_id",
+  "placeholder_mappings": {
+    "MOVIE_TITLE": {
+      "canonical_placeholder": "TITLE",
+      "target": "title",
+      "confidence": 0.98,
+      "source": "heuristic",
+      "reason": "known field alias"
+    }
+  },
+  "_comment": null,
+  "resolution_date_rule": "Resolution date should be start_date + 4 days.",
+  "resolution_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "question_start",
+    "metadata_key": null,
+    "offset_days": 4,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "year_policy": null,
+    "end_offset_days": null
+  }
+}

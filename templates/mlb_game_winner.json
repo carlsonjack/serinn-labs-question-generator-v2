@@ -1,0 +1,10 @@
+{
+  "id": "mlb_game_winner",
+  "subcategory": "MLB",
+  "question_family": "event",
+  "question": "Who will win {home_team} vs {away_team}?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{home_team}||{away_team}",
+  "priority": 1,
+  "requires_entities": false
+}

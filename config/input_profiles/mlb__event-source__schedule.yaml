@@ -1,0 +1,17 @@
+category_key: mlb
+confidence: 1.0
+field_mappings:
+  away_team: away_team
+  event_date: event_date
+  event_id: event_id
+  event_name: event_name
+  event_time: Event_time
+  home_team: home_team
+file_pattern: schedule.xlsx
+fingerprint: e16478e4086626b97fbb6e00a8b38088e5d39738b7a2bb7c2e503dc40c2b344a
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: schedule
+sheet_name: MLB 2026
+source_role: event_source

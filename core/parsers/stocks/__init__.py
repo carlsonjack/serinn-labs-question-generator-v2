@@ -1,0 +1,2 @@
+"""Stocks input normalizer package."""
+

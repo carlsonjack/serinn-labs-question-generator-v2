@@ -1,0 +1,11 @@
+{
+  "id": "f1_race_winner_head_to_head",
+  "subcategory": "F1",
+  "question_family": "event",
+  "question": "Who will win this Formula 1 race: {home_team} or {away_team}?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{home_team}||{away_team}",
+  "priority": 1,
+  "requires_entities": false,
+  "_comment": "F1 Race sessions — normalized events must set home_team/away_team to the two answer identities (e.g. drivers or constructors). Filter to session_type Race in the parser."
+}

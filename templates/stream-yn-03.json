@@ -1,0 +1,34 @@
+{
+  "id": "stream-yn-03",
+  "subcategory": "Television",
+  "question_family": "content",
+  "question": "Will [TITLE] be renewed for another season?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "template_type": "Renewal",
+  "required_dataset_fields": "show_title; release_date; topic_import_id",
+  "placeholder_mappings": {
+    "SHOW_TITLE": {
+      "canonical_placeholder": "TITLE",
+      "target": "question",
+      "confidence": 0.94,
+      "source": "ai",
+      "reason": "The template asks about a television show's title, and TITLE is the closest canonical placeholder available for a named work. More specific options like MOVIE_TITLE or FILM_TITLE are medium-specific and do not fit television."
+    }
+  },
+  "_comment": null,
+  "resolution_date_rule": "Suggested resolution date: start_date + 180 days.",
+  "resolution_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": 180,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "year_policy": null,
+    "end_offset_days": null
+  }
+}
