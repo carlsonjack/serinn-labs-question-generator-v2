@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -19,7 +19,12 @@
         box-sizing: border-box;
       }
       body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
         margin: 0;
         background: var(--bg);
         color: var(--text);
@@ -491,115 +496,137 @@
   <body>
     <div class="wrap">
       <h1>Structured content generation</h1>
-      <p class="sub">
-        Upload the input files defined in <code>config/settings.yaml</code> under
-        <code>inputs.files</code>, then generate. Output files are written to
-        <code>{{ output_dir }}</code>.
-      </p>
 
       <section>
         <h2>Input files</h2>
 
         <div class="workflow-step">
           <h3 class="workflow-step-head">
-            <span class="w-num">Step 1</span>Define packages &amp; file slots<span class="w-optional">Optional</span>
+            <span class="w-num">Step 1</span>Define packages &amp; file
+            slots<span class="w-optional">Optional</span>
           </h3>
           <p class="workflow-step-one-liner">
-            Open only when you are changing input types, adding a package, or editing slot mappings; skip
-            to step 2 if the package is already set.
+            Open only when you are changing input types, adding a package, or
+            editing slot mappings; skip to step 2 if the package is already set.
           </p>
           <details class="inputs-def">
             <summary>Define packages &amp; file slots</summary>
             <p class="muted small" style="margin: 0.35rem 0 0.65rem">
-              Each <strong>package</strong> (e.g. <code>mlb</code>) maps <strong>slot ids</strong> to the
-              filename used under <code>inputs/</code> when you upload. Slot ids should match your input
-              profiles (e.g. <code>event_source</code>, <code>metric_source</code>). You can use any
-              <code>.xlsx</code> basename per slot; common slot names like <code>schedule</code> or
-              <code>stats</code> are auto-mapped to roles when <code>inputs.file_roles</code> omits that
-              package, or use <code>event_source</code> + <code>metric_source</code> for zero-config
-              schedule+stats packages.
+              Each <strong>package</strong> (e.g. <code>mlb</code>) maps
+              <strong>slot ids</strong> to the filename used under
+              <code>inputs/</code> when you upload. Slot ids should match your
+              input profiles (e.g. <code>event_source</code>,
+              <code>metric_source</code>). You can use any
+              <code>.xlsx</code> basename per slot; common slot names like
+              <code>schedule</code> or <code>stats</code> are auto-mapped to
+              roles when <code>inputs.file_roles</code> omits that package, or
+              use <code>event_source</code> + <code>metric_source</code> for
+              zero-config schedule+stats packages.
             </p>
             <div id="inputs-files-root"></div>
             <div class="actions" style="margin-top: 0.35rem">
-              <button type="button" class="ghost" id="btn-add-input-pkg">Add package</button>
-              <button type="button" id="btn-save-inputs-files">Save definitions</button>
+              <button type="button" class="ghost" id="btn-add-input-pkg">
+                Add package
+              </button>
+              <button type="button" id="btn-save-inputs-files">
+                Save definitions
+              </button>
               <span class="muted" id="inputs-files-msg"></span>
             </div>
           </details>
         </div>
 
         <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 2</span>Select input package</h3>
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 2</span>Select input package
+          </h3>
           <p class="workflow-step-one-liner">
-            Choose which package’s slots, normalizer, and template list this run uses.
+            Choose which package’s slots, normalizer, and template list this run
+            uses.
           </p>
           <label for="input_category_key">Input package</label>
           <select id="input_category_key" autocomplete="off">
             {% for c in input_categories %}
-            <option value="{{ c }}" {% if c == input_category_key %}selected{% endif %}>{{ c }}</option>
+            <option
+              value="{{ c }}"
+              {%
+              if
+              c=""
+              ="input_category_key"
+              %}selected{%
+              endif
+              %}
+            >
+              {{ c }}
+            </option>
             {% endfor %}
           </select>
         </div>
 
         <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 3</span>Upload input files</h3>
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 3</span>Upload input files
+          </h3>
           <p class="workflow-step-one-liner">
-            Drop the required <code>.xlsx</code> files on each slot, then save uploads to refresh parsing
-            and downstream previews.
+            Drop the required <code>.xlsx</code> files on each slot, then save
+            uploads to refresh parsing and downstream previews.
           </p>
           <p class="muted" style="margin-top: -0.35rem; margin-bottom: 0.65rem">
             Files below follow the package selected in step 2.
           </p>
 
-        <div id="input-slots-root">
-          {% if not input_slots %}
-          <p class="muted">
-            No input slots — add <code>inputs.files.&lt;package&gt;</code> in settings.
-          </p>
-          {% endif %}
-          {% for s in input_slots %}
-          <div class="input-slot-wrap" data-slot-id="{{ s.slot_id }}">
-            <div
-              class="drop"
-              id="drop-{{ s.slot_id }}"
-              data-input="file-{{ s.slot_id }}"
-              tabindex="0"
-            >
-              <strong>{{ s.label }}</strong> — drop <code>.xlsx</code> here or click
-              <div class="target-name muted">
-                Saved as <code>{{ s.target_filename }}</code>
+          <div id="input-slots-root">
+            {% if not input_slots %}
+            <p class="muted">
+              No input slots — add <code>inputs.files.&lt;package&gt;</code> in
+              settings.
+            </p>
+            {% endif %} {% for s in input_slots %}
+            <div class="input-slot-wrap" data-slot-id="{{ s.slot_id }}">
+              <div
+                class="drop"
+                id="drop-{{ s.slot_id }}"
+                data-input="file-{{ s.slot_id }}"
+                tabindex="0"
+              >
+                <strong>{{ s.label }}</strong> — drop <code>.xlsx</code> here or
+                click
+                <div class="target-name muted">
+                  Saved as <code>{{ s.target_filename }}</code>
+                </div>
               </div>
+              <input
+                type="file"
+                id="file-{{ s.slot_id }}"
+                class="slot-file"
+                data-slot-id="{{ s.slot_id }}"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              />
+              <div class="slot-line muted" id="line-{{ s.slot_id }}"></div>
             </div>
-            <input
-              type="file"
-              id="file-{{ s.slot_id }}"
-              class="slot-file"
-              data-slot-id="{{ s.slot_id }}"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            />
-            <div class="slot-line muted" id="line-{{ s.slot_id }}"></div>
+            {% endfor %}
           </div>
-          {% endfor %}
-        </div>
 
-        <div class="actions">
-          <button type="button" id="btn-upload">
-            Save uploads + create normalizer profile
-          </button>
-          <span class="muted" id="upload-msg"></span>
-        </div>
+          <div class="actions">
+            <button type="button" id="btn-upload">
+              Save uploads + create normalizer profile
+            </button>
+            <span class="muted" id="upload-msg"></span>
+          </div>
         </div>
 
         <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 4</span>Check content preview</h3>
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 4</span>Check content preview
+          </h3>
           <p class="workflow-step-one-liner">
-            After save, scan the normalizer profile preview for layout errors or column mismatches before
-            you continue.
+            After save, scan the normalizer profile preview for layout errors or
+            column mismatches before you continue.
           </p>
           <h2>Normalizer profile</h2>
           <p class="muted small" style="margin-top: -0.25rem">
-            The upload button saves the selected files, analyzes their layout, and saves the
-            best available normalization profile for this package.
+            The upload button saves the selected files, analyzes their layout,
+            and saves the best available normalization profile for this package.
           </p>
           <div class="muted small" id="normalizer-msg"></div>
           <div class="summary" id="normalizer-preview" hidden></div>
@@ -610,205 +637,297 @@
         <h2>Configuration</h2>
 
         <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 5</span>Confirm date range</h3>
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 5</span>Confirm date range
+          </h3>
           <p class="workflow-step-one-liner">
-            Values are taken from your input when possible; adjust the window here if it does not match
-            the period you want to generate.
+            Values are taken from your input when possible; adjust the window
+            here if it does not match the period you want to generate.
           </p>
           <div class="row2">
             <div>
               <label for="date_start">Date start</label>
-              <input type="text" id="date_start" value="{{ settings.date_filter.start }}" placeholder="YYYY-MM-DD" />
+              <input
+                type="text"
+                id="date_start"
+                value="{{ settings.date_filter.start }}"
+                placeholder="YYYY-MM-DD"
+              />
             </div>
             <div>
               <label for="date_end">Date end</label>
-              <input type="text" id="date_end" value="{{ settings.date_filter.end }}" placeholder="YYYY-MM-DD" />
+              <input
+                type="text"
+                id="date_end"
+                value="{{ settings.date_filter.end }}"
+                placeholder="YYYY-MM-DD"
+              />
             </div>
           </div>
-          <p class="muted small" id="date-filter-auto-note" hidden aria-live="polite" style="margin-top: 0.35rem"></p>
-        </div>
-
-        <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 6</span>Topic Import ID</h3>
-          <p class="workflow-step-one-liner">
-            Pick or type the topic import ID that should be stored with this batch’s output.
-          </p>
-        <label for="topic_import_id">Topic Import ID</label>
-        <div class="topic-import-row">
-          <div class="topic-combobox" id="topic_import_id_combo">
-            <input
-              type="text"
-              id="topic_import_id"
-              value="{{ settings.topic_import_id or '' }}"
-              role="combobox"
-              aria-autocomplete="list"
-              aria-expanded="false"
-              aria-controls="topic_import_id_options"
-              autocomplete="off"
-              placeholder="Search the list or type any ID"
-            />
-            <div
-              class="topic-options"
-              id="topic_import_id_options"
-              role="listbox"
-              hidden
-            ></div>
-          </div>
-          <button type="button" class="ghost" id="btn-save-topic-import-catalog">
-            Save ID to pick list
-          </button>
-        </div>
-        <p class="muted small" id="topic-import-catalog-msg" aria-live="polite" style="margin-top: 0"></p>
-        <p class="muted small" style="margin-top: -0.2rem">
-          Use <strong>Save ID to pick list</strong> after typing a new ID so it appears in the dropdown
-          for next time (writes <code>config/topic_import_ids_catalog.json</code>). Generate still saves
-          the active ID in settings.
-        </p>
-        <p class="muted small" style="margin-top: -0.35rem">
-          Choose a suggestion below, or type your own ID — anything you enter is kept for this run,
-          even if it is not in the list yet.
-        </p>
-        </div>
-
-        <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 7</span>Subcategory label</h3>
-          <p class="workflow-step-one-liner">
-            Confirm or edit the label saved with generated rows if it was not auto-filled the way you
-            expect.
-          </p>
-        <label for="subcategory">Subcategory label</label>
-        <input type="text" id="subcategory" value="{{ settings.subcategory or 'MLB' }}" />
-        <p class="muted small" style="margin-top: -0.35rem">
-          This label is saved with generated output. The template list below follows the selected
-          input package.
-        </p>
+          <p
+            class="muted small"
+            id="date-filter-auto-note"
+            hidden
+            aria-live="polite"
+            style="margin-top: 0.35rem"
+          ></p>
         </div>
 
         <div class="workflow-step">
           <h3 class="workflow-step-head">
-            <span class="w-num">Step 8</span>Top N per team (entity questions)<span class="w-optional">Optional</span>
+            <span class="w-num">Step 6</span>Topic Import ID
           </h3>
           <p class="workflow-step-one-liner">
-            Cap how many entity rows to keep per team when templates need that limit; leave default if
-            unsure.
+            Pick or type the topic import ID that should be stored with this
+            batch’s output.
           </p>
-        <label for="top_n">
-          Top N per team (entity questions)
-          <span class="muted small" style="font-weight: normal">optional</span>
-        </label>
-        <input type="number" id="top_n" min="1" max="50" value="{{ settings.top_n_per_team or 3 }}" />
+          <label for="topic_import_id">Topic Import ID</label>
+          <div class="topic-import-row">
+            <div class="topic-combobox" id="topic_import_id_combo">
+              <input
+                type="text"
+                id="topic_import_id"
+                value="{{ settings.topic_import_id or '' }}"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="topic_import_id_options"
+                autocomplete="off"
+                placeholder="Search the list or type any ID"
+              />
+              <div
+                class="topic-options"
+                id="topic_import_id_options"
+                role="listbox"
+                hidden
+              ></div>
+            </div>
+            <button
+              type="button"
+              class="ghost"
+              id="btn-save-topic-import-catalog"
+            >
+              Save ID to pick list
+            </button>
+          </div>
+          <p
+            class="muted small"
+            id="topic-import-catalog-msg"
+            aria-live="polite"
+            style="margin-top: 0"
+          ></p>
+          <p class="muted small" style="margin-top: -0.2rem">
+            Use <strong>Save ID to pick list</strong> after typing a new ID so
+            it appears in the dropdown for next time (writes
+            <code>config/topic_import_ids_catalog.json</code>). Generate still
+            saves the active ID in settings.
+          </p>
+          <p class="muted small" style="margin-top: -0.35rem">
+            Choose a suggestion below, or type your own ID — anything you enter
+            is kept for this run, even if it is not in the list yet.
+          </p>
         </div>
 
         <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 9</span>Review configuration</h3>
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 7</span>Subcategory label
+          </h3>
           <p class="workflow-step-one-liner">
-            Quick pass: dates, topic ID, subcategory, Top N, and the optional max below should match how
-            you intend to run before you pick templates.
+            Confirm or edit the label saved with generated rows if it was not
+            auto-filled the way you expect.
           </p>
-        <label for="max_q">
-          Max questions to generate
-          <span class="muted small" style="font-weight: normal"> (leave blank for no limit)</span>
-        </label>
-        <input
-          type="number"
-          id="max_q"
-          min="1"
-          placeholder="No limit"
-          value="{% if settings.get('max_generated_questions') is not none %}{{ settings.max_generated_questions }}{% endif %}"
-        />
-        <p class="muted small" style="margin-top: -0.35rem">
-          After expanding <em>games × enabled templates</em>, only the first N rows are sent to the
-          API. Leave empty to generate all matching rows. Use this to sample or cap cost.
-        </p>
+          <label for="subcategory">Subcategory label</label>
+          <input
+            type="text"
+            id="subcategory"
+            value="{{ settings.subcategory or 'MLB' }}"
+          />
+          <p class="muted small" style="margin-top: -0.35rem">
+            This label is saved with generated output. The template list below
+            follows the selected input package.
+          </p>
         </div>
 
         <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 10</span>Templates</h3>
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 8</span>Top N per team (entity
+            questions)<span class="w-optional">Optional</span>
+          </h3>
           <p class="workflow-step-one-liner">
-            Enable the templates you want for this run; use Add template below to upload new JSON, CSV,
-            or XLSX definitions.
+            Cap how many entity rows to keep per team when templates need that
+            limit; leave default if unsure.
           </p>
-        <details class="templates-collapse" open>
-          <summary>
-            <span id="template-heading">Templates ({{ template_subcategory }})</span>
-          </summary>
-          <div class="templates-collapse-body">
-            <p class="muted small" id="template-help" style="margin-top: 0">
-              Only templates matching the selected input package are shown. Open a row for a preview
-              and what enabling it does.
-            </p>
-            <div class="tpls" id="template-checkboxes">
-              {% if not template_meta %}
-              <p class="muted">No templates match the selected input package yet.</p>
-              {% endif %}
-              {% for t in template_meta %}
-              <details class="tpl-card" {% if t.enabled %}open{% endif %}>
-                <summary>
-                  <input
-                    type="checkbox"
-                    data-tid="{{ t.id }}"
-                    {% if t.enabled %}checked{% endif %}
-                    onclick="event.stopPropagation()"
-                    aria-label="Enable {{ t.id }}"
-                  />
-                  <span class="sum-main">
-                    <strong>{{ t.id }}</strong>
-                    <span class="tpl-meta">
-                      {{ t.subcategory }} · {{ t.question_family }} · {{ t.answer_type }}{% if t.line is not none %} · line {{ t.line }}{% endif %}{% if t.stat_column %} · stat {{ t.stat_column }}{% endif %}
+          <label for="top_n">
+            Top N per team (entity questions)
+            <span class="muted small" style="font-weight: normal"
+              >optional</span
+            >
+          </label>
+          <input
+            type="number"
+            id="top_n"
+            min="1"
+            max="50"
+            value="{{ settings.top_n_per_team or 3 }}"
+          />
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 9</span>Review configuration
+          </h3>
+          <p class="workflow-step-one-liner">
+            Quick pass: dates, topic ID, subcategory, Top N, and the optional
+            max below should match how you intend to run before you pick
+            templates.
+          </p>
+          <label for="max_q">
+            Max questions to generate
+            <span class="muted small" style="font-weight: normal">
+              (leave blank for no limit)</span
+            >
+          </label>
+          <input
+            type="number"
+            id="max_q"
+            min="1"
+            placeholder="No limit"
+            value="{% if settings.get('max_generated_questions') is not none %}{{ settings.max_generated_questions }}{% endif %}"
+          />
+          <p class="muted small" style="margin-top: -0.35rem">
+            After expanding <em>games × enabled templates</em>, only the first N
+            rows are sent to the API. Leave empty to generate all matching rows.
+            Use this to sample or cap cost.
+          </p>
+        </div>
+
+        <div class="workflow-step">
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 10</span>Templates
+          </h3>
+          <p class="workflow-step-one-liner">
+            Enable the templates you want for this run; use Add template below
+            to upload new JSON, CSV, or XLSX definitions.
+          </p>
+          <details class="templates-collapse" open>
+            <summary>
+              <span id="template-heading"
+                >Templates ({{ template_subcategory }})</span
+              >
+            </summary>
+            <div class="templates-collapse-body">
+              <p class="muted small" id="template-help" style="margin-top: 0">
+                Only templates matching the selected input package are shown.
+                Open a row for a preview and what enabling it does.
+              </p>
+              <div class="tpls" id="template-checkboxes">
+                {% if not template_meta %}
+                <p class="muted">
+                  No templates match the selected input package yet.
+                </p>
+                {% endif %} {% for t in template_meta %}
+                <details class="tpl-card" {% if t.enabled %}open{% endif %}>
+                  <summary>
+                    <input
+                      type="checkbox"
+                      data-tid="{{ t.id }}"
+                      {%
+                      if
+                      t.enabled
+                      %}checked{%
+                      endif
+                      %}
+                      onclick="event.stopPropagation()"
+                      aria-label="Enable {{ t.id }}"
+                    />
+                    <span class="sum-main">
+                      <strong>{{ t.id }}</strong>
+                      <span class="tpl-meta">
+                        {{ t.subcategory }} · {{ t.question_family }} · {{
+                        t.answer_type }}{% if t.line is not none %} · line {{
+                        t.line }}{% endif %}{% if t.stat_column %} · stat {{
+                        t.stat_column }}{% endif %}
+                      </span>
                     </span>
-                  </span>
-                </summary>
-                <div class="tpl-body">
-                  <p class="preview-q">“{{ t.preview_question }}”</p>
-                  <p class="muted small">Answer options pattern: <code>{{ t.preview_answer_options }}</code></p>
-                  {% for line in t.explainer %}
-                  <p class="expl">{{ line }}</p>
-                  {% endfor %}
-                </div>
-              </details>
-              {% endfor %}
-            </div>
-
-            <h3>Add template</h3>
-            <p class="muted small">
-              Upload a template <code>.csv</code>, <code>.xlsx</code>, or <code>.json</code>. CSV/XLSX uploads
-              can contain template tables or repeated 2-row blocks. Valid uploads are
-              saved and enabled automatically; reload is handled for you.
-            </p>
-            <div class="tpl-upload-zone" id="tpl-upload-zone" tabindex="0">
-              <strong>Add template file</strong> — drop CSV, XLSX, or JSON file(s) here or click
-              <div class="muted" id="tpl-pending-label" aria-live="polite"></div>
-            </div>
-            <input type="file" id="tpl-files" accept=".csv,.xlsx,.xls,.json,text/csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" multiple />
-            <div class="actions" style="margin-top: 0.5rem; align-items: flex-start">
-              <button type="button" id="btn-tpl-upload">Upload</button>
-              <div class="tpl-upload-feedback" id="tpl-upload-feedback">
-                <span class="muted" id="tpl-upload-msg"></span>
-                <details id="tpl-upload-mapping-details" class="tpl-upload-mapping-details" hidden>
-                  <summary class="small">See mapping details</summary>
-                  <div class="tpl-upload-mapping-body" id="tpl-upload-mapping-body"></div>
+                  </summary>
+                  <div class="tpl-body">
+                    <p class="preview-q">“{{ t.preview_question }}”</p>
+                    <p class="muted small">
+                      Answer options pattern:
+                      <code>{{ t.preview_answer_options }}</code>
+                    </p>
+                    {% for line in t.explainer %}
+                    <p class="expl">{{ line }}</p>
+                    {% endfor %}
+                  </div>
                 </details>
+                {% endfor %}
+              </div>
+
+              <h3>Add template</h3>
+              <p class="muted small">
+                Upload a template <code>.csv</code>, <code>.xlsx</code>, or
+                <code>.json</code>. CSV/XLSX uploads can contain template tables
+                or repeated 2-row blocks. Valid uploads are saved and enabled
+                automatically; reload is handled for you.
+              </p>
+              <div class="tpl-upload-zone" id="tpl-upload-zone" tabindex="0">
+                <strong>Add template file</strong> — drop CSV, XLSX, or JSON
+                file(s) here or click
+                <div
+                  class="muted"
+                  id="tpl-pending-label"
+                  aria-live="polite"
+                ></div>
+              </div>
+              <input
+                type="file"
+                id="tpl-files"
+                accept=".csv,.xlsx,.xls,.json,text/csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                multiple
+              />
+              <div
+                class="actions"
+                style="margin-top: 0.5rem; align-items: flex-start"
+              >
+                <button type="button" id="btn-tpl-upload">Upload</button>
+                <div class="tpl-upload-feedback" id="tpl-upload-feedback">
+                  <span class="muted" id="tpl-upload-msg"></span>
+                  <details
+                    id="tpl-upload-mapping-details"
+                    class="tpl-upload-mapping-details"
+                    hidden
+                  >
+                    <summary class="small">See mapping details</summary>
+                    <div
+                      class="tpl-upload-mapping-body"
+                      id="tpl-upload-mapping-body"
+                    ></div>
+                  </details>
+                </div>
               </div>
             </div>
-          </div>
-        </details>
+          </details>
         </div>
       </section>
 
       <section>
         <h2>Run</h2>
         <div class="workflow-step">
-          <h3 class="workflow-step-head"><span class="w-num">Step 11</span>Run</h3>
+          <h3 class="workflow-step-head">
+            <span class="w-num">Step 11</span>Run
+          </h3>
           <p class="workflow-step-one-liner">
-            Click Generate, wait until the job shows done, then download the CSV from the results area.
+            Click Generate, wait until the job shows done, then download the CSV
+            from the results area.
           </p>
-        <div class="actions">
-          <button type="button" id="btn-run">Generate</button>
-          <span class="muted" id="run-hint"></span>
-        </div>
-        <div class="status" id="status-line"></div>
-        <div class="summary" id="summary" hidden></div>
-        <div class="downloads" id="downloads"></div>
+          <div class="actions">
+            <button type="button" id="btn-run">Generate</button>
+            <span class="muted" id="run-hint"></span>
+          </div>
+          <div class="status" id="status-line"></div>
+          <div class="summary" id="summary" hidden></div>
+          <div class="downloads" id="downloads"></div>
         </div>
       </section>
     </div>
