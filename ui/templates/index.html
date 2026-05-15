@@ -549,13 +549,7 @@
             {% for c in input_categories %}
             <option
               value="{{ c }}"
-              {%
-              if
-              c=""
-              ="input_category_key"
-              %}selected{%
-              endif
-              %}
+              {% if c == input_category_key %}selected{% endif %}
             >
               {{ c }}
             </option>
@@ -932,6 +926,15 @@
       </section>
     </div>
 
+    <script type="application/json" id="serinn-bootstrap-inputs-files">
+      {{ inputs_files_map | tojson }}
+    </script>
+    <script type="application/json" id="serinn-bootstrap-templates-enabled">
+      {{ (settings.get("templates_enabled") or {}) | tojson }}
+    </script>
+    <script type="application/json" id="serinn-bootstrap-topic-catalog">
+      {{ topic_import_ids_catalog | tojson }}
+    </script>
     <script>
       (function () {
         const $ = (id) => document.getElementById(id);
@@ -942,9 +945,17 @@
           return d.innerHTML;
         }
 
-        let inputsFilesState = {{ inputs_files_map | tojson }};
-        let templatesEnabledState = {{ (settings.get("templates_enabled") or {}) | tojson }};
-        const topicImportCatalog = {{ topic_import_ids_catalog | tojson }};
+        function readBootstrapJson(id) {
+          return JSON.parse($(id).textContent);
+        }
+
+        let inputsFilesState = readBootstrapJson("serinn-bootstrap-inputs-files");
+        let templatesEnabledState = readBootstrapJson(
+          "serinn-bootstrap-templates-enabled"
+        );
+        const topicImportCatalog = readBootstrapJson(
+          "serinn-bootstrap-topic-catalog"
+        );
         let currentNormalizerSpec = null;
 
         function isTemplateEnabled(templateMeta) {
