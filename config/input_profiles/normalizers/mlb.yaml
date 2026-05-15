@@ -33,6 +33,7 @@ sources:
       player_name: Player
       team: Team
     metric_mappings:
+      AGE: Age
       AT_BATS: AB
       BATTING_AVERAGE: BA
       CAUGHT_STEALING: CS
@@ -47,6 +48,7 @@ sources:
       OPS: OPS
       OPS_PLUS: OPS+
       PLATE_APPEARANCES: PA
+      RANK: Rk
       RBAT_PLUS: Rbat+
       ROBA: rOBA
       RUNS: R
@@ -61,10 +63,8 @@ sources:
       WALKS: BB
       WAR: WAR
     metadata_mappings:
-      age: Age
       league: Lg
       position: Pos
-      rank: Rk
     matchup_split: null
     event_datetime: null
     event_id: null
@@ -77,6 +77,7 @@ sources:
       player_name: Player
       team: Team
     metric_mappings:
+      AGE: Age
       AT_BATS: AB
       BATTING_AVERAGE: BA
       CAUGHT_STEALING: CS
@@ -91,6 +92,7 @@ sources:
       OPS: OPS
       OPS_PLUS: OPS+
       PLATE_APPEARANCES: PA
+      RANK: Rk
       RBAT_PLUS: Rbat+
       ROBA: rOBA
       RUNS: R
@@ -105,10 +107,8 @@ sources:
       WALKS: BB
       WAR: WAR
     metadata_mappings:
-      age: Age
       league: Lg
       position: Pos
-      rank: Rk
     matchup_split: null
     event_datetime: null
     event_id: null
@@ -202,5 +202,4 @@ shape_signature:
       header_row_index: 0
       sheet_name: 2026 MLB Statistics
 notes: Event schedule uses separate date and time columns. Stats workbook contains
-  two metric sheets split by season; both are mapped as player metric sources. No
-  timezone was provided in the snapshot.
+  two metric sheets split by season; both are mapped as player metric sources.

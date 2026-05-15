@@ -35,19 +35,19 @@ def test_load_topic_import_ids_catalog_missing_file_returns_empty(tmp_path: Path
 
 
 def test_append_creates_file_and_sorts(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setattr(tic, "TOPIC_IMPORT_IDS_CATALOG_PATH", tmp_path / "cat.json")
+    monkeypatch.setattr(tic, "_CATALOG_PATH_OVERRIDE", tmp_path / "cat.json")
     r1 = tic.append_topic_import_id_to_catalog("zebra-id")
     assert r1["added"] is True
     r2 = tic.append_topic_import_id_to_catalog("alpha-id")
     assert r2["added"] is True
     r3 = tic.append_topic_import_id_to_catalog("ALPHA-ID")
     assert r3["already_exists"] is True
-    data = json.loads(tic.TOPIC_IMPORT_IDS_CATALOG_PATH.read_text(encoding="utf-8"))
+    data = json.loads((tmp_path / "cat.json").read_text(encoding="utf-8"))
     assert [x["id"] for x in data] == ["alpha-id", "zebra-id"]
 
 
 def test_append_rejects_invalid_id(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setattr(tic, "TOPIC_IMPORT_IDS_CATALOG_PATH", tmp_path / "cat.json")
+    monkeypatch.setattr(tic, "_CATALOG_PATH_OVERRIDE", tmp_path / "cat.json")
     with pytest.raises(ValueError, match="empty"):
         tic.append_topic_import_id_to_catalog("   ")
     with pytest.raises(ValueError, match="letters"):

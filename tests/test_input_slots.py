@@ -95,8 +95,8 @@ def test_save_settings_yaml_replaces_inputs_files_entirely(tmp_path, monkeypatch
     from core.config import load_settings_disk_only, save_settings_yaml
 
     cfg = tmp_path / "settings.yaml"
-    monkeypatch.setattr("core.config._SETTINGS", cfg)
-    monkeypatch.setattr("core.config._SETTINGS_LOCAL", tmp_path / "missing.local.yaml")
+    monkeypatch.setattr("core.config._SETTINGS_PATH_OVERRIDE", cfg)
+    monkeypatch.setattr("core.config._SETTINGS_LOCAL_PATH_OVERRIDE", tmp_path / "missing.local.yaml")
 
     cfg.write_text(
         "inputs:\n"

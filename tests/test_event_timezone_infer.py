@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -15,7 +16,11 @@ def clear_timezone_cache(monkeypatch, tmp_path):
     """Use an isolated cache file so tests do not read the user's disk cache."""
 
     cache = tmp_path / "tz_cache.json"
-    monkeypatch.setattr("core.event_timezone_infer.CACHE_PATH", cache)
+
+    def fake_cache_path() -> Path:
+        return cache
+
+    monkeypatch.setattr("core.event_timezone_infer._cache_path", fake_cache_path)
     yield
     if cache.is_file():
         cache.unlink()
@@ -28,7 +33,11 @@ def test_infer_team_timezones_skips_when_no_api_key() -> None:
 
 def test_infer_team_timezones_with_mock_client_writes_cache(tmp_path, monkeypatch) -> None:
     cache = tmp_path / "tz.json"
-    monkeypatch.setattr("core.event_timezone_infer.CACHE_PATH", cache)
+
+    def fake_cache_path() -> Path:
+        return cache
+
+    monkeypatch.setattr("core.event_timezone_infer._cache_path", fake_cache_path)
 
     client = MagicMock()
     client.chat.completions.create = MagicMock(

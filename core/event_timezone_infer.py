@@ -13,15 +13,25 @@ from zoneinfo import ZoneInfo
 logger = logging.getLogger(__name__)
 
 _ROOT = Path(__file__).resolve().parent.parent
-CACHE_PATH = _ROOT / "config" / "event_team_timezone_cache.json"
+
+
+def _cache_path() -> Path:
+    from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+
+    bootstrap_if_needed()
+    base = get_writable_root() if uses_writable_data_tree() else _ROOT
+    return base / "config" / "event_team_timezone_cache.json"
+
+
 _CHUNK = 40
 
 
 def _load_cache() -> dict[str, str]:
-    if not CACHE_PATH.is_file():
+    path = _cache_path()
+    if not path.is_file():
         return {}
     try:
-        raw = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+        raw = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {}
     if not isinstance(raw, dict):
@@ -34,12 +44,13 @@ def _load_cache() -> dict[str, str]:
 
 
 def _save_cache(cache: dict[str, str]) -> None:
-    CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    path = _cache_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
     merged = _load_cache()
     merged.update(cache)
     sorted_keys = sorted(merged.keys(), key=str.lower)
     ordered = {k: merged[k] for k in sorted_keys}
-    CACHE_PATH.write_text(json.dumps(ordered, indent=2) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(ordered, indent=2) + "\n", encoding="utf-8")
 
 
 def _validate_iana(name: str) -> bool:

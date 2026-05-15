@@ -10,16 +10,25 @@ import yaml
 
 from .contracts import InputProfile, NormalizationSpec, SourceRole
 
-_ROOT = Path(__file__).resolve().parent.parent.parent
-_PROFILE_DIR = _ROOT / "config" / "input_profiles"
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+# Default profile directory; tests monkeypatch this to a temp path. Ignored when
+# :func:`core.data_layout.uses_writable_data_tree` is true (e.g. on Vercel).
+_PROFILE_DIR = _REPO_ROOT / "config" / "input_profiles"
 _NORMALIZER_PROFILE_DIRNAME = "normalizers"
 
 
 def get_profile_dir() -> Path:
     """Return the profile directory, creating it lazily when needed."""
 
-    _PROFILE_DIR.mkdir(parents=True, exist_ok=True)
-    return _PROFILE_DIR
+    from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+
+    bootstrap_if_needed()
+    if uses_writable_data_tree():
+        path = get_writable_root() / "config" / "input_profiles"
+    else:
+        path = _PROFILE_DIR
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def get_normalizer_profile_dir() -> Path:

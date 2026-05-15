@@ -54,6 +54,14 @@ _JOBS: dict[str, "JobState"] = {}
 _ACTIVE_RUN = False
 
 
+def _data_root() -> Path:
+    """Root for mutable repo-relative paths (e.g. ``inputs/``); uses ``/tmp`` on Vercel."""
+
+    from core.data_layout import get_writable_root, uses_writable_data_tree
+
+    return get_writable_root() if uses_writable_data_tree() else _ROOT
+
+
 def _is_safe_download_name(name: str) -> bool:
     if not name or name != Path(name).name:
         return False
@@ -102,7 +110,7 @@ def _template_meta_for_package(
 
 def _inputs_directory(settings: dict[str, Any]) -> Path:
     raw = Path(settings.get("inputs", {}).get("directory", "inputs"))
-    return raw if raw.is_absolute() else _ROOT / raw
+    return raw if raw.is_absolute() else _data_root() / raw
 
 
 def _issue_to_api(issue: ValidationIssue) -> dict[str, Any]:
@@ -516,7 +524,7 @@ def create_app() -> Flask:
     @app.post("/upload")
     def upload() -> Any:
         settings = load_settings()
-        input_dir = _ROOT / settings.get("inputs", {}).get("directory", "inputs")
+        input_dir = _inputs_directory(settings)
         cat = (request.form.get("category_key") or "").strip() or get_inputs_category_key(
             settings
         )

@@ -9,7 +9,6 @@ from typing import Any
 from .schema import QuestionTemplate, parse_template_dict
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
-_DEFAULT_DIR = _ROOT / "templates"
 
 
 def index_template_json_paths_by_id(directory: Path) -> dict[str, list[Path]]:
@@ -45,7 +44,7 @@ def load_template_dir(directory: Path | None = None) -> dict[str, QuestionTempla
     Raises if any file is invalid or duplicate ids appear.
     """
 
-    base = directory if directory is not None else _DEFAULT_DIR
+    base = directory if directory is not None else default_templates_directory()
     if not base.is_dir():
         raise FileNotFoundError(f"Template directory not found: {base}")
 
@@ -71,7 +70,11 @@ def load_template_file(path: Path) -> QuestionTemplate:
 def default_templates_directory() -> Path:
     """Directory used when no path is passed to :func:`load_template_dir`."""
 
-    return _DEFAULT_DIR
+    from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+
+    bootstrap_if_needed()
+    base = get_writable_root() if uses_writable_data_tree() else _ROOT
+    return base / "templates"
 
 
 def resolve_templates_directory(settings: dict[str, Any]) -> Path:
@@ -81,8 +84,12 @@ def resolve_templates_directory(settings: dict[str, Any]) -> Path:
     Absolute paths are accepted as-is.
     """
 
+    from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+
     raw = settings.get("templates_directory", "templates")
     path = Path(str(raw))
     if path.is_absolute():
         return path
-    return _ROOT / path
+    bootstrap_if_needed()
+    base = get_writable_root() if uses_writable_data_tree() else _ROOT
+    return base / path

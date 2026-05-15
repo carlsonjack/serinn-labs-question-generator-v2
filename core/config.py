@@ -8,9 +8,25 @@ from typing import Any
 
 import yaml
 
-_ROOT = Path(__file__).resolve().parent.parent
-_SETTINGS = _ROOT / "config" / "settings.yaml"
-_SETTINGS_LOCAL = _ROOT / "config" / "settings.local.yaml"
+from core.data_layout import REPO_ROOT, bootstrap_if_needed, get_writable_root
+
+# Tests may monkeypatch these to redirect settings I/O to temp files.
+_SETTINGS_PATH_OVERRIDE: Path | None = None
+_SETTINGS_LOCAL_PATH_OVERRIDE: Path | None = None
+
+
+def _settings_path() -> Path:
+    if _SETTINGS_PATH_OVERRIDE is not None:
+        return _SETTINGS_PATH_OVERRIDE
+    bootstrap_if_needed()
+    return get_writable_root() / "config" / "settings.yaml"
+
+
+def _settings_local_path() -> Path:
+    if _SETTINGS_LOCAL_PATH_OVERRIDE is not None:
+        return _SETTINGS_LOCAL_PATH_OVERRIDE
+    bootstrap_if_needed()
+    return get_writable_root() / "config" / "settings.local.yaml"
 
 
 def _load_dotenv() -> None:
@@ -20,7 +36,7 @@ def _load_dotenv() -> None:
         from dotenv import load_dotenv
     except ImportError:
         return
-    path = _ROOT / ".env"
+    path = REPO_ROOT / ".env"
     if path.is_file():
         load_dotenv(path)
 
@@ -41,14 +57,16 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 
 def load_settings() -> dict[str, Any]:
-    if not _SETTINGS.is_file():
-        raise FileNotFoundError(f"Missing config file: {_SETTINGS}")
+    settings_path = _settings_path()
+    if not settings_path.is_file():
+        raise FileNotFoundError(f"Missing config file: {settings_path}")
 
-    with _SETTINGS.open(encoding="utf-8") as f:
+    with settings_path.open(encoding="utf-8") as f:
         data: dict[str, Any] = yaml.safe_load(f) or {}
 
-    if _SETTINGS_LOCAL.is_file():
-        with _SETTINGS_LOCAL.open(encoding="utf-8") as f:
+    local_path = _settings_local_path()
+    if local_path.is_file():
+        with local_path.open(encoding="utf-8") as f:
             local = yaml.safe_load(f) or {}
         if isinstance(local, dict):
             data = _deep_merge(data, local)
@@ -63,14 +81,16 @@ def load_settings() -> dict[str, Any]:
 def load_settings_disk_only() -> dict[str, Any]:
     """Load ``settings.yaml`` (+ optional ``settings.local.yaml``) without env API key."""
 
-    if not _SETTINGS.is_file():
-        raise FileNotFoundError(f"Missing config file: {_SETTINGS}")
+    settings_path = _settings_path()
+    if not settings_path.is_file():
+        raise FileNotFoundError(f"Missing config file: {settings_path}")
 
-    with _SETTINGS.open(encoding="utf-8") as f:
+    with settings_path.open(encoding="utf-8") as f:
         data: dict[str, Any] = yaml.safe_load(f) or {}
 
-    if _SETTINGS_LOCAL.is_file():
-        with _SETTINGS_LOCAL.open(encoding="utf-8") as f:
+    local_path = _settings_local_path()
+    if local_path.is_file():
+        with local_path.open(encoding="utf-8") as f:
             local = yaml.safe_load(f) or {}
         if isinstance(local, dict):
             data = _deep_merge(data, local)
@@ -101,8 +121,9 @@ def save_settings_yaml(updates: dict[str, Any]) -> None:
     if updates.get("openai_api_key") in ("", None) and "openai_api_key" in updates:
         merged["openai_api_key"] = current.get("openai_api_key", "")
 
-    _SETTINGS.parent.mkdir(parents=True, exist_ok=True)
-    with _SETTINGS.open("w", encoding="utf-8") as f:
+    settings_path = _settings_path()
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    with settings_path.open("w", encoding="utf-8") as f:
         yaml.safe_dump(
             merged,
             f,

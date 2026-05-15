@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
 from core.generation.content import IMPORT_OUTPUT_COLUMNS, ImportQuestionRow
 from core.generation.row_assembler import OUTPUT_COLUMNS, OutputRow
 from core.generation.stocks import StockQuestionRow
@@ -21,7 +22,18 @@ from core.generation.stocks import StockQuestionRow
 logger = logging.getLogger(__name__)
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_OUTPUT_DIR = _PROJECT_ROOT / "outputs"
+
+
+def _default_output_dir() -> Path:
+    bootstrap_if_needed()
+    if uses_writable_data_tree():
+        out = get_writable_root() / "outputs"
+        out.mkdir(parents=True, exist_ok=True)
+        return out
+    return _PROJECT_ROOT / "outputs"
+
+
+DEFAULT_OUTPUT_DIR = _default_output_dir()
 
 # BOM helps Excel/Numbers auto-detect UTF-8; plain utf-8 often mis-reads as Latin-1.
 CSV_WRITE_ENCODING = "utf-8-sig"

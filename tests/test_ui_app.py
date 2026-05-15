@@ -44,8 +44,8 @@ def test_api_save_input_category_unknown_package(client):
 
 def test_api_save_input_category_persists_canonical_key(client, tmp_path, monkeypatch):
     cfg = tmp_path / "settings.yaml"
-    monkeypatch.setattr("core.config._SETTINGS", cfg)
-    monkeypatch.setattr("core.config._SETTINGS_LOCAL", tmp_path / "nope.local.yaml")
+    monkeypatch.setattr("core.config._SETTINGS_PATH_OVERRIDE", cfg)
+    monkeypatch.setattr("core.config._SETTINGS_LOCAL_PATH_OVERRIDE", tmp_path / "nope.local.yaml")
     cfg.write_text(
         "inputs:\n"
         "  directory: inputs\n"
@@ -132,7 +132,7 @@ def test_index_renders_topic_import_id_combobox(client, tmp_path, monkeypatch):
 def test_api_append_topic_import_id_catalog(client, tmp_path, monkeypatch):
     cat = tmp_path / "topic_import_ids_catalog.json"
     cat.write_text(json.dumps([{"id": "existing-id", "label": ""}]), encoding="utf-8")
-    monkeypatch.setattr("core.topic_import_catalog.TOPIC_IMPORT_IDS_CATALOG_PATH", cat)
+    monkeypatch.setattr("core.topic_import_catalog._CATALOG_PATH_OVERRIDE", cat)
 
     bad = client.post("/api/topic-import-ids/catalog", json={})
     assert bad.status_code == 400
@@ -657,8 +657,8 @@ def test_ui_handoff_package_alias_upload_and_run(client, tmp_path, monkeypatch):
 
 def test_api_save_inputs_files(client, tmp_path, monkeypatch):
     cfg = tmp_path / "settings.yaml"
-    monkeypatch.setattr("core.config._SETTINGS", cfg)
-    monkeypatch.setattr("core.config._SETTINGS_LOCAL", tmp_path / "nope.local.yaml")
+    monkeypatch.setattr("core.config._SETTINGS_PATH_OVERRIDE", cfg)
+    monkeypatch.setattr("core.config._SETTINGS_LOCAL_PATH_OVERRIDE", tmp_path / "nope.local.yaml")
 
     cfg.write_text(
         "inputs:\n"
@@ -699,8 +699,8 @@ def test_save_settings_yaml_roundtrip(tmp_path, monkeypatch):
     from core.config import load_settings_disk_only, save_settings_yaml
 
     cfg = tmp_path / "settings.yaml"
-    monkeypatch.setattr("core.config._SETTINGS", cfg)
-    monkeypatch.setattr("core.config._SETTINGS_LOCAL", tmp_path / "nope.yaml")
+    monkeypatch.setattr("core.config._SETTINGS_PATH_OVERRIDE", cfg)
+    monkeypatch.setattr("core.config._SETTINGS_LOCAL_PATH_OVERRIDE", tmp_path / "nope.yaml")
 
     cfg.write_text(
         "topic_import_id: \"x\"\ndate_filter:\n  start: \"2026-01-01\"\n  end: \"2026-02-01\"\n",

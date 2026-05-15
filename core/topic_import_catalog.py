@@ -8,9 +8,21 @@ from pathlib import Path
 from typing import Any
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-TOPIC_IMPORT_IDS_CATALOG_PATH = _PROJECT_ROOT / "config" / "topic_import_ids_catalog.json"
+
+# Tests may monkeypatch to redirect catalog I/O.
+_CATALOG_PATH_OVERRIDE: Path | None = None
 
 _TOPIC_ID_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,199}$")
+
+
+def default_topic_import_catalog_path() -> Path:
+    if _CATALOG_PATH_OVERRIDE is not None:
+        return _CATALOG_PATH_OVERRIDE
+    from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+
+    bootstrap_if_needed()
+    base = get_writable_root() if uses_writable_data_tree() else _PROJECT_ROOT
+    return base / "config" / "topic_import_ids_catalog.json"
 
 
 def _normalize_catalog_items(raw: Any) -> list[dict[str, str]]:
@@ -36,7 +48,7 @@ def load_topic_import_ids_catalog(
 ) -> list[dict[str, str]]:
     """Load searchable topic import ID suggestions. Returns [] if missing or invalid."""
 
-    target = path or TOPIC_IMPORT_IDS_CATALOG_PATH
+    target = path or default_topic_import_catalog_path()
     try:
         raw = json.loads(target.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
@@ -69,7 +81,7 @@ def append_topic_import_id_to_catalog(
     Returns a dict suitable for JSON: ok, added, already_exists, id, total.
     """
 
-    target = path or TOPIC_IMPORT_IDS_CATALOG_PATH
+    target = path or default_topic_import_catalog_path()
     tid = validate_topic_import_id_for_catalog(topic_id)
     lab = (label or "").strip()
 
