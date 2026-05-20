@@ -18,12 +18,18 @@ from core.csv_export import DEFAULT_OUTPUT_DIR
 from core.data_layout import resolve_inputs_directory
 from core.input_date_range import infer_date_range_from_excel_paths
 from core.input_slots import (
+    clear_category_input_files,
+    clear_unuploaded_category_input_files,
     get_files_map_for_category,
     get_inputs_category_key,
     iter_input_slots,
     list_input_categories,
     normalize_inputs_files,
+    present_files_map,
+    require_present_input_files,
+    resolve_input_upload_filename,
     resolve_inputs_package_file_key,
+    INPUT_DATA_SUFFIXES,
 )
 from core.parsers.ai_profile_builder import propose_normalization_spec, uses_ai_normalization
 from core.parsers.contracts import NormalizationSpec, ValidationIssue, ValidationSeverity
@@ -120,9 +126,14 @@ def _issue_to_api(issue: ValidationIssue) -> dict[str, Any]:
 def _detected_files_for_preview(
     settings: dict[str, Any],
     category_key: str,
+    *,
+    file_config: dict[str, str] | None = None,
 ) -> tuple[list[Any], list[ValidationIssue]]:
     input_dir = _inputs_directory(settings)
-    file_config = get_files_map_for_category(settings, category_key)
+    if file_config is None:
+        file_config = present_files_map(
+            input_dir, get_files_map_for_category(settings, category_key)
+        )
     jobs, issues = resolve_input_scan_jobs(
         settings,
         category_key=category_key,
@@ -228,8 +239,21 @@ def create_app() -> Flask:
         matched = resolve_inputs_package_file_key(current, raw)
         if matched is None:
             return jsonify({"error": f"Unknown input package: {raw!r}"}), 400
+        prev = resolve_inputs_package_file_key(
+            current, get_inputs_category_key(current)
+        )
+        cleared: list[str] = []
+        if (
+            prev
+            and matched.lower() != prev.lower()
+        ):
+            input_dir = _inputs_directory(current)
+            input_dir.mkdir(parents=True, exist_ok=True)
+            cleared = clear_category_input_files(input_dir, current, matched)
         save_settings_yaml({"inputs": {"category_key": matched}})
-        return jsonify({"ok": True, "category_key": matched})
+        return jsonify(
+            {"ok": True, "category_key": matched, "cleared_files": cleared}
+        )
 
     @app.post("/api/topic-import-ids/catalog")
     def api_append_topic_import_id_catalog() -> Any:
@@ -279,9 +303,10 @@ def create_app() -> Flask:
         if not files_map:
             return jsonify({"error": f"No input files configured for package {cat!r}."}), 400
         input_dir = _inputs_directory(settings)
-        missing = [name for name in files_map.values() if not (input_dir / name).is_file()]
-        if missing:
-            return jsonify({"error": f"Missing uploaded input file(s): {', '.join(missing)}"}), 400
+        present_error = require_present_input_files(input_dir, files_map)
+        if present_error:
+            return jsonify({"error": present_error}), 400
+        present_map = present_files_map(input_dir, files_map)
 
         try:
             requested_ai = bool(body.get("use_ai", True))
@@ -289,10 +314,12 @@ def create_app() -> Flask:
                 settings,
                 category_key=cat,
                 input_dir=input_dir,
-                file_config=files_map,
+                file_config=present_map,
                 use_ai=requested_ai,
             )
-            detected, detect_issues = _detected_files_for_preview(settings, cat)
+            detected, detect_issues = _detected_files_for_preview(
+                settings, cat, file_config=present_map
+            )
             preview = preview_normalization_spec(spec, detected, settings)
         except Exception as exc:  # noqa: BLE001
             return jsonify({"error": str(exc)}), 400
@@ -528,18 +555,47 @@ def create_app() -> Flask:
 
         input_dir.mkdir(parents=True, exist_ok=True)
 
-        saved: list[dict[str, str]] = []
-        any_file = False
+        uploaded_slot_ids: set[str] = set()
+        pending: list[tuple[str, str, str, Any]] = []
         for slot_id, target_name in files_map.items():
             fh = request.files.get(slot_id)
             if fh is None or fh.filename == "":
                 continue
-            any_file = True
-            if not fh.filename.lower().endswith(".xlsx"):
-                return jsonify({"error": f"Only .xlsx allowed: {fh.filename!r}"}), 400
-            dest = input_dir / target_name
+            dest_name = resolve_input_upload_filename(target_name, fh.filename)
+            if dest_name is None:
+                allowed = ", ".join(sorted(INPUT_DATA_SUFFIXES))
+                return jsonify(
+                    {"error": f"Only {allowed} allowed: {fh.filename!r}"}
+                ), 400
+            uploaded_slot_ids.add(slot_id)
+            pending.append((slot_id, target_name, dest_name, fh))
+
+        cleared = clear_unuploaded_category_input_files(
+            input_dir, files_map, uploaded_slot_ids
+        )
+
+        saved: list[dict[str, str]] = []
+        files_updates: dict[str, str] = {}
+        for slot_id, configured_name, dest_name, fh in pending:
+            dest = input_dir / dest_name
+            for suffix in INPUT_DATA_SUFFIXES:
+                alt = input_dir / f"{Path(configured_name).stem}{suffix}"
+                if alt.is_file() and alt != dest:
+                    alt.unlink()
             fh.save(str(dest))
-            saved.append({"slot_id": slot_id, "filename": target_name})
+            saved.append({"slot_id": slot_id, "filename": dest_name})
+            if dest_name != configured_name:
+                files_updates[slot_id] = dest_name
+        any_file = bool(saved)
+
+        if files_updates:
+            disk = load_settings_disk_only()
+            inputs = dict(disk.get("inputs") or {})
+            files_root = dict(inputs.get("files") or {})
+            pkg_map = dict(files_root.get(cat) or {})
+            pkg_map.update(files_updates)
+            files_root[cat] = pkg_map
+            save_settings_yaml({"inputs": {"files": files_root}})
 
         date_filter_auto: dict[str, Any] = {"applied": False}
         if saved:
@@ -566,6 +622,7 @@ def create_app() -> Flask:
                 "ok": True,
                 "category_key": cat,
                 "saved": saved,
+                "cleared_files": cleared,
                 "date_filter_auto": date_filter_auto,
             }
         )

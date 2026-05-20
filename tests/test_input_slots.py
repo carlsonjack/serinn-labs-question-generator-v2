@@ -10,6 +10,8 @@ from core.input_slots import (
     iter_input_slots,
     list_input_categories,
     normalize_inputs_files,
+    present_files_map,
+    require_present_input_files,
     resolve_inputs_package_file_key,
 )
 
@@ -40,6 +42,14 @@ def test_iter_input_slots_order_and_labels():
     assert [x["slot_id"] for x in slots] == ["event_source", "metric_source"]
     assert slots[0]["target_filename"] == "schedule.xlsx"
     assert slots[0]["label"] == "Event source"
+
+
+def test_present_files_map_and_require(tmp_path):
+    files_map = {"event_source": "schedule.xlsx", "metric_source": "stats.xlsx"}
+    (tmp_path / "schedule.xlsx").write_bytes(b"s")
+    assert present_files_map(tmp_path, files_map) == {"event_source": "schedule.xlsx"}
+    assert require_present_input_files(tmp_path, files_map) is None
+    assert require_present_input_files(tmp_path, {"event_source": "missing.xlsx"}) is not None
 
 
 def test_get_files_map():

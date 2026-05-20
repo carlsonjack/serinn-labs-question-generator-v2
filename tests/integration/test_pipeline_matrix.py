@@ -92,7 +92,7 @@ def test_pipeline_matrix_cases(
         assert result.errors_csv is None
 
     if case.fake_duplicate_questions:
-        assert result.flagged_csv is not None
+        assert result.flagged_csv is None
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:

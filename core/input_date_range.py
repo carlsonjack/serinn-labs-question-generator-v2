@@ -1,4 +1,4 @@
-"""Infer min/max calendar dates from uploaded Excel input workbooks."""
+"""Infer min/max calendar dates from uploaded Excel or CSV input workbooks."""
 
 from __future__ import annotations
 
@@ -175,6 +175,32 @@ def _dates_for_sheet(path: Path, sheet_name: str) -> list[pd.Timestamp]:
     return best_series
 
 
+def _dates_for_csv(path: Path) -> list[pd.Timestamp]:
+    """Pick one header row for a CSV that yields the strongest date column."""
+
+    best_series: list[pd.Timestamp] = []
+    best_quality = -1.0
+    for header_idx in range(0, _MAX_HEADER_ROWS + 1):
+        try:
+            df = pd.read_csv(path, header=header_idx, nrows=_MAX_DATA_ROWS)
+        except Exception:
+            continue
+        if df.empty or df.shape[1] == 0:
+            continue
+        col_idx = _best_date_column_index(df)
+        if col_idx is None:
+            continue
+        parsed = _parse_calendarish_series(df.iloc[:, col_idx])
+        valid = parsed.dropna()
+        if valid.empty:
+            continue
+        quality = float(len(valid)) + _hint_score(str(df.columns[col_idx])) * 10.0
+        if quality > best_quality:
+            best_quality = quality
+            best_series = valid.tolist()
+    return best_series
+
+
 def infer_date_range_from_excel_paths(paths: Sequence[Path]) -> tuple[str | None, str | None]:
     """Return ``(start_iso, end_iso)`` as ``YYYY-MM-DD``, or ``(None, None)`` if no dates found."""
 
@@ -182,7 +208,11 @@ def infer_date_range_from_excel_paths(paths: Sequence[Path]) -> tuple[str | None
     for path in paths:
         if not path.is_file():
             continue
-        if path.suffix.lower() not in {".xlsx", ".xls"}:
+        suffix = path.suffix.lower()
+        if suffix == ".csv":
+            stamps.extend(_dates_for_csv(path))
+            continue
+        if suffix not in {".xlsx", ".xls"}:
             continue
         try:
             book = pd.ExcelFile(path)

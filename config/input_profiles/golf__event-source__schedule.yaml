@@ -1,0 +1,12 @@
+category_key: golf
+confidence: 0.125
+field_mappings:
+  event_name: event_name
+file_pattern: schedule.xlsx
+fingerprint: 40d95b0d889b6582e24b72402ad26edb15cdc97172e458144ddd3c835ee690da
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: schedule
+sheet_name: pga_2026_schedule
+source_role: event_source

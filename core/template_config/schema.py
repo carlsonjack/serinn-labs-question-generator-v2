@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -31,6 +32,10 @@ ALLOWED_KEYS: frozenset[str] = frozenset(
         "_comment",
         "resolution_date_rule",
         "resolution_date_spec",
+        "start_date_rule",
+        "start_date_spec",
+        "expiration_date_rule",
+        "expiration_date_spec",
     }
 )
 
@@ -64,6 +69,10 @@ class QuestionTemplate:
     _comment: str | None = None
     resolution_date_rule: str | None = None
     resolution_date_spec: dict[str, Any] | None = None
+    start_date_rule: str | None = None
+    start_date_spec: dict[str, Any] | None = None
+    expiration_date_rule: str | None = None
+    expiration_date_spec: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize for tests and downstream JSON-friendly consumers."""
@@ -117,6 +126,10 @@ def parse_template_dict(data: dict[str, Any]) -> QuestionTemplate:
     comment = data.get("_comment")
     resolution_date_rule = data.get("resolution_date_rule")
     resolution_date_spec_raw = data.get("resolution_date_spec")
+    start_date_rule = data.get("start_date_rule")
+    start_date_spec_raw = data.get("start_date_spec")
+    expiration_date_rule = data.get("expiration_date_rule")
+    expiration_date_spec_raw = data.get("expiration_date_spec")
 
     if stat_column is not None and not isinstance(stat_column, str):
         raise ValueError("stat_column must be a string or omitted")
@@ -150,12 +163,30 @@ def parse_template_dict(data: dict[str, Any]) -> QuestionTemplate:
         raise ValueError("notes must be a string or omitted")
     if resolution_date_rule is not None and not isinstance(resolution_date_rule, str):
         raise ValueError("resolution_date_rule must be a string or omitted")
+    if start_date_rule is not None and not isinstance(start_date_rule, str):
+        raise ValueError("start_date_rule must be a string or omitted")
+    if expiration_date_rule is not None and not isinstance(expiration_date_rule, str):
+        raise ValueError("expiration_date_rule must be a string or omitted")
     resolution_date_rule_str = resolution_date_rule.strip() if resolution_date_rule else None
+    start_date_rule_str = start_date_rule.strip() if start_date_rule else None
+    expiration_date_rule_str = expiration_date_rule.strip() if expiration_date_rule else None
     resolution_date_spec: dict[str, Any] | None = None
     if resolution_date_spec_raw is not None:
         if not isinstance(resolution_date_spec_raw, dict):
             raise ValueError("resolution_date_spec must be an object or omitted")
         resolution_date_spec = parse_resolution_date_spec_dict(resolution_date_spec_raw).model_dump(
+            mode="json"
+        )
+    start_date_spec: dict[str, Any] | None = None
+    if start_date_spec_raw is not None:
+        if not isinstance(start_date_spec_raw, dict):
+            raise ValueError("start_date_spec must be an object or omitted")
+        start_date_spec = parse_resolution_date_spec_dict(start_date_spec_raw).model_dump(mode="json")
+    expiration_date_spec: dict[str, Any] | None = None
+    if expiration_date_spec_raw is not None:
+        if not isinstance(expiration_date_spec_raw, dict):
+            raise ValueError("expiration_date_spec must be an object or omitted")
+        expiration_date_spec = parse_resolution_date_spec_dict(expiration_date_spec_raw).model_dump(
             mode="json"
         )
 
@@ -218,6 +249,10 @@ def parse_template_dict(data: dict[str, Any]) -> QuestionTemplate:
         _comment=comment,
         resolution_date_rule=resolution_date_rule_str or None,
         resolution_date_spec=resolution_date_spec,
+        start_date_rule=start_date_rule_str or None,
+        start_date_spec=start_date_spec,
+        expiration_date_rule=expiration_date_rule_str or None,
+        expiration_date_spec=expiration_date_spec,
     )
 
 
@@ -271,7 +306,10 @@ def _validate_answer_options(
     if answer_type == "multiple_choice":
         if requires_entities:
             return
-        if "||" not in answer_options:
-            raise ValueError("multiple_choice event templates must use || in answer_options")
-        return
+        if "||" in answer_options:
+            return
+        ao = (answer_options or "").strip()
+        if question_family == "event" and ao and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", ao):
+            return
+        raise ValueError("multiple_choice event templates must use || in answer_options")
     raise AssertionError("unreachable")

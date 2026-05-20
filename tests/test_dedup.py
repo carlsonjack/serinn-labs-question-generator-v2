@@ -66,8 +66,13 @@ class TestRowHash:
 
     def test_same_key_fields_same_hash(self):
         a = _make_row(start_date="2026-01-01T00:00:00")
-        b = _make_row(start_date="2099-12-31T23:59:59")
+        b = _make_row(start_date="2026-01-01T00:00:00")
         assert row_hash(a) == row_hash(b)
+
+    def test_different_start_date_different_hash(self):
+        a = _make_row(start_date="2026-01-01T00:00:00")
+        b = _make_row(start_date="2099-12-31T23:59:59")
+        assert row_hash(a) != row_hash(b)
 
     def test_different_subcategory_different_hash(self):
         a = _make_row(subcategory="MLB")
@@ -167,6 +172,15 @@ class TestRemoveExactDuplicates:
         assert len(unique) == 1
         assert removed == 1
 
+    def test_same_matchup_different_start_date_not_duplicate(self):
+        rows = [
+            _make_row(start_date="2026-05-18T19:10:00"),
+            _make_row(start_date="2026-05-19T19:10:00"),
+        ]
+        unique, removed = _remove_exact_duplicates(rows)
+        assert len(unique) == 2
+        assert removed == 0
+
 
 # ===================================================================
 # TestFindNearDuplicates
@@ -240,7 +254,7 @@ class TestFindNearDuplicates:
 # ===================================================================
 
 class TestDeduplicate:
-    """deduplicate() combines exact dedup + near-duplicate flagging."""
+    """deduplicate() runs exact dedup; near-duplicate flagging is currently disabled."""
 
     def test_empty_input(self):
         result = deduplicate([])
@@ -269,12 +283,13 @@ class TestDeduplicate:
             _make_row(question="Who will win Mets vs Yankees tonight?"),
         ]
         result = deduplicate(rows, similarity_threshold=0.80)
-        assert len(result.flagged_rows) == 2
+        assert len(result.clean_rows) == 2
+        assert len(result.flagged_rows) == 0
         assert result.exact_duplicates_removed == 0
-        assert result.near_duplicates_flagged == 2
+        assert result.near_duplicates_flagged == 0
 
     def test_exact_then_near(self):
-        """Exact dedup runs before near-dup detection — duplicates are removed first."""
+        """Exact dedup runs first; near-dup flagging disabled so similar rows stay in clean."""
         rows = [
             _make_row(question="Who will win Mets vs Yankees?"),
             _make_row(question="Who will win Mets vs Yankees?"),  # exact dupe
@@ -282,7 +297,8 @@ class TestDeduplicate:
         ]
         result = deduplicate(rows, similarity_threshold=0.80)
         assert result.exact_duplicates_removed == 1
-        assert result.near_duplicates_flagged == 2
+        assert result.near_duplicates_flagged == 0
+        assert len(result.clean_rows) == 2
 
     def test_total_input_property(self):
         rows = [
@@ -300,8 +316,10 @@ class TestDeduplicate:
         ]
         strict = deduplicate(rows, similarity_threshold=0.99)
         assert len(strict.flagged_rows) == 0
+        assert len(strict.clean_rows) == 2
         loose = deduplicate(rows, similarity_threshold=0.50)
-        assert len(loose.flagged_rows) == 2
+        assert len(loose.flagged_rows) == 0
+        assert len(loose.clean_rows) == 2
 
     def test_clean_rows_exclude_flagged(self):
         rows = [
@@ -312,6 +330,8 @@ class TestDeduplicate:
         result = deduplicate(rows, similarity_threshold=0.80)
         clean_questions = {r.question for r in result.clean_rows}
         flagged_questions = {r.question for r in result.flagged_rows}
+        assert len(flagged_questions) == 0
+        assert len(clean_questions) == 3
         assert clean_questions & flagged_questions == set()
 
 

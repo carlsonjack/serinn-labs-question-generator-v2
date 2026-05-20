@@ -1,6 +1,7 @@
 """Controlled generation layer (EPIC 5)."""
 
 from .batch_executor import BatchExecutor, BatchResult, FailedBatch
+from .deterministic_events import build_deterministic_questions
 from .content import CONTENT_OUTPUT_COLUMNS, ContentPlanner, ImportQuestionRow
 from .prompt_builder import (
     GeneratedQuestion,
@@ -29,6 +30,7 @@ from .token_tracker import (
 __all__ = [
     "BatchExecutor",
     "BatchResult",
+    "build_deterministic_questions",
     "build_cost_summary",
     "build_event_string",
     "CONTENT_OUTPUT_COLUMNS",

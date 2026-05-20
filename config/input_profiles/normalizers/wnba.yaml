@@ -1,0 +1,160 @@
+version: 1
+package_key: wnba
+sources:
+  event_source:
+    source_role: event_source
+    file_pattern: schedule.xlsx
+    sheet_name: WNBA 2026 Schedule
+    header_row_index: 0
+    field_mappings:
+      away_team: Away Team
+      event_date: Date
+      event_display: Game
+      home_team: Home Team
+    metric_mappings: {}
+    metadata_mappings: {}
+    matchup_split: null
+    event_datetime:
+      datetime_column: null
+      date_column: Date
+      time_column: null
+      timezone: null
+    event_id: null
+  metric_source_2025:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: 2025 Season
+    header_row_index: 1
+    field_mappings:
+      player_name: NAME
+      team: TEAM
+    metric_mappings:
+      ASSISTS: AST
+      BLOCKS: BLK
+      DOUBLE_DOUBLES: DD2
+      FIELD_GOALS_ATTEMPTED: FGA
+      FIELD_GOALS_MADE: FGM
+      FIELD_GOAL_PERCENTAGE: FG%
+      FREE_THROWS_ATTEMPTED: FTA
+      FREE_THROWS_MADE: FTM
+      FREE_THROW_PERCENTAGE: FT%
+      GAMES_PLAYED: GP
+      MINUTES: MIN
+      POINTS: PTS
+      REBOUNDS: REB
+      STEALS: STL
+      THREE_POINTERS_ATTEMPTED: 3PA
+      THREE_POINTERS_MADE: 3PM
+      THREE_POINT_PERCENTAGE: 3P%
+      TRIPLE_DOUBLES: TD3
+      TURNOVERS: TO
+    metadata_mappings:
+      position: POS
+      rank: RK
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+  metric_source_2026:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: 2026 Season
+    header_row_index: 1
+    field_mappings:
+      player_name: NAME
+      team: TEAM
+    metric_mappings:
+      ASSISTS: AST
+      BLOCKS: BLK
+      DOUBLE_DOUBLES: DD2
+      FIELD_GOALS_ATTEMPTED: FGA
+      FIELD_GOALS_MADE: FGM
+      FIELD_GOAL_PERCENTAGE: FG%
+      FREE_THROWS_ATTEMPTED: FTA
+      FREE_THROWS_MADE: FTM
+      FREE_THROW_PERCENTAGE: FT%
+      GAMES_PLAYED: GP
+      MINUTES: MIN
+      POINTS: PTS
+      REBOUNDS: REB
+      STEALS: STL
+      THREE_POINTERS_ATTEMPTED: 3PA
+      THREE_POINTERS_MADE: 3PM
+      THREE_POINT_PERCENTAGE: 3P%
+      TRIPLE_DOUBLES: TD3
+      TURNOVERS: TO
+    metadata_mappings:
+      position: POS
+      rank: RK
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  event_source:
+    filename: schedule.xlsx
+    sheets:
+    - columns:
+      - Date
+      - Game
+      - Home Team
+      - Away Team
+      header_row_index: 0
+      sheet_name: WNBA 2026 Schedule
+  metric_source:
+    filename: stats.xlsx
+    sheets:
+    - columns:
+      - RK
+      - NAME
+      - TEAM
+      - POS
+      - GP
+      - MIN
+      - PTS
+      - FGM
+      - FGA
+      - FG%
+      - 3PM
+      - 3PA
+      - 3P%
+      - FTM
+      - FTA
+      - FT%
+      - REB
+      - AST
+      - STL
+      - BLK
+      - TO
+      - DD2
+      - TD3
+      header_row_index: 1
+      sheet_name: 2026 Season
+    - columns:
+      - RK
+      - NAME
+      - TEAM
+      - POS
+      - GP
+      - MIN
+      - PTS
+      - FGM
+      - FGA
+      - FG%
+      - 3PM
+      - 3PA
+      - 3P%
+      - FTM
+      - FTA
+      - FT%
+      - REB
+      - AST
+      - STL
+      - BLK
+      - TO
+      - DD2
+      - TD3
+      header_row_index: 1
+      sheet_name: 2025 Season
+notes: Schedule workbook provides canonical event records from explicit Home Team
+  and Away Team columns; Game is preserved as event_display. Stats workbook contains
+  separate season-level player metric sheets for 2026 and 2025, each mapped independently.
+  No event_id column was present in the snapshots.

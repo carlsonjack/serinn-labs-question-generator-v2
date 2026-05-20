@@ -1,0 +1,1089 @@
+package_key: ncaab
+teams:
+- code: Abilene Christian
+  aliases:
+  - Abilene Christian
+- code: Air Force
+  aliases:
+  - Air Force
+- code: Akron
+  aliases:
+  - Akron
+- code: Alabama
+  aliases:
+  - Alabama
+- code: Alabama A&M
+  aliases:
+  - Alabama A&M
+- code: Alabama State
+  aliases:
+  - Alabama State
+- code: Albany
+  aliases:
+  - Albany
+- code: Alcorn State
+  aliases:
+  - Alcorn State
+- code: American
+  aliases:
+  - American
+- code: Appalachian State
+  aliases:
+  - Appalachian State
+- code: Arizona
+  aliases:
+  - Arizona
+- code: Arizona State
+  aliases:
+  - Arizona State
+- code: Arkansas
+  aliases:
+  - Arkansas
+- code: Arkansas State
+  aliases:
+  - Arkansas State
+- code: Arkansas-Pine Bluff
+  aliases:
+  - Arkansas-Pine Bluff
+- code: Army
+  aliases:
+  - Army
+- code: Auburn
+  aliases:
+  - Auburn
+- code: Austin Peay
+  aliases:
+  - Austin Peay
+- code: Ball State
+  aliases:
+  - Ball State
+- code: Baylor
+  aliases:
+  - Baylor
+- code: Bellarmine
+  aliases:
+  - Bellarmine
+- code: Belmont
+  aliases:
+  - Belmont
+- code: Bethune-Cookman
+  aliases:
+  - Bethune-Cookman
+- code: Binghamton
+  aliases:
+  - Binghamton
+- code: Boise State
+  aliases:
+  - Boise State
+- code: Boston College
+  aliases:
+  - Boston College
+- code: Boston University
+  aliases:
+  - Boston University
+- code: Bowling Green
+  aliases:
+  - Bowling Green
+- code: Bradley
+  aliases:
+  - Bradley
+- code: Brown
+  aliases:
+  - Brown
+- code: Bryant
+  aliases:
+  - Bryant
+- code: Bucknell
+  aliases:
+  - Bucknell
+- code: Buffalo
+  aliases:
+  - Buffalo
+- code: Butler
+  aliases:
+  - Butler
+- code: BYU
+  aliases:
+  - BYU
+- code: Cal Baptist
+  aliases:
+  - Cal Baptist
+- code: Cal Poly
+  aliases:
+  - Cal Poly
+- code: Cal State Bakersfield
+  aliases:
+  - Cal State Bakersfield
+- code: Cal State Fullerton
+  aliases:
+  - Cal State Fullerton
+- code: Cal State Northridge
+  aliases:
+  - Cal State Northridge
+- code: California
+  aliases:
+  - California
+  - Cal
+- code: Campbell
+  aliases:
+  - Campbell
+- code: Canisius
+  aliases:
+  - Canisius
+- code: Central Arkansas
+  aliases:
+  - Central Arkansas
+- code: Central Connecticut
+  aliases:
+  - Central Connecticut
+- code: Central Michigan
+  aliases:
+  - Central Michigan
+- code: Charleston
+  aliases:
+  - Charleston
+- code: Charleston Southern
+  aliases:
+  - Charleston Southern
+- code: Charlotte
+  aliases:
+  - Charlotte
+- code: Chattanooga
+  aliases:
+  - Chattanooga
+- code: Chicago State
+  aliases:
+  - Chicago State
+- code: Cincinnati
+  aliases:
+  - Cincinnati
+- code: Clemson
+  aliases:
+  - Clemson
+- code: Cleveland State
+  aliases:
+  - Cleveland State
+- code: Coastal Carolina
+  aliases:
+  - Coastal Carolina
+- code: Colgate
+  aliases:
+  - Colgate
+- code: Colorado
+  aliases:
+  - Colorado
+- code: Colorado State
+  aliases:
+  - Colorado State
+- code: Columbia
+  aliases:
+  - Columbia
+- code: Connecticut
+  aliases:
+  - Connecticut
+  - UConn
+- code: Coppin State
+  aliases:
+  - Coppin State
+- code: Cornell
+  aliases:
+  - Cornell
+- code: Creighton
+  aliases:
+  - Creighton
+- code: Dartmouth
+  aliases:
+  - Dartmouth
+- code: Davidson
+  aliases:
+  - Davidson
+- code: Dayton
+  aliases:
+  - Dayton
+- code: Delaware
+  aliases:
+  - Delaware
+- code: Delaware State
+  aliases:
+  - Delaware State
+- code: Denver
+  aliases:
+  - Denver
+- code: DePaul
+  aliases:
+  - DePaul
+- code: Detroit Mercy
+  aliases:
+  - Detroit Mercy
+- code: Drake
+  aliases:
+  - Drake
+- code: Drexel
+  aliases:
+  - Drexel
+- code: Duke
+  aliases:
+  - Duke
+- code: Duquesne
+  aliases:
+  - Duquesne
+- code: East Carolina
+  aliases:
+  - East Carolina
+- code: East Tennessee State
+  aliases:
+  - East Tennessee State
+- code: Eastern Illinois
+  aliases:
+  - Eastern Illinois
+- code: Eastern Kentucky
+  aliases:
+  - Eastern Kentucky
+- code: Eastern Michigan
+  aliases:
+  - Eastern Michigan
+- code: Eastern Washington
+  aliases:
+  - Eastern Washington
+- code: Elon
+  aliases:
+  - Elon
+- code: Evansville
+  aliases:
+  - Evansville
+- code: Fairfield
+  aliases:
+  - Fairfield
+- code: Fairleigh Dickinson
+  aliases:
+  - Fairleigh Dickinson
+- code: Florida
+  aliases:
+  - Florida
+- code: Florida A&M
+  aliases:
+  - Florida A&M
+- code: Florida Atlantic
+  aliases:
+  - Florida Atlantic
+  - FAU
+- code: Florida Gulf Coast
+  aliases:
+  - Florida Gulf Coast
+- code: Florida International
+  aliases:
+  - Florida International
+  - FIU
+- code: Florida State
+  aliases:
+  - Florida State
+- code: Fordham
+  aliases:
+  - Fordham
+- code: Fresno State
+  aliases:
+  - Fresno State
+- code: Furman
+  aliases:
+  - Furman
+- code: Gardner-Webb
+  aliases:
+  - Gardner-Webb
+- code: George Mason
+  aliases:
+  - George Mason
+- code: George Washington
+  aliases:
+  - George Washington
+- code: Georgetown
+  aliases:
+  - Georgetown
+- code: Georgia
+  aliases:
+  - Georgia
+- code: Georgia Southern
+  aliases:
+  - Georgia Southern
+- code: Georgia State
+  aliases:
+  - Georgia State
+- code: Georgia Tech
+  aliases:
+  - Georgia Tech
+- code: Gonzaga
+  aliases:
+  - Gonzaga
+- code: Grambling State
+  aliases:
+  - Grambling State
+- code: Grand Canyon
+  aliases:
+  - Grand Canyon
+- code: Green Bay
+  aliases:
+  - Green Bay
+- code: Hampton
+  aliases:
+  - Hampton
+- code: Harvard
+  aliases:
+  - Harvard
+- code: Hawaii
+  aliases:
+  - Hawaii
+- code: High Point
+  aliases:
+  - High Point
+- code: Hofstra
+  aliases:
+  - Hofstra
+- code: Holy Cross
+  aliases:
+  - Holy Cross
+- code: Houston
+  aliases:
+  - Houston
+- code: Houston Christian
+  aliases:
+  - Houston Christian
+- code: Howard
+  aliases:
+  - Howard
+- code: Idaho
+  aliases:
+  - Idaho
+- code: Idaho State
+  aliases:
+  - Idaho State
+- code: Illinois
+  aliases:
+  - Illinois
+- code: Illinois State
+  aliases:
+  - Illinois State
+- code: Illinois-Chicago
+  aliases:
+  - Illinois-Chicago
+  - UIC
+- code: Incarnate Word
+  aliases:
+  - Incarnate Word
+- code: Indiana
+  aliases:
+  - Indiana
+- code: Indiana State
+  aliases:
+  - Indiana State
+- code: Iona
+  aliases:
+  - Iona
+- code: Iowa
+  aliases:
+  - Iowa
+- code: Iowa State
+  aliases:
+  - Iowa State
+- code: Jackson State
+  aliases:
+  - Jackson State
+- code: Jacksonville
+  aliases:
+  - Jacksonville
+- code: Jacksonville State
+  aliases:
+  - Jacksonville State
+- code: James Madison
+  aliases:
+  - James Madison
+- code: Kansas
+  aliases:
+  - Kansas
+- code: Kansas City
+  aliases:
+  - Kansas City
+- code: Kansas State
+  aliases:
+  - Kansas State
+- code: Kennesaw State
+  aliases:
+  - Kennesaw State
+- code: Kent State
+  aliases:
+  - Kent State
+- code: Kentucky
+  aliases:
+  - Kentucky
+- code: La Salle
+  aliases:
+  - La Salle
+- code: Lafayette
+  aliases:
+  - Lafayette
+- code: Lamar
+  aliases:
+  - Lamar
+- code: Lehigh
+  aliases:
+  - Lehigh
+- code: Liberty
+  aliases:
+  - Liberty
+- code: Lindenwood
+  aliases:
+  - Lindenwood
+- code: Lipscomb
+  aliases:
+  - Lipscomb
+- code: Little Rock
+  aliases:
+  - Little Rock
+- code: Long Beach State
+  aliases:
+  - Long Beach State
+- code: Longwood
+  aliases:
+  - Longwood
+- code: Louisiana
+  aliases:
+  - Louisiana
+- code: Louisiana Tech
+  aliases:
+  - Louisiana Tech
+- code: Louisiana-Monroe
+  aliases:
+  - Louisiana-Monroe
+- code: Louisville
+  aliases:
+  - Louisville
+- code: Loyola Chicago
+  aliases:
+  - Loyola Chicago
+- code: Loyola Maryland
+  aliases:
+  - Loyola Maryland
+- code: Loyola Marymount
+  aliases:
+  - Loyola Marymount
+- code: LSU
+  aliases:
+  - LSU
+  - Louisiana State
+- code: Maine
+  aliases:
+  - Maine
+- code: Manhattan
+  aliases:
+  - Manhattan
+- code: Marist
+  aliases:
+  - Marist
+- code: Marquette
+  aliases:
+  - Marquette
+- code: Marshall
+  aliases:
+  - Marshall
+- code: Maryland
+  aliases:
+  - Maryland
+- code: Maryland-Eastern Shore
+  aliases:
+  - Maryland-Eastern Shore
+- code: Massachusetts
+  aliases:
+  - Massachusetts
+  - UMass
+- code: McNeese
+  aliases:
+  - McNeese
+- code: Memphis
+  aliases:
+  - Memphis
+- code: Mercer
+  aliases:
+  - Mercer
+- code: Merrimack
+  aliases:
+  - Merrimack
+- code: Miami
+  aliases:
+  - Miami
+  - Miami (FL)
+- code: Miami (Ohio)
+  aliases:
+  - Miami (Ohio)
+  - Miami OH
+- code: Michigan
+  aliases:
+  - Michigan
+- code: Michigan State
+  aliases:
+  - Michigan State
+- code: Middle Tennessee
+  aliases:
+  - Middle Tennessee
+- code: Milwaukee
+  aliases:
+  - Milwaukee
+- code: Minnesota
+  aliases:
+  - Minnesota
+- code: Mississippi State
+  aliases:
+  - Mississippi State
+- code: Mississippi Valley State
+  aliases:
+  - Mississippi Valley State
+- code: Missouri
+  aliases:
+  - Missouri
+- code: Missouri State
+  aliases:
+  - Missouri State
+- code: Monmouth
+  aliases:
+  - Monmouth
+- code: Montana
+  aliases:
+  - Montana
+- code: Montana State
+  aliases:
+  - Montana State
+- code: Morehead State
+  aliases:
+  - Morehead State
+- code: Morgan State
+  aliases:
+  - Morgan State
+- code: Mount St. Mary's
+  aliases:
+  - Mount St. Mary's
+- code: Murray State
+  aliases:
+  - Murray State
+- code: Navy
+  aliases:
+  - Navy
+- code: NC A&T
+  aliases:
+  - NC A&T
+  - North Carolina A&T
+- code: NC Central
+  aliases:
+  - NC Central
+  - North Carolina Central
+- code: NC State
+  aliases:
+  - NC State
+  - North Carolina State
+- code: Nebraska
+  aliases:
+  - Nebraska
+- code: Nevada
+  aliases:
+  - Nevada
+- code: New Hampshire
+  aliases:
+  - New Hampshire
+- code: New Mexico
+  aliases:
+  - New Mexico
+- code: New Mexico State
+  aliases:
+  - New Mexico State
+- code: New Orleans
+  aliases:
+  - New Orleans
+- code: Niagara
+  aliases:
+  - Niagara
+- code: Nicholls
+  aliases:
+  - Nicholls
+- code: Norfolk State
+  aliases:
+  - Norfolk State
+- code: North Alabama
+  aliases:
+  - North Alabama
+- code: North Carolina
+  aliases:
+  - North Carolina
+- code: North Dakota
+  aliases:
+  - North Dakota
+- code: North Dakota State
+  aliases:
+  - North Dakota State
+- code: North Florida
+  aliases:
+  - North Florida
+- code: North Texas
+  aliases:
+  - North Texas
+- code: Northeastern
+  aliases:
+  - Northeastern
+- code: Northern Arizona
+  aliases:
+  - Northern Arizona
+- code: Northern Colorado
+  aliases:
+  - Northern Colorado
+- code: Northern Illinois
+  aliases:
+  - Northern Illinois
+- code: Northern Iowa
+  aliases:
+  - Northern Iowa
+- code: Northern Kentucky
+  aliases:
+  - Northern Kentucky
+- code: Northwestern
+  aliases:
+  - Northwestern
+- code: Northwestern State
+  aliases:
+  - Northwestern State
+- code: Notre Dame
+  aliases:
+  - Notre Dame
+- code: Oakland
+  aliases:
+  - Oakland
+- code: Ohio
+  aliases:
+  - Ohio
+- code: Ohio State
+  aliases:
+  - Ohio State
+- code: Oklahoma
+  aliases:
+  - Oklahoma
+- code: Oklahoma State
+  aliases:
+  - Oklahoma State
+- code: Old Dominion
+  aliases:
+  - Old Dominion
+- code: Ole Miss
+  aliases:
+  - Ole Miss
+  - Mississippi
+- code: Omaha
+  aliases:
+  - Omaha
+- code: Oral Roberts
+  aliases:
+  - Oral Roberts
+- code: Oregon
+  aliases:
+  - Oregon
+- code: Oregon State
+  aliases:
+  - Oregon State
+- code: Pacific
+  aliases:
+  - Pacific
+- code: Penn
+  aliases:
+  - Penn
+- code: Penn State
+  aliases:
+  - Penn State
+- code: Pepperdine
+  aliases:
+  - Pepperdine
+- code: Pittsburgh
+  aliases:
+  - Pittsburgh
+  - Pitt
+- code: Portland
+  aliases:
+  - Portland
+- code: Portland State
+  aliases:
+  - Portland State
+- code: Prairie View A&M
+  aliases:
+  - Prairie View A&M
+- code: Presbyterian
+  aliases:
+  - Presbyterian
+- code: Princeton
+  aliases:
+  - Princeton
+- code: Providence
+  aliases:
+  - Providence
+- code: Purdue
+  aliases:
+  - Purdue
+- code: Purdue Fort Wayne
+  aliases:
+  - Purdue Fort Wayne
+- code: Quinnipiac
+  aliases:
+  - Quinnipiac
+- code: Radford
+  aliases:
+  - Radford
+- code: Rhode Island
+  aliases:
+  - Rhode Island
+- code: Rice
+  aliases:
+  - Rice
+- code: Richmond
+  aliases:
+  - Richmond
+- code: Rider
+  aliases:
+  - Rider
+- code: Robert Morris
+  aliases:
+  - Robert Morris
+- code: Rutgers
+  aliases:
+  - Rutgers
+- code: Sacramento State
+  aliases:
+  - Sacramento State
+- code: Sacred Heart
+  aliases:
+  - Sacred Heart
+- code: Saint Francis (PA)
+  aliases:
+  - Saint Francis (PA)
+- code: Saint Joseph's
+  aliases:
+  - Saint Joseph's
+  - Saint Josephs
+- code: Saint Louis
+  aliases:
+  - Saint Louis
+- code: Saint Mary's
+  aliases:
+  - Saint Mary's
+- code: Saint Peter's
+  aliases:
+  - Saint Peter's
+- code: Sam Houston
+  aliases:
+  - Sam Houston
+- code: Samford
+  aliases:
+  - Samford
+- code: San Diego
+  aliases:
+  - San Diego
+- code: San Diego State
+  aliases:
+  - San Diego State
+- code: San Francisco
+  aliases:
+  - San Francisco
+- code: San Jose State
+  aliases:
+  - San Jose State
+- code: Santa Clara
+  aliases:
+  - Santa Clara
+- code: Seattle
+  aliases:
+  - Seattle
+- code: Seton Hall
+  aliases:
+  - Seton Hall
+- code: Siena
+  aliases:
+  - Siena
+- code: SIU Edwardsville
+  aliases:
+  - SIU Edwardsville
+  - SIUE
+- code: SMU
+  aliases:
+  - SMU
+- code: South Alabama
+  aliases:
+  - South Alabama
+- code: South Carolina
+  aliases:
+  - South Carolina
+- code: South Carolina State
+  aliases:
+  - South Carolina State
+- code: South Carolina Upstate
+  aliases:
+  - South Carolina Upstate
+- code: South Dakota
+  aliases:
+  - South Dakota
+- code: South Dakota State
+  aliases:
+  - South Dakota State
+- code: South Florida
+  aliases:
+  - South Florida
+  - USF
+- code: Southeast Missouri State
+  aliases:
+  - Southeast Missouri State
+- code: Southeastern Louisiana
+  aliases:
+  - Southeastern Louisiana
+- code: Southern
+  aliases:
+  - Southern
+- code: Southern Illinois
+  aliases:
+  - Southern Illinois
+- code: Southern Miss
+  aliases:
+  - Southern Miss
+  - Southern Mississippi
+- code: Southern Utah
+  aliases:
+  - Southern Utah
+- code: St. Bonaventure
+  aliases:
+  - St. Bonaventure
+- code: St. John's
+  aliases:
+  - St. John's
+  - St. Johns
+- code: St. Thomas
+  aliases:
+  - St. Thomas
+- code: Stanford
+  aliases:
+  - Stanford
+- code: Stephen F. Austin
+  aliases:
+  - Stephen F. Austin
+- code: Stetson
+  aliases:
+  - Stetson
+- code: Stonehill
+  aliases:
+  - Stonehill
+- code: Syracuse
+  aliases:
+  - Syracuse
+- code: Tarleton State
+  aliases:
+  - Tarleton State
+- code: TCU
+  aliases:
+  - TCU
+- code: Temple
+  aliases:
+  - Temple
+- code: Tennessee
+  aliases:
+  - Tennessee
+- code: Tennessee State
+  aliases:
+  - Tennessee State
+- code: Tennessee Tech
+  aliases:
+  - Tennessee Tech
+- code: Texas
+  aliases:
+  - Texas
+- code: Texas A&M
+  aliases:
+  - Texas A&M
+- code: Texas A&M-Corpus Christi
+  aliases:
+  - Texas A&M-Corpus Christi
+- code: Texas Southern
+  aliases:
+  - Texas Southern
+- code: Texas State
+  aliases:
+  - Texas State
+- code: Texas Tech
+  aliases:
+  - Texas Tech
+- code: The Citadel
+  aliases:
+  - The Citadel
+- code: Toledo
+  aliases:
+  - Toledo
+- code: Towson
+  aliases:
+  - Towson
+- code: Troy
+  aliases:
+  - Troy
+- code: Tulane
+  aliases:
+  - Tulane
+- code: Tulsa
+  aliases:
+  - Tulsa
+- code: UAB
+  aliases:
+  - UAB
+- code: UC Davis
+  aliases:
+  - UC Davis
+- code: UC Irvine
+  aliases:
+  - UC Irvine
+- code: UC Riverside
+  aliases:
+  - UC Riverside
+- code: UC San Diego
+  aliases:
+  - UC San Diego
+- code: UC Santa Barbara
+  aliases:
+  - UC Santa Barbara
+- code: UCF
+  aliases:
+  - UCF
+  - Central Florida
+- code: UCLA
+  aliases:
+  - UCLA
+- code: UMass Lowell
+  aliases:
+  - UMass Lowell
+- code: UNC Asheville
+  aliases:
+  - UNC Asheville
+- code: UNC Greensboro
+  aliases:
+  - UNC Greensboro
+- code: UNC Wilmington
+  aliases:
+  - UNC Wilmington
+- code: UNLV
+  aliases:
+  - UNLV
+- code: USC
+  aliases:
+  - USC
+  - Southern California
+- code: USC Upstate
+  aliases:
+  - USC Upstate
+- code: UT Arlington
+  aliases:
+  - UT Arlington
+- code: UT Martin
+  aliases:
+  - UT Martin
+- code: UT Rio Grande Valley
+  aliases:
+  - UT Rio Grande Valley
+- code: Utah
+  aliases:
+  - Utah
+- code: Utah State
+  aliases:
+  - Utah State
+- code: Utah Tech
+  aliases:
+  - Utah Tech
+- code: Utah Valley
+  aliases:
+  - Utah Valley
+- code: UTEP
+  aliases:
+  - UTEP
+- code: UTSA
+  aliases:
+  - UTSA
+- code: Valparaiso
+  aliases:
+  - Valparaiso
+- code: Vanderbilt
+  aliases:
+  - Vanderbilt
+- code: VCU
+  aliases:
+  - VCU
+- code: Vermont
+  aliases:
+  - Vermont
+- code: Villanova
+  aliases:
+  - Villanova
+- code: Virginia
+  aliases:
+  - Virginia
+- code: Virginia Tech
+  aliases:
+  - Virginia Tech
+- code: VMI
+  aliases:
+  - VMI
+- code: Wagner
+  aliases:
+  - Wagner
+- code: Wake Forest
+  aliases:
+  - Wake Forest
+- code: Washington
+  aliases:
+  - Washington
+- code: Washington State
+  aliases:
+  - Washington State
+- code: Weber State
+  aliases:
+  - Weber State
+- code: West Virginia
+  aliases:
+  - West Virginia
+- code: Western Carolina
+  aliases:
+  - Western Carolina
+- code: Western Illinois
+  aliases:
+  - Western Illinois
+- code: Western Kentucky
+  aliases:
+  - Western Kentucky
+- code: Western Michigan
+  aliases:
+  - Western Michigan
+- code: Wichita State
+  aliases:
+  - Wichita State
+- code: William & Mary
+  aliases:
+  - William & Mary
+  - William and Mary
+- code: Winthrop
+  aliases:
+  - Winthrop
+- code: Wisconsin
+  aliases:
+  - Wisconsin
+- code: Wofford
+  aliases:
+  - Wofford
+- code: Wright State
+  aliases:
+  - Wright State
+- code: Wyoming
+  aliases:
+  - Wyoming
+- code: Xavier
+  aliases:
+  - Xavier
+- code: Yale
+  aliases:
+  - Yale
+- code: Youngstown State
+  aliases:
+  - Youngstown State
+package_aliases:
+- NCAA Basketball
+- college basketball

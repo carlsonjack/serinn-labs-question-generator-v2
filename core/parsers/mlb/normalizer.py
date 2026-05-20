@@ -9,7 +9,6 @@ from ..base import CategoryNormalizer
 from ..contracts import DetectedFile, NormalizedBundle, SourceRole
 from ..registry import register_category_normalizer
 from ..validators import validate_date_filter_results, validate_schedule_teams_have_stats
-from .common import TEAM_MAP
 from .schedule import MlbScheduleParser
 from .stats import MlbStatsParser
 
@@ -41,8 +40,8 @@ class MlbCategoryNormalizer(CategoryNormalizer):
 
         schedule_path = paths_by_role.get(SourceRole.EVENT_SOURCE)
         stats_path = paths_by_role.get(SourceRole.METRIC_SOURCE)
-        if schedule_path is None or stats_path is None:
-            raise ValueError("MLB normalization requires both event and metric sources.")
+        if schedule_path is None:
+            raise ValueError("MLB normalization requires an event source (schedule).")
 
         category_key = _category_key_from_detected_files(detected_files, default="mlb")
         schedule_result = (
@@ -50,32 +49,36 @@ class MlbCategoryNormalizer(CategoryNormalizer):
             .load(schedule_path)
             .normalize()
         )
-        stats_parser = MlbStatsParser(category_key=category_key).load(stats_path)
-        stats_result = stats_parser.normalize()
 
         issues = [
             *schedule_result.warnings,
             *schedule_result.errors,
-            *stats_result.warnings,
-            *stats_result.errors,
+        ]
+        events = list(schedule_result.data)
+        player_stats: list = []
+        profiles = [
+            profile
+            for profile in (schedule_result.profile_used,)
+            if profile is not None
         ]
 
-        events = list(schedule_result.data)
-        player_stats = list(stats_result.data)
+        if stats_path is not None:
+            stats_parser = MlbStatsParser(category_key=category_key).load(stats_path)
+            stats_result = stats_parser.normalize()
+            issues.extend(stats_result.warnings)
+            issues.extend(stats_result.errors)
+            player_stats = list(stats_result.data)
+            if stats_result.profile_used is not None:
+                profiles.append(stats_result.profile_used)
+
         issues.extend(validate_date_filter_results(events))
         issues.extend(
             validate_schedule_teams_have_stats(
                 events,
                 player_stats,
-                team_lookup=TEAM_MAP,
+                category_key=category_key,
             )
         )
-
-        profiles = [
-            profile
-            for profile in (schedule_result.profile_used, stats_result.profile_used)
-            if profile is not None
-        ]
         return NormalizedBundle(
             events=events,
             player_stats=player_stats,

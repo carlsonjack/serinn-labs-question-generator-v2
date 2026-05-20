@@ -343,6 +343,56 @@ class TestDateComputation:
         assert row.expiration_date == "2026-05-15T21:40:00"
         assert row.resolution_date == "2026-05-16T03:40:00"
 
+    def test_start_date_spec_event_minus_hours(self):
+        tpl = QuestionTemplate(
+            id="mlb_game_winner",
+            subcategory="MLB",
+            question_family="event",
+            question="Who will win {home_team} vs {away_team}?",
+            answer_type="multiple_choice",
+            answer_options="{home_team}||{away_team}",
+            priority=1,
+            requires_entities=False,
+            start_date_spec={
+                "kind": "offset_from_anchor",
+                "anchor": "event_datetime",
+                "offset_days": 0,
+                "offset_hours": -48,
+            },
+        )
+        row = self.assembler.assemble(_gen_q(), _item(template=tpl))
+        assert row.start_date == "2026-05-13T21:40:00"
+        assert row.expiration_date == "2026-05-15T21:40:00"
+        assert row.resolution_date == "2026-05-16T01:40:00"
+
+    def test_expiration_spec_sees_overridden_start(self):
+        tpl = QuestionTemplate(
+            id="mlb_game_winner",
+            subcategory="MLB",
+            question_family="event",
+            question="Who will win {home_team} vs {away_team}?",
+            answer_type="multiple_choice",
+            answer_options="{home_team}||{away_team}",
+            priority=1,
+            requires_entities=False,
+            start_date_spec={
+                "kind": "offset_from_anchor",
+                "anchor": "event_datetime",
+                "offset_days": 0,
+                "offset_hours": -48,
+            },
+            expiration_date_spec={
+                "kind": "offset_from_anchor",
+                "anchor": "question_start",
+                "offset_days": 0,
+                "offset_hours": 24,
+            },
+        )
+        row = self.assembler.assemble(_gen_q(), _item(template=tpl))
+        assert row.start_date == "2026-05-13T21:40:00"
+        assert row.expiration_date == "2026-05-14T21:40:00"
+        assert row.resolution_date == "2026-05-16T01:40:00"
+
     def test_dates_match_engine_directly(self):
         dates = compute_question_dates(
             "2026-05-15T21:40:00",

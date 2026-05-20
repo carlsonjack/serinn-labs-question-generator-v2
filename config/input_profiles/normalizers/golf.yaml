@@ -1,0 +1,80 @@
+version: 1
+package_key: golf
+sources:
+  event_source:
+    source_role: event_source
+    file_pattern: schedule.xlsx
+    sheet_name: pga_2026_schedule
+    header_row_index: 0
+    field_mappings:
+      competition_format: field
+      event_display: event_name
+      event_name: event_name
+      start_date: start_date
+    metric_mappings: {}
+    metadata_mappings:
+      country: country
+      course: course
+      season: season
+      status: status
+      tour: tour
+      winner: winner
+    matchup_split: null
+    event_datetime:
+      datetime_column: null
+      date_column: start_date
+      time_column: null
+      timezone: null
+    event_id: null
+  metric_source:
+    source_role: metric_source
+    file_pattern: stats.xlsx
+    sheet_name: World Rankings
+    header_row_index: 0
+    field_mappings:
+      player_name: PLAYER
+    metric_mappings:
+      AVG_POINTS: AVG POINTS
+      MOVEMENT: MOVEMENT
+      POINTS_GAINED: POINTS GAINED
+      POINTS_LOST: POINTS LOST
+      RANK: RANK
+      TOTAL_POINTS: TOTAL POINTS
+    metadata_mappings:
+      player_id: PLAYER_ID
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  event_source:
+    filename: schedule.xlsx
+    sheets:
+    - columns:
+      - start_date
+      - season
+      - tour
+      - event_name
+      - country
+      - course
+      - status
+      - winner
+      header_row_index: 0
+      sheet_name: pga_2026_schedule
+  metric_source:
+    filename: stats.xlsx
+    sheets:
+    - columns:
+      - RANK
+      - MOVEMENT
+      - PLAYER_ID
+      - PLAYER
+      - AVG POINTS
+      - TOTAL POINTS
+      - POINTS LOST
+      - POINTS GAINED
+      header_row_index: 0
+      sheet_name: World Rankings
+notes: Golf schedule is a field competition source, so map event_name/start_date and
+  omit home_team/away_team. World rankings are global player rankings without a team
+  column, so omit team and preserve PLAYER_ID as metadata.
+competition_format: field

@@ -1,0 +1,118 @@
+package_key: laliga
+teams:
+- code: RMA
+  aliases:
+  - RMA
+  - Real Madrid
+- code: BAR
+  aliases:
+  - BAR
+  - Barcelona
+  - FC Barcelona
+- code: ATM
+  aliases:
+  - ATM
+  - Atlético Madrid
+  - Atletico Madrid
+  - Atletico
+- code: GIR
+  aliases:
+  - GIR
+  - Girona
+  - Girona FC
+- code: ATH
+  aliases:
+  - ATH
+  - Athletic Club
+  - Athletic Bilbao
+  - Athletic
+- code: RSO
+  aliases:
+  - RSO
+  - Real Sociedad
+  - Sociedad
+- code: BET
+  aliases:
+  - BET
+  - Real Betis
+  - Betis
+- code: VLL
+  aliases:
+  - VLL
+  - Real Valladolid
+  - Valladolid
+- code: OSA
+  aliases:
+  - OSA
+  - Osasuna
+  - CA Osasuna
+- code: CEL
+  aliases:
+  - CEL
+  - Celta Vigo
+  - Celta
+- code: SEV
+  aliases:
+  - SEV
+  - Sevilla
+  - Sevilla FC
+- code: VAL
+  aliases:
+  - VAL
+  - Valencia
+  - Valencia CF
+- code: GET
+  aliases:
+  - GET
+  - Getafe
+  - Getafe CF
+- code: ALA
+  aliases:
+  - ALA
+  - Alavés
+  - Alaves
+  - Deportivo Alavés
+- code: LEG
+  aliases:
+  - LEG
+  - Leganés
+  - Leganes
+- code: LAS
+  aliases:
+  - LAS
+  - UD Las Palmas
+  - Las Palmas
+- code: MLL
+  aliases:
+  - MLL
+  - Mallorca
+  - RCD Mallorca
+- code: RAY
+  aliases:
+  - RAY
+  - Rayo Vallecano
+  - Rayo
+- code: CAD
+  aliases:
+  - CAD
+  - Cádiz
+  - Cadiz
+  - Cádiz CF
+- code: GRA
+  aliases:
+  - GRA
+  - Granada
+  - Granada CF
+- code: ESP
+  aliases:
+  - ESP
+  - Espanyol
+  - RCD Espanyol
+- code: VIL
+  aliases:
+  - VIL
+  - Villarreal
+  - Villarreal CF
+package_aliases:
+- La Liga
+- LaLiga

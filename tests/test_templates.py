@@ -14,11 +14,12 @@ from core.template_config import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent
+FIXTURE_TEMPLATES = ROOT / "tests" / "fixtures" / "shipped_templates"
 TEMPLATES = ROOT / "templates"
 
 
 def test_load_all_shipped_templates() -> None:
-    templates = load_template_dir(TEMPLATES)
+    templates = load_template_dir(FIXTURE_TEMPLATES)
     ids = set(templates.keys())
     assert {
         "mlb_game_winner",

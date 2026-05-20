@@ -15,6 +15,8 @@ from pydantic import BaseModel
 from core.parsers.contracts import NormalizedEvent, PlayerStatRecord
 from core.template_config.schema import QuestionTemplate
 
+from .event_fill import fill_sports_template_text, resolve_event_answer_options
+
 
 # ---------------------------------------------------------------------------
 # Prompt configuration
@@ -190,8 +192,9 @@ class PromptBuilder:
             lines.append(f"Line: {tpl.line}")
 
         if tpl.question_family == "event":
-            lines.append(f"Answer options: {fill_event_answer_options(tpl, event)}")
-
+            lines.append(
+                f"Answer options: {resolve_event_answer_options(tpl, event, item.players)}"
+            )
         elif tpl.question_family == "entity_stat":
             if not item.players:
                 raise ValueError(
@@ -199,7 +202,12 @@ class PromptBuilder:
                     f"none provided for event {event.event_id}"
                 )
             player_names = [p.player_name for p in item.players]
-            lines.append(f"Entities (use ONLY these as answer options): {', '.join(player_names)}")
+            lines.append(
+                f"Entities (use ONLY these as answer options): {', '.join(player_names)}"
+            )
+            lines.append(
+                f"Answer options: {resolve_event_answer_options(tpl, event, item.players)}"
+            )
             lines.append(f"Stat: {tpl.stat_column}")
 
         lines.append("")
@@ -215,13 +223,8 @@ def fill_template_placeholders(
     template: QuestionTemplate,
     event: NormalizedEvent,
 ) -> str:
-    """Replace ``{home_team}``, ``{away_team}``, ``{line}`` in template question text."""
-    text = template.question
-    text = text.replace("{home_team}", event.home_team)
-    text = text.replace("{away_team}", event.away_team)
-    if template.line is not None:
-        text = text.replace("{line}", str(template.line))
-    return text
+    """Replace event placeholders in template question text (bracket and brace forms)."""
+    return fill_sports_template_text(template.question, event, template)
 
 
 def fill_event_answer_options(
@@ -229,7 +232,4 @@ def fill_event_answer_options(
     event: NormalizedEvent,
 ) -> str:
     """Replace placeholders in ``answer_options`` for event-level templates."""
-    opts = template.answer_options
-    opts = opts.replace("{home_team}", event.home_team)
-    opts = opts.replace("{away_team}", event.away_team)
-    return opts
+    return fill_sports_template_text(template.answer_options, event, template)

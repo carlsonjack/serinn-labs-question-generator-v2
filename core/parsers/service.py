@@ -19,6 +19,7 @@ from core.template_ui import normalize_template_package, package_aliases_for_set
 
 # Register built-in category normalizers.
 from .f1 import normalizer as _f1_normalizer  # noqa: F401
+from .golf import normalizer as _golf_normalizer  # noqa: F401
 from .mlb import normalizer as _mlb_normalizer  # noqa: F401
 from .stocks import normalizer as _stocks_normalizer  # noqa: F401
 
@@ -173,13 +174,15 @@ def resolve_input_scan_jobs(
                 (),
             )
         )
-        jobs.append(
-            (
-                input_dir / str(file_config["metric_source"]),
-                SourceRole.METRIC_SOURCE,
-                _metric_sheet_terms(settings),
+        metric_path = input_dir / str(file_config["metric_source"])
+        if metric_path.is_file():
+            jobs.append(
+                (
+                    metric_path,
+                    SourceRole.METRIC_SOURCE,
+                    _metric_sheet_terms(settings),
+                )
             )
-        )
         return jobs, issues
 
     role_map = _merged_file_role_map(settings, matched_pkg_key, file_config)
@@ -224,8 +227,11 @@ def resolve_input_scan_jobs(
                 )
             )
             continue
+        path = input_dir / str(fname)
+        if not path.is_file():
+            continue
         terms = _metric_sheet_terms(settings) if role == SourceRole.METRIC_SOURCE else ()
-        jobs.append((input_dir / str(fname), role, terms))
+        jobs.append((path, role, terms))
 
     return jobs, issues
 

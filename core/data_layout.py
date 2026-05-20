@@ -2,8 +2,9 @@
 
 The deployed project tree is read-only except ``/tmp``. When ``VERCEL`` is set
 (or ``SERINN_WRITABLE_ROOT`` is set to a directory), mutable paths
-(settings, inputs, outputs, templates copy, profile YAML) live under a writable
-root so uploads and saves do not raise OSError.
+Mutable paths (settings, inputs, outputs, uploaded templates, profile YAML) live under a writable
+root so uploads and saves do not raise OSError. Bundled repo templates are not copied on bootstrap;
+only user uploads populate the writable ``templates/`` directory.
 """
 
 from __future__ import annotations
@@ -80,9 +81,8 @@ def bootstrap_if_needed() -> None:
     if bundled_cat.is_file() and not dst_cat.is_file():
         shutil.copy2(bundled_cat, dst_cat)
 
-    src_tmpl = REPO_ROOT / "templates"
     dst_tmpl = w / "templates"
-    if src_tmpl.is_dir():
-        shutil.copytree(src_tmpl, dst_tmpl, dirs_exist_ok=True)
+    dst_tmpl.mkdir(parents=True, exist_ok=True)
+    # Do not copy bundled repo templates — uploads live only in the writable tree.
 
     sentinel.write_text("ok\n", encoding="utf-8")

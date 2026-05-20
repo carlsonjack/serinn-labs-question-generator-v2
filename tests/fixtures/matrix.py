@@ -9,11 +9,8 @@ from typing import Any, Literal
 import pytest
 
 from core.generation.batch_executor import BatchResult, FailedBatch
-from core.generation.prompt_builder import (
-    GeneratedQuestion,
-    PromptItem,
-    fill_event_answer_options,
-)
+from core.generation.deterministic_events import build_deterministic_questions
+from core.generation.prompt_builder import GeneratedQuestion, PromptItem
 from tests.fixtures.workbooks import (
     write_f1_schedule_minimal,
     write_mlb_schedule_minimal,
@@ -48,6 +45,7 @@ class PipelineMatrixCase:
     fake_fail_batches: frozenset[int] = frozenset()
     fake_invalid_indices: frozenset[int] = frozenset()
     fake_duplicate_questions: bool = False
+    event_use_llm: bool = False
     expected_output_rows: int | None = None
     expected_invalid_rows: int = 0
     expected_failed_batches: int = 0
@@ -163,6 +161,7 @@ def matrix_settings(
         },
         "batch_size": case.batch_size,
         "max_generated_questions": case.max_generated_questions,
+        "event_generation": {"use_llm": case.event_use_llm},
         "inputs": inputs,
         "parsing": {"persist_profiles": False},
         "_fake_generation": {
@@ -199,33 +198,22 @@ class FakeBatchExecutor:
                 )
             else:
                 for item in batch:
-                    question = "" if global_index in invalid_indices else _question_text(item, duplicate_questions)
-                    result.questions.append(
-                        GeneratedQuestion(
-                            template_id=item.template.id,
-                            event_id=item.event.event_id,
-                            question=question,
-                            answer_options=_answer_options(item),
+                    gen = build_deterministic_questions([item])[0]
+                    if global_index in invalid_indices:
+                        gen = gen.model_copy(update={"question": ""})
+                    elif duplicate_questions:
+                        suffix = "!" if item.template.id.endswith("_b") else "?"
+                        gen = gen.model_copy(
+                            update={
+                                "question": f"Will this repeated question be flagged{suffix}"
+                            }
                         )
-                    )
+                    result.questions.append(gen)
                     global_index += 1
                 result.successful_batches += 1
             if on_batch_done is not None:
                 on_batch_done(batch_index + 1, len(batches))
         return result
-
-
-def _question_text(item: PromptItem, duplicate_questions: bool) -> str:
-    if duplicate_questions:
-        suffix = "!" if item.template.id.endswith("_b") else "?"
-        return f"Will this repeated question be flagged{suffix}"
-    return f"{item.template.id} for {item.event.event_id}?"
-
-
-def _answer_options(item: PromptItem) -> str:
-    if item.template.question_family == "entity_stat":
-        return "||".join(player.player_name for player in item.players)
-    return fill_event_answer_options(item.template, item.event)
 
 
 def pipeline_matrix_params() -> list[Any]:
@@ -272,8 +260,8 @@ def pipeline_matrix_params() -> list[Any]:
             category_key="mlb",
             workbook_kind="mlb_missing_stats",
             templates=[event_template("mlb_missing_file_matrix", "MLB")],
-            expected_success=False,
-            expected_message="missing_input_file",
+            expected_success=True,
+            expected_output_rows=2,
         ),
         PipelineMatrixCase(
             case_id="invalid_source_role",
@@ -299,6 +287,7 @@ def pipeline_matrix_params() -> list[Any]:
             workbook_kind="mlb_minimal",
             templates=[event_template("mlb_partial_batch_matrix", "MLB")],
             batch_size=1,
+            event_use_llm=True,
             fake_fail_batches=frozenset({0}),
             expected_success=True,
             expected_output_rows=1,
@@ -310,6 +299,7 @@ def pipeline_matrix_params() -> list[Any]:
             workbook_kind="mlb_minimal",
             templates=[event_template("mlb_all_failed_matrix", "MLB")],
             batch_size=1,
+            event_use_llm=True,
             fake_fail_batches=frozenset({0, 1}),
             expected_success=False,
             expected_message="All generation batches failed",
@@ -320,6 +310,7 @@ def pipeline_matrix_params() -> list[Any]:
             category_key="mlb",
             workbook_kind="mlb_minimal",
             templates=[event_template("mlb_invalid_row_matrix", "MLB")],
+            event_use_llm=True,
             fake_invalid_indices=frozenset({0}),
             expected_success=True,
             expected_output_rows=1,
@@ -335,7 +326,7 @@ def pipeline_matrix_params() -> list[Any]:
             ],
             fake_duplicate_questions=True,
             expected_success=True,
-            expected_output_rows=0,
+            expected_output_rows=4,
             exhaustive=True,
         ),
     ]

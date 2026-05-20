@@ -12,7 +12,7 @@ In [`config/settings.yaml`](config/settings.yaml), `inputs.category_key` chooses
 
 ### 2. Put files where `inputs.files` says they should go
 
-For each slot (`event_source`, `metric_source`, `schedule`, `stats`, …) the value is the **filename** that must live under your inputs directory (default `inputs/`). Upload those files in the UI (**Save uploads + create normalizer profile**) or copy them in manually.
+For each slot (`event_source`, `metric_source`, `schedule`, `stats`, …) the value is the **filename** that must live under your inputs directory (default `inputs/`). Upload those files in the UI (**Save uploads + create normalizer profile**) or copy them in manually. For schedule/event-only templates (e.g. game winner), you can upload only the schedule slot; the metric slot stays optional until you run player-stat templates.
 
 ### 3. **Topic import ID** (where questions land downstream)
 
@@ -46,15 +46,111 @@ Matching rule: labels are compared in a **normalized** form (case-insensitive; s
 
 ### 6. Enable templates
 
-In `templates_enabled`, set each template **`id`** you want to `true`. Disabled ids are skipped even if they match the package.
+Templates are **enabled by default**. Uploading via the UI sets each template id to `true` in `templates_enabled`. To skip a template during generation, set its id to `false` in `templates_enabled`.
 
 ### 7. New / custom workbook layouts — AI normalizer
 
 For a package without a built-in Python normalizer, use the UI flow: upload inputs → **Save uploads + create normalizer profile** (proposes a declarative spec, previews, saves under `config/input_profiles/normalizers/`). Then generation uses that profile when parsing your `.xlsx` files.
 
+### Template upload files (plain English)
+
+The app accepts **JSON** templates (one file = one template) and **CSV / Excel** uploads with **many templates in one file**. Spreadsheet uploads use one of **two layouts**. If a column is not listed for that layout, you can leave it out.
+
+---
+
+#### Layout A — **Wide table** (one header row, one row per template)
+
+Typical **Excel export**: the first row has column names; each following row is one template.
+
+**Always required**
+
+| Column | What to put |
+|--------|-------------|
+| **`template_id`** | Short unique id for this template (letters, numbers, dashes). Same idea as `id` in JSON. |
+| **`question_template`** | The question text. For sports, you can use `{home_team}` and `{away_team}` where those names should appear. |
+| **`answer_type`** | Either **`yes_no`** or **`multiple_choice`**. (The uploader also accepts common synonyms like `binary` / `single_select` and maps them.) |
+
+**Highly recommended**
+
+| Column | What to put |
+|--------|-------------|
+| **`subcategory`** | Label for this package (e.g. `WNBA`, `MLB`). Should match your **input package** when the app compares names (case-insensitive). If you leave it blank, the app uses **`Content`**. |
+| **`answer_options_pattern`** *or* **`answer_options_rule`** | For **multiple choice**, the answer choices separated by **`||`** (two vertical bars), e.g. `Mets||Yankees`. For **yes/no**, you can leave this **blank** for most template types—the app will fill **`Yes||No`** when needed. For **player lists from a stats file**, use **`entity_stat`** (below) and either type **`{entity_options}`** or leave this blank and the app will set `{entity_options}` for you. |
+| **`question_family`** | What kind of question this is (see **“Question family”** below). If you leave it blank, the app **guesses** from your text and rules columns. If you put **`stat_column`** without a family, the app treats the row as **`entity_stat`**. |
+| **`default_priority`** *or* **`priority`** | Number for ordering (`1`, `2`, …) or leave blank if you do not care. |
+
+**For “pick a player from the stats sheet” templates (`entity_stat`)**
+
+| Column | What to put |
+|--------|-------------|
+| **`stat_column`** | The **spreadsheet column header** from your stats workbook (normalized), e.g. **`PTS`**, **`HR`**, **`GOAL_PROBABILITY`**, **`FG%`**. It must match the key the parser stores for each player. **Required** for `entity_stat`. |
+| **`top_n_per_team`** *or* **`top_n`** | How many top players **per team** (home + away) to offer as choices. If you leave it blank, the app uses **`2`**. |
+| **`requires_entities`** | Should be **`true`** or left blank for `entity_stat`. **`false` is not allowed** for `entity_stat`. For any other `question_family`, this must be **`false`** or blank—do not set `true`. |
+
+**Optional extra columns**
+
+| Column | What to put |
+|--------|-------------|
+| **`template_type`**, **`required_dataset_fields`**, **`notes`** | Free text for your own notes or downstream tooling. |
+| **`start_date_rule`**, **`expiration_date_rule`**, **`resolution_date_rule`** | Short text rules for when the question opens, closes, and resolves. If you use **`resolution_date_rule`**, the app may compile it to a structured spec when an API key is set (see **Resolution date rules** below). |
+| **`required_input_file`** | Optional; used only to help guess `question_family` when that column is empty. |
+
+---
+
+#### Layout B — **Block CSV** (two rows per template)
+
+**Row 1** = field names. **Row 2** = values. Then **another row 1** + **row 2** for the next template, and so on.
+
+Use the same **ideas** as the table above, but column names match **JSON** style: **`id`**, **`question`**, **`answer_type`**, **`answer_options`**, **`question_family`**, **`requires_entities`**, **`stat_column`**, **`top_n_per_team`**, **`priority`**, etc.
+
+Example: [`samples/template_upload_three_mlb_templates.csv`](samples/template_upload_three_mlb_templates.csv), [`samples/wnba_schedule_game_winner_one_question.csv`](samples/wnba_schedule_game_winner_one_question.csv) (schedule-only), and [`samples/wnba_entity_points_one_question.csv`](samples/wnba_entity_points_one_question.csv) (stats / `entity_stat`).
+
+---
+
+#### Question family — what each value means
+
+| Value | In simple terms |
+|--------|-----------------|
+| **`event`** | A question about the **game or teams** (winner, spread-style wording, totals bands, etc.). Answer options are fixed text you write in the sheet (or `Yes||No`). The **stats file is not** used to build the answer list. |
+| **`entity_stat`** | A question where answers are **real names** (usually players) taken from the **stats** input using **`stat_column`** and **`top_n_per_team`**. Use **`{entity_options}`** as the answer pattern (or leave answer options blank and the uploader sets it). |
+| **`content`** | Entertainment / marketing-style templates (albums, movies, etc.), not tied to a single sports event in the schedule row sense. |
+| **`stock`** | Stock-market templates (separate client layout). |
+
+**Schedule-only vs stats — which columns to fill**
+
+| Column | `event` (schedule question) | `entity_stat` (player question) |
+|--------|----------------------------|----------------------------------|
+| **`question_family`** | `event` | `entity_stat` |
+| **`requires_entities`** | `false` | `true` |
+| **`stat_column`** | omit | required (e.g. `PTS`, `HR`) |
+| **`top_n_per_team`** | omit | required in practice (e.g. `2`) |
+| **`answer_options`** | `{home_team}||{away_team}` or `Yes||No` | `{entity_options}` |
+| **Inputs** | schedule `.xlsx` only is enough | schedule **and** stats `.xlsx` |
+
+WNBA examples: schedule winner → [`templates/WNBA-010.json`](templates/WNBA-010.json) and [`samples/wnba_schedule_game_winner_one_question.csv`](samples/wnba_schedule_game_winner_one_question.csv); player points → [`samples/wnba_entity_points_one_question.csv`](samples/wnba_entity_points_one_question.csv).
+
+**Authoring templates with Claude / ChatGPT:** see [`docs/TEMPLATE_AUTHORING_FOR_LLM.md`](docs/TEMPLATE_AUTHORING_FOR_LLM.md) (column-by-column guide, date-rule examples, and prompt patterns). **Excel uploads** must use **Layout A** (one header row + one row per template); columns can be `question` or `question_template` and `answer_options` or `answer_options_pattern`.
+
+---
+
+#### Answer type and answer options — quick guide
+
+| **`answer_type`** | What to put in answer options |
+|-------------------|--------------------------------|
+| **`yes_no`** | Best: **`Yes||No`**. If you leave it blank, **`event`** and **`entity_stat`** rows get **`Yes||No`** automatically; **`content`** / **`stock`** can stay blank where the schema allows. |
+| **`multiple_choice`** | Usually **`Option A||Option B||Option C`**. For **`entity_stat`**, use **`{entity_options}`** (or leave blank to default). **`event`** rows need either a `||` list, or a single “rule-like” token the app already knows about—otherwise validation may fail. |
+
+---
+
+#### Client “stock template” CSV (different shape)
+
+Some spreadsheets use **capitalized** headers like **`Template ID`**, **`Question Template`**, **`Answer Type`**, **`Answer Options`**, **`Recommended Priority`**. That path is only for the **stock** client format, not for general sports `template_id` tables.
+
+---
+
 ### Sample template CSVs
 
-See [`samples/`](samples/) (e.g. [`samples/template_upload_two_world_cup_templates.csv`](samples/template_upload_two_world_cup_templates.csv)) for the repeating header row format used by **Upload** in the UI.
+See [`samples/`](samples/) (e.g. [`samples/template_upload_two_world_cup_templates.csv`](samples/template_upload_two_world_cup_templates.csv)) for **Layout B** block examples used by **Upload** in the UI.
 
 ### Resolution date rules (`resolution_date_rule`)
 
@@ -97,15 +193,38 @@ The machine schema lives in [`core/resolution_date_spec.py`](core/resolution_dat
 
 ---
 
+## Team aliases
+
+Schedule and stats workbooks often use different team labels (e.g. `Houston Astros` vs `HOU`, `Los Angeles Sparks` vs `LA`). Per-league maps live under [`config/team_aliases/`](config/team_aliases/) and load automatically when the pipeline joins events to player stats via `resolve_stats_team_code`.
+
+**Registered packages:** `mlb`, `wnba`, `mls`, `nwsl`, `laliga`, `nba`, `nfl`, `nhl`, `ncaaf`, `ncaab` (plus `package_aliases` in each YAML such as `MLS`, `La Liga`, `NBA`). Package keys are matched case-insensitively (`NHL` and `nhl` share the same map).
+
+**College:** canonical codes are full school names; shared mascot nicknames are intentionally omitted to avoid wrong joins.
+
+To add or update a league, edit or add a YAML file and run `python scripts/generate_team_aliases.py` when using the generator. See [`config/team_aliases/README.md`](config/team_aliases/README.md).
+
+---
+
 ## Multi-vertical inputs (reference)
 
-- **MLB (legacy):** Under `inputs.files.mlb`, keep `event_source` and `metric_source` filenames (e.g. `schedule.xlsx`, `stats.xlsx`). Set `inputs.category_key` to `mlb`. No change from the original workflow.
+- **MLB (legacy):** Under `inputs.files.mlb`, keep `event_source` and `metric_source` filenames (e.g. `schedule.xlsx`, `stats.xlsx`). Set `inputs.category_key` to `mlb`. Both slots remain in settings, but only files you upload are required on disk—schedule-only runs work for event templates without `stats.xlsx`.
 - **Additional packages (e.g. F1):** Add `inputs.files.<Package>` with slot ids → target filenames (any `.xlsx` basename per slot). Slots whose ids match a `SourceRole` (`event_source`, `metric_source`, `entity_source`, `reference_source`) or a built-in alias (`schedule`, `stats`, `fixtures`, `roster`, …) are mapped automatically—no `inputs.file_roles` required unless you use opaque slot names. For schedule+stats only, you can reuse the same two-slot ids as MLB with any filenames. Schedule-only packages omit metric slots.
 - **Templates:** Each JSON template’s `subcategory` must match the selected input package when normalized (case-insensitive), e.g. `F1` templates with package `F1`.
 - **Aliases:** If the input package key should differ from the template label or parser key, add `inputs.package_aliases`, e.g. `formula_one: [F1, Formula 1]`. The alias allows `formula_one` inputs to use `F1` templates and the registered F1 normalizer.
 - **New packages (e.g. MLS):** If there is no Python normalizer for your package key yet, configure **both** `event_source` and `metric_source` (or `schedule` + `stats` with role inference) so the pipeline can run the same schedule+stats composition as MLB; detection still uses your package key for saved profiles. Single-file calendar feeds should map with `package_aliases` to `f1` or add a dedicated normalizer.
 - **Export Topic Import ID:** Optional map `topic_import_ids` in `config/settings.yaml` (`mlb`, `f1`, …) keyed by lowercase package id; falls back to top-level `topic_import_id`.
 - **Calendar-style event labels:** Normalizers may set `event_display` on `NormalizedEvent`; the CSV `event` column uses it when present (otherwise `Away vs Home`).
+
+### Field competitions (golf, F1)
+
+Some sports have **tournament calendars** instead of home/away matchups. Configure `inputs.packages.<pkg>.competition_format: field`:
+
+- **Schedule:** map `event_name` / `start_date`; no home/away columns required.
+- **Stats (optional):** global rankings without a `TEAM` column — all players get a synthetic field code (default `FIELD`).
+- **Templates:** use `{event_name}` for tournament labels; `entity_stat` uses `top_n_per_team` as **top N in the entire field**.
+- **Ascending stats:** set `ascending_stat_columns` (e.g. `RANK`) when lower values are better.
+
+Registered field normalizers: `f1`, `golf`.
 
 See [`config/settings.yaml`](config/settings.yaml) for a commented example with both `mlb` and `F1`.
 
@@ -187,6 +306,17 @@ python main.py
 Open the URL printed in the terminal (default [http://127.0.0.1:5000/](http://127.0.0.1:5000/)). Optional environment variables: `HOST`, `PORT`, `FLASK_DEBUG` (see `.env.example`).
 
 In the UI: pick the **input package**, set **date range** / **topic import id** / **subcategory label** as needed, **upload** `.xlsx` files (and run **Save uploads + create normalizer profile** once if you use a new layout), enable templates, then **generate** and download the CSV.
+
+### Sports / events generation (no OpenAI by default)
+
+For schedule + stats packages (MLB, WNBA, MLS, etc.), question text and answer options are filled **locally from templates** unless you opt in to LLM wording:
+
+| Setting | Default | Meaning |
+|---------|---------|---------|
+| `event_generation.use_llm` | `false` | Fill `{home_team}`, `[HOME_TEAM]`, `{entity_options}`, etc. in code — **no API key required** to generate. |
+| `event_generation.use_llm` | `true` | Previous behavior: batched OpenAI calls polish question wording (requires `openai_api_key`). |
+
+OpenAI may still be used for **other** steps: compiling `resolution_date_rule` on template upload, and **home-team timezone inference** when the saved normalizer profile leaves `event_datetime.timezone` unset (e.g. WNBA). Those are separate from event question generation.
 
 ## Adding a new client category
 

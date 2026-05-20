@@ -1,0 +1,165 @@
+package_key: nhl
+teams:
+- code: ANA
+  aliases:
+  - ANA
+  - Anaheim Ducks
+  - Ducks
+- code: BOS
+  aliases:
+  - BOS
+  - Boston Bruins
+  - Bruins
+- code: BUF
+  aliases:
+  - BUF
+  - Buffalo Sabres
+  - Sabres
+- code: CGY
+  aliases:
+  - CGY
+  - Calgary Flames
+  - Flames
+- code: CAR
+  aliases:
+  - CAR
+  - Carolina Hurricanes
+  - Hurricanes
+- code: CHI
+  aliases:
+  - CHI
+  - Chicago Blackhawks
+  - Blackhawks
+- code: COL
+  aliases:
+  - COL
+  - Colorado Avalanche
+  - Avalanche
+- code: CBJ
+  aliases:
+  - CBJ
+  - Columbus Blue Jackets
+  - Blue Jackets
+- code: DAL
+  aliases:
+  - DAL
+  - Dallas Stars
+  - Stars
+- code: DET
+  aliases:
+  - DET
+  - Detroit Red Wings
+  - Red Wings
+- code: EDM
+  aliases:
+  - EDM
+  - Edmonton Oilers
+  - Oilers
+- code: FLA
+  aliases:
+  - FLA
+  - Florida Panthers
+  - Panthers
+- code: LAK
+  aliases:
+  - LAK
+  - Los Angeles Kings
+  - Kings
+  - LA Kings
+- code: MIN
+  aliases:
+  - MIN
+  - Minnesota Wild
+  - Wild
+- code: MTL
+  aliases:
+  - MTL
+  - Montreal Canadiens
+  - Canadiens
+- code: NSH
+  aliases:
+  - NSH
+  - Nashville Predators
+  - Predators
+- code: NJD
+  aliases:
+  - NJD
+  - New Jersey Devils
+  - Devils
+- code: NYI
+  aliases:
+  - NYI
+  - New York Islanders
+  - Islanders
+- code: NYR
+  aliases:
+  - NYR
+  - New York Rangers
+  - Rangers
+- code: OTT
+  aliases:
+  - OTT
+  - Ottawa Senators
+  - Senators
+- code: PHI
+  aliases:
+  - PHI
+  - Philadelphia Flyers
+  - Flyers
+- code: PIT
+  aliases:
+  - PIT
+  - Pittsburgh Penguins
+  - Penguins
+- code: SJS
+  aliases:
+  - SJS
+  - San Jose Sharks
+  - Sharks
+- code: SEA
+  aliases:
+  - SEA
+  - Seattle Kraken
+  - Kraken
+- code: STL
+  aliases:
+  - STL
+  - St. Louis Blues
+  - Blues
+- code: TBL
+  aliases:
+  - TBL
+  - Tampa Bay Lightning
+  - Lightning
+- code: TOR
+  aliases:
+  - TOR
+  - Toronto Maple Leafs
+  - Maple Leafs
+- code: UTA
+  aliases:
+  - UTA
+  - Utah Hockey Club
+  - Utah HC
+- code: VAN
+  aliases:
+  - VAN
+  - Vancouver Canucks
+  - Canucks
+- code: VGK
+  aliases:
+  - VGK
+  - Vegas Golden Knights
+  - Golden Knights
+- code: WPG
+  aliases:
+  - WPG
+  - Winnipeg Jets
+  - Jets
+- code: WSH
+  aliases:
+  - WSH
+  - Washington Capitals
+  - Capitals
+package_aliases:
+- NHL

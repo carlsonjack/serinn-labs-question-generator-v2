@@ -8,6 +8,20 @@ from typing import Any, Mapping
 
 _PKG_OR_SLOT_ID = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]{0,63}$")
 
+INPUT_DATA_SUFFIXES: frozenset[str] = frozenset({".xlsx", ".csv"})
+
+
+def resolve_input_upload_filename(configured_name: str, uploaded_filename: str) -> str | None:
+    """Return the on-disk basename for an uploaded slot file (extension from upload)."""
+
+    suffix = Path(uploaded_filename).suffix.lower()
+    if suffix not in INPUT_DATA_SUFFIXES:
+        return None
+    safe = _safe_target_filename(configured_name)
+    if not safe:
+        return None
+    return Path(safe).stem + suffix
+
 
 def _safe_target_filename(name: str) -> str | None:
     s = name.strip()
@@ -80,6 +94,31 @@ def get_inputs_category_key(settings: Mapping[str, Any]) -> str:
     return "mlb"
 
 
+def present_files_map(
+    input_dir: Path, files_map: Mapping[str, str]
+) -> dict[str, str]:
+    """Return configured slots whose target file exists on disk."""
+
+    return {
+        slot_id: target_name
+        for slot_id, target_name in files_map.items()
+        if (input_dir / target_name).is_file()
+    }
+
+
+def require_present_input_files(
+    input_dir: Path, files_map: Mapping[str, str]
+) -> str | None:
+    """Return an error message when no configured input files are present."""
+
+    if present_files_map(input_dir, files_map):
+        return None
+    if not files_map:
+        return "No input files configured for this package."
+    names = ", ".join(sorted(files_map.values()))
+    return f"No uploaded input files found. Expected at least one of: {names}"
+
+
 def get_files_map_for_category(
     settings: Mapping[str, Any], category_key: str | None = None
 ) -> dict[str, str]:
@@ -127,6 +166,51 @@ def resolve_inputs_package_file_key(
         if isinstance(k, str) and isinstance(v, dict) and k.lower() == lower:
             return k
     return None
+
+
+def clear_category_input_files(
+    input_dir: Path,
+    settings: Mapping[str, Any],
+    category_key: str,
+    *,
+    only_slot_ids: set[str] | frozenset[str] | None = None,
+    skip_slot_ids: set[str] | frozenset[str] | None = None,
+) -> list[str]:
+    """Remove on-disk files for configured slots of *category_key*.
+
+    Returns basenames that were deleted. Missing files are ignored.
+    """
+
+    files_map = get_files_map_for_category(settings, category_key)
+    removed: list[str] = []
+    for slot_id, target_name in files_map.items():
+        if only_slot_ids is not None and slot_id not in only_slot_ids:
+            continue
+        if skip_slot_ids is not None and slot_id in skip_slot_ids:
+            continue
+        path = input_dir / target_name
+        if path.is_file():
+            path.unlink()
+            removed.append(target_name)
+    return removed
+
+
+def clear_unuploaded_category_input_files(
+    input_dir: Path,
+    files_map: Mapping[str, str],
+    uploaded_slot_ids: set[str] | frozenset[str],
+) -> list[str]:
+    """Remove files for slots that were not part of an upload batch."""
+
+    removed: list[str] = []
+    for slot_id, target_name in files_map.items():
+        if slot_id in uploaded_slot_ids:
+            continue
+        path = input_dir / target_name
+        if path.is_file():
+            path.unlink()
+            removed.append(target_name)
+    return removed
 
 
 def iter_input_slots(

@@ -14,6 +14,7 @@ def test_registered_verticals_include_mlb_and_f1() -> None:
     cats = list_registered_categories()
     assert "mlb" in cats
     assert "f1" in cats
+    assert "golf" in cats
     assert "stocks" in cats
 
 

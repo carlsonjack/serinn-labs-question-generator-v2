@@ -28,6 +28,19 @@ def test_resolve_inputs_directory_under_vercel(monkeypatch, tmp_path) -> None:
     assert p == (tmp_path / "serinn-labs-data" / "inputs").resolve()
 
 
+def test_bootstrap_creates_empty_templates_dir_without_copying_repo(
+    monkeypatch, tmp_path
+) -> None:
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    from core.data_layout import bootstrap_if_needed, get_writable_root
+
+    bootstrap_if_needed()
+    writable_tpl = get_writable_root() / "templates"
+    assert writable_tpl.is_dir()
+    assert list(writable_tpl.glob("*.json")) == []
+
+
 def test_bootstrap_seeds_settings_and_upload_works_under_vercel(
     monkeypatch, tmp_path
 ) -> None:

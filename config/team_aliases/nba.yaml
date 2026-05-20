@@ -1,0 +1,161 @@
+package_key: nba
+teams:
+- code: ATL
+  aliases:
+  - ATL
+  - Atlanta Hawks
+  - Hawks
+- code: BOS
+  aliases:
+  - BOS
+  - Boston Celtics
+  - Celtics
+- code: BKN
+  aliases:
+  - BKN
+  - Brooklyn Nets
+  - Nets
+- code: CHA
+  aliases:
+  - CHA
+  - Charlotte Hornets
+  - Hornets
+- code: CHI
+  aliases:
+  - CHI
+  - Chicago Bulls
+  - Bulls
+- code: CLE
+  aliases:
+  - CLE
+  - Cleveland Cavaliers
+  - Cavaliers
+  - Cavs
+- code: DAL
+  aliases:
+  - DAL
+  - Dallas Mavericks
+  - Mavericks
+  - Mavs
+- code: DEN
+  aliases:
+  - DEN
+  - Denver Nuggets
+  - Nuggets
+- code: DET
+  aliases:
+  - DET
+  - Detroit Pistons
+  - Pistons
+- code: GSW
+  aliases:
+  - GSW
+  - Golden State Warriors
+  - Warriors
+- code: HOU
+  aliases:
+  - HOU
+  - Houston Rockets
+  - Rockets
+- code: IND
+  aliases:
+  - IND
+  - Indiana Pacers
+  - Pacers
+- code: LAC
+  aliases:
+  - LAC
+  - Los Angeles Clippers
+  - Clippers
+  - LA Clippers
+- code: LAL
+  aliases:
+  - LAL
+  - Los Angeles Lakers
+  - Lakers
+  - LA Lakers
+- code: MEM
+  aliases:
+  - MEM
+  - Memphis Grizzlies
+  - Grizzlies
+- code: MIA
+  aliases:
+  - MIA
+  - Miami Heat
+  - Heat
+- code: MIL
+  aliases:
+  - MIL
+  - Milwaukee Bucks
+  - Bucks
+- code: MIN
+  aliases:
+  - MIN
+  - Minnesota Timberwolves
+  - Timberwolves
+  - Wolves
+- code: NOP
+  aliases:
+  - NOP
+  - New Orleans Pelicans
+  - Pelicans
+- code: NYK
+  aliases:
+  - NYK
+  - New York Knicks
+  - Knicks
+- code: OKC
+  aliases:
+  - OKC
+  - Oklahoma City Thunder
+  - Thunder
+- code: ORL
+  aliases:
+  - ORL
+  - Orlando Magic
+  - Magic
+- code: PHI
+  aliases:
+  - PHI
+  - Philadelphia 76ers
+  - 76ers
+  - Sixers
+- code: PHX
+  aliases:
+  - PHX
+  - Phoenix Suns
+  - Suns
+- code: POR
+  aliases:
+  - POR
+  - Portland Trail Blazers
+  - Trail Blazers
+  - Blazers
+- code: SAC
+  aliases:
+  - SAC
+  - Sacramento Kings
+  - Kings
+- code: SAS
+  aliases:
+  - SAS
+  - San Antonio Spurs
+  - Spurs
+- code: TOR
+  aliases:
+  - TOR
+  - Toronto Raptors
+  - Raptors
+- code: UTA
+  aliases:
+  - UTA
+  - Utah Jazz
+  - Jazz
+- code: WAS
+  aliases:
+  - WAS
+  - Washington Wizards
+  - Wizards
+package_aliases:
+- NBA

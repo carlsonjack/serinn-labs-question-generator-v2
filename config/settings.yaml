@@ -1,65 +1,17 @@
 openai_api_key: ''
 model: gpt-5.4
-topic_import_id: mlb-mlb-season-2026
+topic_import_id: pga-us-open-2026
 topic_import_ids:
   mlb: mlb-regular-season
   f1: f1-race-winner
   music: music-new-releases-us-2026-06
   stocks: stocks-us-market
-subcategory: MLB
+subcategory: Golf
 top_n_per_team: 3
 templates_directory: templates
-templates_enabled:
-  entertainment_placeholder: false
-  markets_placeholder: false
-  mlb_game_winner: true
-  mlb_home_run: false
-  mlb_rbi: false
-  mlb_steal_base: false
-  mlb_total_runs_over_8_5: false
-  mlb_win_margin_2: false
-  news_placeholder: false
-  sample_csv_event_yesno: true
-  sample_csv_event_mc: true
-  sample_csv_entity_hr: true
-  f1_race_winner_head_to_head: true
-  f1_race_winner_flag: true
-  f1_race_winner_yes_no: true
-  f1_race_finish_ahead_yes_no: true
-  mls_sample_event_yesno: false
-  mls_sample_event_mc: true
-  mls_sample_entity_goals: true
-  music-award-01: true
-  music-mc-01: true
-  music-mc-02: true
-  music-mc-03: true
-  music-mc-04: true
-  music-tour-mc-01: true
-  music-yn-01: true
-  music-yn-02: true
-  world_cup_event_winner_mc: true
-  world_cup_entity_goal_prob: true
-  stream-yn-01: true
-  stream-yn-02: true
-  stream-yn-03: true
-  stream-yn-04: true
-  stream-award-yn-01: true
-  stream-award-yn-02: true
-  stream-award-yn-03: true
-  stream-award-yn-04: true
-  stream-award-mc-01: true
-  stream-award-mc-02: true
-  movie-yn-01: true
-  movie-yn-02: true
-  movie-mc-01: true
-  movie-mc-02: true
-  movie-yn-03: true
-  movie-yn-04: true
-  movie-award-01: true
-  manual-mc-01: true
 date_filter:
-  start: '2026-05-15'
-  end: '2026-09-27'
+  start: '2026-01-08'
+  end: '2026-12-03'
 date_rules:
   default:
     start_offset_hours: -24
@@ -79,7 +31,9 @@ date_rules:
     resolution_offset_hours: 4
     resolution_offset_anchor: expiration
 batch_size: 100
-max_generated_questions: 20
+max_generated_questions: null
+event_generation:
+  use_llm: false
 stocks:
   questions_per_day: 50
 content:
@@ -104,10 +58,13 @@ model_pricing:
     output: 10.0
 inputs:
   directory: inputs
-  category_key: mlb
+  category_key: golf
   files:
     F1:
       schedule: f1_schedule.xlsx
+    golf:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
     mlb:
       event_source: schedule.xlsx
       metric_source: stats.xlsx
@@ -122,6 +79,9 @@ inputs:
       metric_source: top-150-stocks.xlsx
     television:
       event_source: television.xlsx
+    wnba:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
     world_cup:
       event_source: schedule.xlsx
       metric_source: stats.xlsx
@@ -135,10 +95,22 @@ inputs:
       releases: entity_source
   packages:
     f1:
+      competition_format: field
       race_session_values:
       - Race
       placeholder_home_team: Driver_A
       placeholder_away_team: Driver_B
+    golf:
+      competition_format: field
+      placeholder_home_team: Golfer_A
+      placeholder_away_team: Golfer_B
+      field_team_code: FIELD
+      ascending_stat_columns:
+      - RANK
+      skip_status_values:
+      - complete
+      - cancelled
+      - canceled
   package_aliases:
     music:
     - Music

@@ -16,7 +16,7 @@ from core.parsers.contracts import NormalizedEvent
 from core.resolution_date_spec import (
     EventResolutionContext,
     ResolutionDateSpec,
-    compute_resolution_datetime_for_event,
+    evaluate_template_datetime_for_event,
 )
 from core.template_config.schema import QuestionTemplate
 
@@ -121,17 +121,57 @@ class RowAssembler:
             category_key=template.subcategory.lower(),
             settings=self.settings,
         )
+        # Baseline start/expiration/resolution from YAML date_rules. Optional template
+        # specs override in order: start → expiration → resolution. Each step sees
+        # question_start / question_expiration updated from prior overrides so anchors
+        # chain correctly (expiration may reference the overridden start).
+        event_dt = parse_event_datetime(event.event_datetime)
+        start_dt = parse_event_datetime(dates.start_date)
+        exp_dt = parse_event_datetime(dates.expiration_date)
+        meta = dict(event.metadata or {})
+
+        start_date = dates.start_date
+        expiration_date = dates.expiration_date
         resolution_date = dates.resolution_date
-        raw_spec = template.resolution_date_spec
-        if raw_spec:
-            spec = ResolutionDateSpec.model_validate(raw_spec)
+
+        raw_start = template.start_date_spec
+        if raw_start:
+            spec = ResolutionDateSpec.model_validate(raw_start)
             ctx = EventResolutionContext(
-                event_datetime=parse_event_datetime(event.event_datetime),
-                question_start=parse_event_datetime(dates.start_date),
-                question_expiration=parse_event_datetime(dates.expiration_date),
-                metadata=dict(event.metadata or {}),
+                event_datetime=event_dt,
+                question_start=start_dt,
+                question_expiration=exp_dt,
+                metadata=meta,
             )
-            override = compute_resolution_datetime_for_event(spec, ctx)
+            override = evaluate_template_datetime_for_event(spec, ctx)
+            if override is not None:
+                start_date = override.isoformat(timespec="seconds")
+                start_dt = override
+
+        raw_exp = template.expiration_date_spec
+        if raw_exp:
+            spec = ResolutionDateSpec.model_validate(raw_exp)
+            ctx = EventResolutionContext(
+                event_datetime=event_dt,
+                question_start=start_dt,
+                question_expiration=exp_dt,
+                metadata=meta,
+            )
+            override = evaluate_template_datetime_for_event(spec, ctx)
+            if override is not None:
+                expiration_date = override.isoformat(timespec="seconds")
+                exp_dt = override
+
+        raw_res = template.resolution_date_spec
+        if raw_res:
+            spec = ResolutionDateSpec.model_validate(raw_res)
+            ctx = EventResolutionContext(
+                event_datetime=event_dt,
+                question_start=start_dt,
+                question_expiration=exp_dt,
+                metadata=meta,
+            )
+            override = evaluate_template_datetime_for_event(spec, ctx)
             if override is not None:
                 resolution_date = override.isoformat(timespec="seconds")
 
@@ -142,8 +182,8 @@ class RowAssembler:
             question=generated.question,
             answer_type=template.answer_type,
             answer_options=generated.answer_options,
-            start_date=dates.start_date,
-            expiration_date=dates.expiration_date,
+            start_date=start_date,
+            expiration_date=expiration_date,
             resolution_date=resolution_date,
             priority=template.priority,
         )

@@ -49,3 +49,17 @@ def test_infer_date_range_empty_when_no_dates(tmp_path: Path) -> None:
     start, end = infer_date_range_from_excel_paths([path])
     assert start is None
     assert end is None
+
+
+def test_infer_date_range_from_csv_start_date_column(tmp_path: Path) -> None:
+    path = tmp_path / "schedule.csv"
+    pd.DataFrame(
+        [
+            {"start_date": "2026-03-05", "event_name": "Arnold Palmer Invitational"},
+            {"start_date": "2026-04-09", "event_name": "Masters Tournament"},
+        ]
+    ).to_csv(path, index=False)
+
+    start, end = infer_date_range_from_excel_paths([path])
+    assert start == "2026-03-05"
+    assert end == "2026-04-09"

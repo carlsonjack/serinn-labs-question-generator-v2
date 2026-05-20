@@ -1,0 +1,2 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,stat_column,top_n_per_team,start_date_rule,expiration_date_rule,resolution_date_rule,_comment
+WNBA-002,WNBA,entity_stat,Which player will score the most points in {home_team} vs {away_team}?,multiple_choice,{entity_options},1,TRUE,PTS,2,event_date_minus_48_hours,11am_eastern_on_event_date,event_date_plus_1_day,Entity-stat variant of WNBA-002: answer options come from stats (PTS) top_n_per_team per side. Schedule team names must match stats TEAM codes (or extend pipeline team map).

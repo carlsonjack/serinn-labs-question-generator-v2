@@ -96,6 +96,23 @@ def test_schedule_parser_reports_missing_required_columns(tmp_path: Path) -> Non
     }
 
 
+def test_load_normalized_bundle_schedule_only_has_events_no_stats(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr("core.parsers.profiles._PROFILE_DIR", tmp_path / "profiles")
+    write_mlb_schedule_minimal(tmp_path / "schedule.xlsx")
+    settings = load_settings()
+    settings["inputs"]["directory"] = str(tmp_path)
+    settings["inputs"]["category_key"] = "mlb"
+    settings["date_filter"] = {"start": "2026-05-01", "end": "2026-05-31"}
+
+    bundle = load_normalized_bundle(settings)
+
+    assert bundle.events
+    assert bundle.player_stats == []
+    assert not any(issue.severity == ValidationSeverity.ERROR for issue in bundle.issues)
+
+
 def test_load_normalized_bundle_persists_profiles_and_has_no_issues(
     tmp_path: Path, monkeypatch
 ) -> None:

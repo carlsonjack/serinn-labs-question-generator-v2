@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -38,8 +38,8 @@ def test_content_offset_from_release() -> None:
     rd = date(2026, 6, 10)
     ctx = ContentResolutionContext(
         release_date=rd,
-        question_start=rd - timedelta(days=7),
-        question_expiration=rd - timedelta(days=1),
+        question_start=datetime.combine(rd - timedelta(days=7), time.min),
+        question_expiration=datetime.combine(rd - timedelta(days=1), time.min),
         metadata={},
     )
     out = compute_resolution_date_for_content(spec, ctx)
@@ -56,8 +56,8 @@ def test_content_calendar_year_policy() -> None:
     rd = date(2025, 3, 1)
     ctx = ContentResolutionContext(
         release_date=rd,
-        question_start=rd,
-        question_expiration=rd,
+        question_start=datetime.combine(rd, time.min),
+        question_expiration=datetime.combine(rd, time.min),
         metadata={},
     )
     assert compute_resolution_date_for_content(spec, ctx) == date(2026, 11, 1)
@@ -67,8 +67,8 @@ def test_content_none_falls_through() -> None:
     spec = ResolutionDateSpec(kind="none")
     ctx = ContentResolutionContext(
         release_date=date(2026, 1, 1),
-        question_start=date(2025, 12, 25),
-        question_expiration=date(2025, 12, 31),
+        question_start=datetime.combine(date(2025, 12, 25), time.min),
+        question_expiration=datetime.combine(date(2025, 12, 31), time.min),
         metadata={},
     )
     assert compute_resolution_date_for_content(spec, ctx) is None
@@ -121,8 +121,8 @@ def test_window_end_content() -> None:
     rd = date(2026, 1, 1)
     ctx = ContentResolutionContext(
         release_date=rd,
-        question_start=rd,
-        question_expiration=rd,
+        question_start=datetime.combine(rd, time.min),
+        question_expiration=datetime.combine(rd, time.min),
         metadata={},
     )
     assert compute_resolution_date_for_content(spec, ctx) == date(2026, 1, 15)
@@ -133,8 +133,8 @@ def test_metadata_date_from_entity_metadata() -> None:
     rd = date(2026, 6, 1)
     ctx = ContentResolutionContext(
         release_date=rd,
-        question_start=rd,
-        question_expiration=rd,
+        question_start=datetime.combine(rd, time.min),
+        question_expiration=datetime.combine(rd, time.min),
         metadata={"estimated_nomination_date": "2026-12-01"},
     )
     assert compute_resolution_date_for_content(spec, ctx) == date(2026, 12, 1)
@@ -148,8 +148,8 @@ def test_offset_rejects_invalid_content_anchor() -> None:
     )
     ctx = ContentResolutionContext(
         release_date=date(2026, 1, 1),
-        question_start=date(2025, 12, 25),
-        question_expiration=date(2025, 12, 31),
+        question_start=datetime.combine(date(2025, 12, 25), time.min),
+        question_expiration=datetime.combine(date(2025, 12, 31), time.min),
         metadata={},
     )
     assert compute_resolution_date_for_content(spec, ctx) is None
@@ -236,10 +236,14 @@ def test_maybe_compile_resolution_for_template_data_with_mock_client() -> None:
         "metadata_key": None,
         "offset_days": 7,
         "offset_hours": 0,
+        "calendar_year": None,
         "calendar_month": None,
         "calendar_day": None,
         "year_policy": None,
         "end_offset_days": None,
+        "local_hour": None,
+        "local_minute": None,
+        "iana_timezone": None,
     }
     assert merged["resolution_date_rule"] == data["resolution_date_rule"]
     client.chat.completions.create.assert_called_once()
@@ -312,6 +316,71 @@ def test_maybe_compile_skips_openai_when_spec_already_present() -> None:
     )
     assert out["resolution_date_spec"]["kind"] == "none"
     client.chat.completions.create.assert_not_called()
+
+
+def test_absolute_calendar_date_event() -> None:
+    spec = ResolutionDateSpec(
+        kind="absolute_calendar_date",
+        calendar_year=2026,
+        calendar_month=10,
+        calendar_day=20,
+    )
+    base = datetime(2026, 5, 15, 19, 0, 0)
+    ctx = EventResolutionContext(
+        event_datetime=base,
+        question_start=base + timedelta(hours=-24),
+        question_expiration=base,
+        metadata={},
+    )
+    out = compute_resolution_datetime_for_event(spec, ctx)
+    assert out == datetime(2026, 10, 20, 0, 0, 0)
+
+
+def test_infer_event_date_minus_hours_snake_case() -> None:
+    data = {
+        "id": "evt-t",
+        "question_family": "event",
+        "start_date_rule": "event_date_minus_48_hours",
+    }
+    merged = maybe_compile_resolution_for_template_data(data, {"openai_api_key": "sk-unused"})
+    spec = merged["start_date_spec"]
+    assert spec["kind"] == "offset_from_anchor"
+    assert spec["anchor"] == "event_datetime"
+    assert spec["offset_hours"] == -48
+
+
+def test_maybe_compile_stock_strips_start_and_expiration_fields() -> None:
+    data = {
+        "id": "st1",
+        "question_family": "stock",
+        "resolution_date_rule": "ignored",
+        "start_date_rule": "ignored",
+        "expiration_date_rule": "ignored",
+    }
+    out = maybe_compile_resolution_for_template_data(data, {"openai_api_key": "sk-x"})
+    assert "resolution_date_rule" not in out
+    assert "start_date_rule" not in out
+
+
+def test_local_time_on_anchor_eastern_maps_to_naive_utc() -> None:
+    spec = ResolutionDateSpec(
+        kind="local_time_on_anchor_date",
+        anchor="event_datetime",
+        local_hour=11,
+        local_minute=0,
+        iana_timezone="America/New_York",
+    )
+    # 2026-05-15 21:40 UTC = 17:40 Eastern; same calendar day in US Eastern.
+    base = datetime(2026, 5, 15, 21, 40, 0)
+    ctx = EventResolutionContext(
+        event_datetime=base,
+        question_start=base + timedelta(hours=-24),
+        question_expiration=base,
+        metadata={},
+    )
+    out = compute_resolution_datetime_for_event(spec, ctx)
+    assert out is not None
+    assert out.hour == 15  # 11:00 Eastern → 15:00 UTC on this date (EDT)
 
 
 @pytest.mark.live_openai

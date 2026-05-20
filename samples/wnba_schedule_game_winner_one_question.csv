@@ -1,0 +1,2 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,start_date_rule,expiration_date_rule,resolution_date_rule,_comment
+WNBA-010,WNBA,event,Who will win {home_team} vs {away_team}?,multiple_choice,{home_team}||{away_team},1,false,24 hours after event start,2 days after event start,January 15 of the event calendar year,Schedule-only: leave stat_column and top_n_per_team empty. Needs schedule upload only.

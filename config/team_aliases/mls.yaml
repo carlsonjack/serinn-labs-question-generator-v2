@@ -1,0 +1,146 @@
+package_key: mls
+teams:
+- code: ATL
+  aliases:
+  - ATL
+  - Atlanta United
+  - Atlanta United FC
+- code: ATX
+  aliases:
+  - ATX
+  - Austin FC
+- code: CLT
+  aliases:
+  - CLT
+  - Charlotte FC
+- code: CHI
+  aliases:
+  - CHI
+  - Chicago Fire
+  - Chicago Fire FC
+- code: CIN
+  aliases:
+  - CIN
+  - FC Cincinnati
+  - Cincinnati
+- code: COL
+  aliases:
+  - COL
+  - Colorado Rapids
+- code: CLB
+  aliases:
+  - CLB
+  - Columbus Crew
+- code: DCU
+  aliases:
+  - DCU
+  - D.C. United
+  - DC United
+- code: DAL
+  aliases:
+  - DAL
+  - FC Dallas
+- code: HOU
+  aliases:
+  - HOU
+  - Houston Dynamo
+  - Houston Dynamo FC
+- code: MIA
+  aliases:
+  - MIA
+  - Inter Miami CF
+  - Inter Miami
+- code: LAFC
+  aliases:
+  - LAFC
+  - Los Angeles FC
+- code: LAG
+  aliases:
+  - LAG
+  - LA Galaxy
+  - Los Angeles Galaxy
+  - Galaxy
+- code: MIN
+  aliases:
+  - MIN
+  - Minnesota United
+  - Minnesota United FC
+- code: MTL
+  aliases:
+  - MTL
+  - CF Montréal
+  - CF Montreal
+  - Montreal
+- code: NSH
+  aliases:
+  - NSH
+  - Nashville SC
+- code: NE
+  aliases:
+  - NE
+  - New England Revolution
+  - Revolution
+- code: NYC
+  aliases:
+  - NYC
+  - New York City FC
+  - NYCFC
+- code: NYRB
+  aliases:
+  - NYRB
+  - New York Red Bulls
+  - Red Bulls
+- code: ORL
+  aliases:
+  - ORL
+  - Orlando City
+  - Orlando City SC
+- code: PHI
+  aliases:
+  - PHI
+  - Philadelphia Union
+- code: POR
+  aliases:
+  - POR
+  - Portland Timbers
+  - Timbers
+- code: RSL
+  aliases:
+  - RSL
+  - Real Salt Lake
+- code: SD
+  aliases:
+  - SD
+  - San Diego FC
+- code: SJ
+  aliases:
+  - SJ
+  - San Jose Earthquakes
+  - Earthquakes
+- code: SEA
+  aliases:
+  - SEA
+  - Seattle Sounders
+  - Seattle Sounders FC
+- code: SKC
+  aliases:
+  - SKC
+  - Sporting Kansas City
+  - Sporting KC
+- code: STL
+  aliases:
+  - STL
+  - St. Louis CITY SC
+  - St. Louis City SC
+- code: TOR
+  aliases:
+  - TOR
+  - Toronto FC
+- code: VAN
+  aliases:
+  - VAN
+  - Vancouver Whitecaps
+  - Vancouver Whitecaps FC
+package_aliases:
+- MLS
+- Major League Soccer

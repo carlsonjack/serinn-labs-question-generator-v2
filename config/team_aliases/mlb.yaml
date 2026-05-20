@@ -1,0 +1,152 @@
+package_key: mlb
+teams:
+- code: ARI
+  aliases:
+  - ARI
+  - Arizona Diamondbacks
+  - Diamondbacks
+  - D-backs
+- code: ATL
+  aliases:
+  - ATL
+  - Atlanta Braves
+  - Braves
+- code: ATH
+  aliases:
+  - ATH
+  - Athletics
+- code: BAL
+  aliases:
+  - BAL
+  - Baltimore Orioles
+  - Orioles
+- code: BOS
+  aliases:
+  - BOS
+  - Boston Red Sox
+  - Red Sox
+- code: CHC
+  aliases:
+  - CHC
+  - Chicago Cubs
+  - Cubs
+- code: CHW
+  aliases:
+  - CHW
+  - Chicago White Sox
+  - White Sox
+- code: CIN
+  aliases:
+  - CIN
+  - Cincinnati Reds
+  - Reds
+- code: CLE
+  aliases:
+  - CLE
+  - Cleveland Guardians
+  - Guardians
+- code: COL
+  aliases:
+  - COL
+  - Colorado Rockies
+  - Rockies
+- code: DET
+  aliases:
+  - DET
+  - Detroit Tigers
+  - Tigers
+- code: HOU
+  aliases:
+  - HOU
+  - Houston Astros
+  - Astros
+- code: KCR
+  aliases:
+  - KCR
+  - Kansas City Royals
+  - Royals
+- code: LAA
+  aliases:
+  - LAA
+  - Los Angeles Angels
+  - Angels
+- code: LAD
+  aliases:
+  - LAD
+  - Los Angeles Dodgers
+  - Dodgers
+- code: MIA
+  aliases:
+  - MIA
+  - Miami Marlins
+  - Marlins
+- code: MIL
+  aliases:
+  - MIL
+  - Milwaukee Brewers
+  - Brewers
+- code: MIN
+  aliases:
+  - MIN
+  - Minnesota Twins
+  - Twins
+- code: NYM
+  aliases:
+  - NYM
+  - New York Mets
+  - Mets
+- code: NYY
+  aliases:
+  - NYY
+  - New York Yankees
+  - Yankees
+- code: PHI
+  aliases:
+  - PHI
+  - Philadelphia Phillies
+  - Phillies
+- code: PIT
+  aliases:
+  - PIT
+  - Pittsburgh Pirates
+  - Pirates
+- code: SDP
+  aliases:
+  - SDP
+  - San Diego Padres
+  - Padres
+- code: SFG
+  aliases:
+  - SFG
+  - San Francisco Giants
+  - Giants
+- code: SEA
+  aliases:
+  - SEA
+  - Seattle Mariners
+  - Mariners
+- code: STL
+  aliases:
+  - STL
+  - St. Louis Cardinals
+  - Cardinals
+- code: TBR
+  aliases:
+  - TBR
+  - Tampa Bay Rays
+  - Rays
+- code: TEX
+  aliases:
+  - TEX
+  - Texas Rangers
+  - Rangers
+- code: TOR
+  aliases:
+  - TOR
+  - Toronto Blue Jays
+  - Blue Jays
+- code: WSN
+  aliases:
+  - WSN
+  - Washington Nationals
+  - Nationals

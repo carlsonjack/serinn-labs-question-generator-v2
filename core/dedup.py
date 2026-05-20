@@ -1,9 +1,11 @@
 """Deduplication layer (EPIC 6, Task 6.1).
 
-Identifies and removes exact-duplicate output rows and flags near-duplicates
-for human review.  Exact duplicates are detected via a hash of
-(subcategory, event, question).  Near-duplicates share the same event but have
-similar (not identical) question text, measured by :class:`difflib.SequenceMatcher`.
+Identifies and removes exact-duplicate output rows.  Near-duplicate flagging
+(same event, similar question text via :class:`difflib.SequenceMatcher`) is
+implemented in :func:`_find_near_duplicates` but is currently not invoked from
+:func:`deduplicate`.
+
+Exact duplicates are detected via a hash of (subcategory, event, question, start_date).
 """
 
 from __future__ import annotations
@@ -27,8 +29,10 @@ DEFAULT_SIMILARITY_THRESHOLD: float = 0.85
 
 
 def row_hash(row: OutputRow) -> str:
-    """Compute a deterministic hash from ``(subcategory, event, question)``."""
-    key = f"{row.subcategory}\x1f{row.event}\x1f{row.question}"
+    """Compute a deterministic hash from ``(subcategory, event, question, start_date)``."""
+    key = (
+        f"{row.subcategory}\x1f{row.event}\x1f{row.question}\x1f{row.start_date}"
+    )
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
 
 
@@ -139,30 +143,33 @@ def deduplicate(
 ) -> DeduplicationResult:
     """Run the full deduplication pipeline on a list of output rows.
 
-    1. Remove exact duplicates (identical subcategory + event + question).
-    2. Flag near-duplicates (same event, similar question text) for review.
+    1. Remove exact duplicates (identical subcategory + event + question + start_date).
+    2. Near-duplicate flagging is currently disabled; all rows that pass step 1 are returned as clean.
 
     Parameters
     ----------
     rows:
         Output rows to deduplicate.
     similarity_threshold:
-        Minimum ratio (0–1) for two questions to be flagged as near-duplicates.
-        Defaults to :data:`DEFAULT_SIMILARITY_THRESHOLD` (0.85).
+        Reserved for near-duplicate detection when re-enabled. Currently unused.
     """
     after_exact, exact_removed = _remove_exact_duplicates(rows)
     if exact_removed:
         logger.info("Removed %d exact duplicate(s)", exact_removed)
 
-    clean, flagged, pairs = _find_near_duplicates(
-        after_exact, threshold=similarity_threshold
-    )
-    if flagged:
-        logger.info(
-            "Flagged %d row(s) as near-duplicate(s) (%d pair(s))",
-            len(flagged),
-            len(pairs),
-        )
+    # Near-duplicate flagging disabled — keep all rows that survived exact dedup.
+    # clean, flagged, pairs = _find_near_duplicates(
+    #     after_exact, threshold=similarity_threshold
+    # )
+    # if flagged:
+    #     logger.info(
+    #         "Flagged %d row(s) as near-duplicate(s) (%d pair(s))",
+    #         len(flagged),
+    #         len(pairs),
+    #     )
+    clean = list(after_exact)
+    flagged: list[OutputRow] = []
+    pairs: list[NearDuplicatePair] = []
 
     return DeduplicationResult(
         clean_rows=clean,

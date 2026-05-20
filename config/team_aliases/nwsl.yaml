@@ -1,0 +1,80 @@
+package_key: nwsl
+teams:
+- code: KC
+  aliases:
+  - KC
+  - Kansas City Current
+  - Current
+- code: CHI
+  aliases:
+  - CHI
+  - Chicago Stars FC
+  - Chicago Red Stars
+- code: DAL
+  aliases:
+  - DAL
+  - Dallas Trinity FC
+- code: HOU
+  aliases:
+  - HOU
+  - Houston Dash
+  - Dash
+- code: GS
+  aliases:
+  - GS
+  - Bay FC
+- code: LOU
+  aliases:
+  - LOU
+  - Racing Louisville FC
+  - Louisville
+- code: LA
+  aliases:
+  - LA
+  - Angel City FC
+  - Angel City
+- code: MIN
+  aliases:
+  - MIN
+  - Minnesota Aurora FC
+- code: NJ
+  aliases:
+  - NJ
+  - NJ/NY Gotham FC
+  - Gotham FC
+  - Gotham
+- code: NC
+  aliases:
+  - NC
+  - North Carolina Courage
+  - Courage
+- code: ORL
+  aliases:
+  - ORL
+  - Orlando Pride
+  - Pride
+- code: POR
+  aliases:
+  - POR
+  - Portland Thorns FC
+  - Portland Thorns
+  - Thorns
+- code: SEA
+  aliases:
+  - SEA
+  - Seattle Reign FC
+  - Reign FC
+  - Reign
+- code: SD
+  aliases:
+  - SD
+  - San Diego Wave FC
+  - Wave FC
+  - Wave
+- code: WAS
+  aliases:
+  - WAS
+  - Washington Spirit
+  - Spirit
+package_aliases:
+- NWSL

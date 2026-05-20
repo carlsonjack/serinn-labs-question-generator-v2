@@ -1,0 +1,15 @@
+category_key: wnba
+confidence: 1.0
+field_mappings:
+  away_team: Away Team
+  event_date: Date
+  home_team: Home Team
+  release_date: Date
+file_pattern: schedule.xlsx
+fingerprint: 004bfffda6f2a4e91fffb7e9c1eb03152c40e6e3be2bca4c5391d77911ff4199
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: schedule
+sheet_name: WNBA 2026 Schedule
+source_role: event_source

@@ -8,6 +8,31 @@ from core.parsers.contracts import SourceRole
 from core.parsers.service import resolve_input_scan_jobs
 
 
+def test_legacy_mlb_schedule_only_skips_metric_job(tmp_path: Path) -> None:
+    (tmp_path / "schedule.xlsx").touch()
+    settings = {
+        "inputs": {
+            "files": {
+                "mlb": {
+                    "event_source": "schedule.xlsx",
+                    "metric_source": "stats.xlsx",
+                },
+            },
+        },
+    }
+    fc = settings["inputs"]["files"]["mlb"]
+    jobs, issues = resolve_input_scan_jobs(
+        settings,
+        category_key="mlb",
+        input_dir=tmp_path,
+        file_config=fc,
+        matched_pkg_key="mlb",
+    )
+    assert not issues
+    assert len(jobs) == 1
+    assert jobs[0][1] == SourceRole.EVENT_SOURCE
+
+
 def test_legacy_mlb_slots_resolve_two_paths(tmp_path: Path) -> None:
     (tmp_path / "schedule.xlsx").touch()
     (tmp_path / "stats.xlsx").touch()

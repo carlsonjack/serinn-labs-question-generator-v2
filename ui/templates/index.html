@@ -517,7 +517,7 @@
               <code>inputs/</code> when you upload. Slot ids should match your
               input profiles (e.g. <code>event_source</code>,
               <code>metric_source</code>). You can use any
-              <code>.xlsx</code> basename per slot; common slot names like
+              <code>.xlsx</code> or <code>.csv</code> basename per slot; common slot names like
               <code>schedule</code> or <code>stats</code> are auto-mapped to
               roles when <code>inputs.file_roles</code> omits that package, or
               use <code>event_source</code> + <code>metric_source</code> for
@@ -562,8 +562,9 @@
             <span class="w-num">Step 3</span>Upload input files
           </h3>
           <p class="workflow-step-one-liner">
-            Drop the required <code>.xlsx</code> files on each slot, then save
-            uploads to refresh parsing and downstream previews.
+            Drop <code>.xlsx</code> or <code>.csv</code> files on each slot you need (schedule-only
+            runs can skip the metric/stats slot), then save uploads to refresh
+            parsing and downstream previews.
           </p>
           <p class="muted" style="margin-top: -0.35rem; margin-bottom: 0.65rem">
             Files below follow the package selected in step 2.
@@ -583,7 +584,8 @@
                 data-input="file-{{ s.slot_id }}"
                 tabindex="0"
               >
-                <strong>{{ s.label }}</strong> — drop <code>.xlsx</code> here or
+                <strong>{{ s.label }}</strong> — drop <code>.xlsx</code> or
+                <code>.csv</code> here or
                 click
                 <div class="target-name muted">
                   Saved as <code>{{ s.target_filename }}</code>
@@ -594,7 +596,7 @@
                 id="file-{{ s.slot_id }}"
                 class="slot-file"
                 data-slot-id="{{ s.slot_id }}"
-                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
               />
               <div class="slot-line muted" id="line-{{ s.slot_id }}"></div>
             </div>
@@ -1186,7 +1188,7 @@
                 '" tabindex="0">' +
                 "<strong>" +
                 escapeHtml(s.label) +
-                "</strong> — drop <code>.xlsx</code> here or click" +
+                "</strong> — drop <code>.xlsx</code> or <code>.csv</code> here or click" +
                 '<div class="target-name muted">Saved as <code>' +
                 escapeHtml(s.target_filename) +
                 "</code></div></div>" +
@@ -1194,7 +1196,7 @@
                 escapeHtml(s.slot_id) +
                 '" class="slot-file" data-slot-id="' +
                 escapeHtml(s.slot_id) +
-                '" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />' +
+                '" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" />' +
                 '<div class="slot-line muted" id="line-' +
                 escapeHtml(s.slot_id) +
                 '"></div></div>'
@@ -1530,6 +1532,13 @@
             if (pj.category_key && $("input_category_key").value !== pj.category_key) {
               $("input_category_key").value = pj.category_key;
             }
+            const cleared = pj.cleared_files || [];
+            if (cleared.length) {
+              $("upload-msg").textContent =
+                "Switched input package — cleared previous file(s): " +
+                cleared.join(", ") +
+                ". Upload fresh files for this package.";
+            }
           } catch (e) {
             $("input-slots-root").innerHTML =
               '<p class="muted">' + escapeHtml(String(e)) + "</p>";
@@ -1559,8 +1568,14 @@
           const names = (j.saved || []).map(function (x) {
             return x.filename;
           });
-          $("upload-msg").textContent =
+          const cleared = j.cleared_files || [];
+          let uploadNote =
             "Saved " + names.length + " file(s): " + names.join(", ");
+          if (cleared.length) {
+            uploadNote +=
+              ". Removed unstaged slot file(s): " + cleared.join(", ");
+          }
+          $("upload-msg").textContent = uploadNote;
           const dfAuto = j.date_filter_auto || {};
           const dateNote = $("date-filter-auto-note");
           if (dfAuto.applied && dfAuto.start && dfAuto.end) {

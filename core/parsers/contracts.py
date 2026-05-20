@@ -237,6 +237,7 @@ class NormalizationSpec:
     version: int = 1
     shape_signature: dict[str, Any] = field(default_factory=dict)
     notes: str = ""
+    competition_format: str = "team_sport"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -245,6 +246,7 @@ class NormalizationSpec:
             "sources": {k: v.to_dict() for k, v in self.sources.items()},
             "shape_signature": self.shape_signature,
             "notes": self.notes,
+            "competition_format": self.competition_format,
         }
 
     @classmethod
@@ -252,6 +254,9 @@ class NormalizationSpec:
         sources_raw = data.get("sources") or {}
         if not isinstance(sources_raw, dict):
             raise ValueError("NormalizationSpec.sources must be a mapping")
+        fmt = str(data.get("competition_format") or "team_sport").strip().lower()
+        if fmt not in {"team_sport", "field"}:
+            fmt = "team_sport"
         return cls(
             version=int(data.get("version") or 1),
             package_key=str(data.get("package_key") or ""),
@@ -262,5 +267,6 @@ class NormalizationSpec:
             },
             shape_signature=dict(data.get("shape_signature") or {}),
             notes=str(data.get("notes") or ""),
+            competition_format=fmt,
         )
 

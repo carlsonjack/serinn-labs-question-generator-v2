@@ -20,6 +20,7 @@ from core.parsers.declarative import execute_normalization_spec
 from core.parsers.detector import inspect_file
 from core.parsers.profiles import save_normalization_spec
 from core.parsers.service import load_normalized_bundle
+from core.pipeline import top_players_for_team
 
 
 def _write_world_cup_schedule(path: Path) -> Path:
@@ -165,6 +166,115 @@ def test_declarative_world_cup_schedule_and_probability_stats(tmp_path: Path) ->
     assert bundle.player_stats[0].player_name == "Santiago Gimenez"
     assert bundle.player_stats[0].stat_values["GOAL_PROBABILITY"] == 0.65
     assert bundle.player_stats[0].metadata["star_power"] == "High"
+
+
+def _write_wnba_stats_minimal(path: Path) -> Path:
+    rows = [
+        {"NAME": "Scorer Alpha", "TEAM": "NY", "PTS": 25.0, "REB": 4.0},
+        {"NAME": "Rebounder Beta", "TEAM": "NY", "PTS": 8.0, "REB": 12.0},
+        {"NAME": "Scorer Gamma", "TEAM": "CON", "PTS": 20.0, "REB": 5.0},
+        {"NAME": "Rebounder Delta", "TEAM": "CON", "PTS": 9.0, "REB": 11.0},
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_excel(path, sheet_name="2026 Season", index=False, startrow=1)
+    return path
+
+
+def _write_wnba_schedule_minimal(path: Path) -> Path:
+    rows = [
+        {
+            "Date": "2026-05-08",
+            "Game": "Connecticut Sun at New York Liberty",
+            "Home Team": "New York Liberty",
+            "Away Team": "Connecticut Sun",
+        }
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_excel(path, sheet_name="WNBA 2026 Schedule", index=False)
+    return path
+
+
+def _wnba_column_key_spec() -> NormalizationSpec:
+    return NormalizationSpec(
+        package_key="wnba",
+        sources={
+            "event_source": SourceNormalizationSpec(
+                source_role=SourceRole.EVENT_SOURCE,
+                file_pattern="schedule.xlsx",
+                field_mappings={
+                    "away_team": "Away Team",
+                    "event_date": "Date",
+                    "event_display": "Game",
+                    "home_team": "Home Team",
+                },
+            ),
+            "metric_source": SourceNormalizationSpec(
+                source_role=SourceRole.METRIC_SOURCE,
+                file_pattern="stats.xlsx",
+                sheet_name="2026 Season",
+                header_row_index=1,
+                field_mappings={"player_name": "NAME", "team": "TEAM"},
+                metric_mappings={
+                    "POINTS": "PTS",
+                    "REBOUNDS": "REB",
+                },
+            ),
+        },
+    )
+
+
+def test_declarative_wnba_stats_use_spreadsheet_column_keys(tmp_path: Path) -> None:
+    schedule = _write_wnba_schedule_minimal(tmp_path / "schedule.xlsx")
+    stats = _write_wnba_stats_minimal(tmp_path / "stats.xlsx")
+    detected = [
+        inspect_file(
+            schedule,
+            category_key="wnba",
+            preferred_role=SourceRole.EVENT_SOURCE,
+        ).detected_file,
+        inspect_file(
+            stats,
+            category_key="wnba",
+            preferred_role=SourceRole.METRIC_SOURCE,
+        ).detected_file,
+    ]
+
+    bundle = execute_normalization_spec(
+        _wnba_column_key_spec(),
+        detected,
+        {"date_filter": {"start": "2026-05-01", "end": "2026-05-31"}},
+    )
+    errors = [i for i in bundle.issues if i.severity == ValidationSeverity.ERROR]
+    assert not errors
+    assert bundle.events
+    assert bundle.player_stats
+
+    scorer = next(p for p in bundle.player_stats if p.player_name == "Scorer Alpha")
+    assert scorer.stat_values["PTS"] == 25.0
+    assert scorer.stat_values["REB"] == 4.0
+    assert "POINTS" not in scorer.stat_values
+    assert "REBOUNDS" not in scorer.stat_values
+
+    event = bundle.events[0]
+    home_pts = top_players_for_team(
+        bundle.player_stats, event.home_team, "PTS", 2, category_key="wnba"
+    )
+    home_reb = top_players_for_team(
+        bundle.player_stats, event.home_team, "REB", 2, category_key="wnba"
+    )
+    away_pts = top_players_for_team(
+        bundle.player_stats, event.away_team, "PTS", 2, category_key="wnba"
+    )
+    away_reb = top_players_for_team(
+        bundle.player_stats, event.away_team, "REB", 2, category_key="wnba"
+    )
+    pts_names = [p.player_name for p in home_pts + away_pts]
+    reb_names = [p.player_name for p in home_reb + away_reb]
+    assert pts_names != reb_names
+    assert [p.player_name for p in home_pts] == ["Scorer Alpha", "Rebounder Beta"]
+    assert [p.player_name for p in home_reb] == ["Rebounder Beta", "Scorer Alpha"]
+    assert [p.player_name for p in away_pts] == ["Scorer Gamma", "Rebounder Delta"]
+    assert [p.player_name for p in away_reb] == ["Rebounder Delta", "Scorer Gamma"]
 
 
 def test_declarative_event_datetime_accepts_natural_language_without_year(

@@ -15,7 +15,9 @@ from core.parsers.contracts import ContentEntity
 from core.resolution_date_spec import (
     ContentResolutionContext,
     ResolutionDateSpec,
-    compute_resolution_date_for_content,
+    content_spec_emits_non_midnight,
+    evaluate_template_datetime_for_content,
+    format_content_template_datetime,
 )
 from core.template_config.schema import QuestionTemplate
 
@@ -406,11 +408,23 @@ def _merged_entity_metadata(entities: Sequence[ContentEntity]) -> dict[str, Any]
     return merged
 
 
-def _template_resolution_spec(template: QuestionTemplate) -> ResolutionDateSpec | None:
-    raw = template.resolution_date_spec
+def _format_content_field_iso(spec: ResolutionDateSpec | None, dt: datetime) -> str:
+    if spec is not None and content_spec_emits_non_midnight(spec):
+        return format_content_template_datetime(dt)
+    if dt.time() != time.min:
+        return format_content_template_datetime(dt)
+    return _calendar_date_to_iso_midnight(dt.date())
+
+
+def _optional_template_date_spec(template: QuestionTemplate, attr: str) -> ResolutionDateSpec | None:
+    raw = getattr(template, attr, None)
     if not raw:
         return None
     return ResolutionDateSpec.model_validate(raw)
+
+
+def _template_resolution_spec(template: QuestionTemplate) -> ResolutionDateSpec | None:
+    return _optional_template_date_spec(template, "resolution_date_spec")
 
 
 def _content_dates(
@@ -420,38 +434,63 @@ def _content_dates(
     *,
     metadata: Mapping[str, Any] | None = None,
 ) -> ContentQuestionDates:
-    start = release_date - timedelta(days=7)
-    expiration = release_date - timedelta(days=1)
-    resolution = _content_resolution_date(
-        template, release_date, settings, start, expiration, metadata
-    )
-    return ContentQuestionDates(
-        _calendar_date_to_iso_midnight(start),
-        _calendar_date_to_iso_midnight(expiration),
-        _calendar_date_to_iso_midnight(resolution),
-    )
+    start_day = release_date - timedelta(days=7)
+    exp_day = release_date - timedelta(days=1)
+    start_dt = datetime.combine(start_day, time.min)
+    exp_dt = datetime.combine(exp_day, time.min)
+    meta = dict(metadata or {})
 
-
-def _content_resolution_date(
-    template: QuestionTemplate,
-    release_date: date,
-    settings: Mapping[str, Any],
-    start: date,
-    expiration: date,
-    metadata: Mapping[str, Any] | None,
-) -> date:
-    spec = _template_resolution_spec(template)
-    ctx = ContentResolutionContext(
+    start_spec = _optional_template_date_spec(template, "start_date_spec")
+    ctx_start = ContentResolutionContext(
         release_date=release_date,
-        question_start=start,
-        question_expiration=expiration,
-        metadata=dict(metadata or {}),
+        question_start=start_dt,
+        question_expiration=exp_dt,
+        metadata=meta,
         static_year=None,
     )
-    resolved = compute_resolution_date_for_content(spec, ctx)
-    if resolved is not None:
-        return resolved
-    return _resolution_date_heuristic(template, release_date, settings)
+    if start_spec:
+        o = evaluate_template_datetime_for_content(start_spec, ctx_start)
+        if o is not None:
+            start_dt = o
+
+    exp_spec = _optional_template_date_spec(template, "expiration_date_spec")
+    ctx_exp = ContentResolutionContext(
+        release_date=release_date,
+        question_start=start_dt,
+        question_expiration=exp_dt,
+        metadata=meta,
+        static_year=None,
+    )
+    if exp_spec:
+        o = evaluate_template_datetime_for_content(exp_spec, ctx_exp)
+        if o is not None:
+            exp_dt = o
+
+    res_spec = _template_resolution_spec(template)
+    ctx_res = ContentResolutionContext(
+        release_date=release_date,
+        question_start=start_dt,
+        question_expiration=exp_dt,
+        metadata=meta,
+        static_year=None,
+    )
+    res_dt: datetime | None = None
+    if res_spec:
+        res_dt = evaluate_template_datetime_for_content(res_spec, ctx_res)
+    if res_dt is None:
+        res_dt = datetime.combine(
+            _resolution_date_heuristic(template, release_date, settings),
+            time.min,
+        )
+        res_fmt_spec: ResolutionDateSpec | None = None
+    else:
+        res_fmt_spec = res_spec
+
+    return ContentQuestionDates(
+        _format_content_field_iso(start_spec, start_dt),
+        _format_content_field_iso(exp_spec, exp_dt),
+        _format_content_field_iso(res_fmt_spec, res_dt),
+    )
 
 
 def _resolution_date_heuristic(
@@ -487,24 +526,64 @@ def _static_row_dates(
     settings: Mapping[str, Any],
     year: int,
 ) -> ContentQuestionDates:
-    base = _static_dates(settings, year)
-    spec = _template_resolution_spec(template)
-    if spec is None or spec.kind == "none":
-        return base
     cfg = _content_config(settings)
-    start_d = _parse_date(str(cfg.get("static_start_date") or f"{year}-06-01"))
-    end_d = _parse_date(str(cfg.get("static_expiration_date") or f"{year}-07-31"))
-    ctx = ContentResolutionContext(
-        release_date=date(year, 1, 1),
-        question_start=start_d,
-        question_expiration=end_d,
+    start_spec = _optional_template_date_spec(template, "start_date_spec")
+    exp_spec = _optional_template_date_spec(template, "expiration_date_spec")
+    res_spec = _template_resolution_spec(template)
+    if not (start_spec or exp_spec or (res_spec and res_spec.kind != "none")):
+        return _static_dates(settings, year)
+
+    start_day = _parse_date(str(cfg.get("static_start_date") or f"{year}-06-01"))
+    end_day = _parse_date(str(cfg.get("static_expiration_date") or f"{year}-07-31"))
+    res_day = _parse_date(str(cfg.get("static_resolution_date") or f"{year + 1}-01-10"))
+    start_dt = datetime.combine(start_day, time.min)
+    exp_dt = datetime.combine(end_day, time.min)
+    rd = date(year, 1, 1)
+
+    ctx0 = ContentResolutionContext(
+        release_date=rd,
+        question_start=start_dt,
+        question_expiration=exp_dt,
         metadata={},
         static_year=year,
     )
-    r = compute_resolution_date_for_content(spec, ctx)
-    if r is None:
-        return base
-    return ContentQuestionDates(base.start_date, base.expiration_date, _calendar_date_to_iso_midnight(r))
+    if start_spec:
+        o = evaluate_template_datetime_for_content(start_spec, ctx0)
+        if o is not None:
+            start_dt = o
+
+    ctx1 = ContentResolutionContext(
+        release_date=rd,
+        question_start=start_dt,
+        question_expiration=exp_dt,
+        metadata={},
+        static_year=year,
+    )
+    if exp_spec:
+        o = evaluate_template_datetime_for_content(exp_spec, ctx1)
+        if o is not None:
+            exp_dt = o
+
+    res_dt = datetime.combine(res_day, time.min)
+    ctx2 = ContentResolutionContext(
+        release_date=rd,
+        question_start=start_dt,
+        question_expiration=exp_dt,
+        metadata={},
+        static_year=year,
+    )
+    res_fmt_spec: ResolutionDateSpec | None = None
+    if res_spec and res_spec.kind != "none":
+        hit = evaluate_template_datetime_for_content(res_spec, ctx2)
+        if hit is not None:
+            res_dt = hit
+            res_fmt_spec = res_spec
+
+    return ContentQuestionDates(
+        _format_content_field_iso(start_spec, start_dt),
+        _format_content_field_iso(exp_spec, exp_dt),
+        _format_content_field_iso(res_fmt_spec, res_dt),
+    )
 
 
 def _static_dates(settings: Mapping[str, Any], year: int) -> ContentQuestionDates:

@@ -21,7 +21,7 @@ _HEADER_SCAN_LIMIT = 10
 FIELD_ALIASES: dict[str, set[str]] = {
     "event_id": {"event id", "event_id", "game id", "id"},
     "event_name": {"event name", "event_name", "matchup", "event"},
-    "event_date": {"event date", "event_date", "date", "game date"},
+    "event_date": {"event date", "event_date", "date", "game date", "start_date"},
     "event_time": {"event time", "event_time", "time", "start time"},
     "player_id": {
         "player id",

@@ -14,6 +14,15 @@ from dateutil.parser import ParserError, UnknownTimezoneWarning, parse as parse_
 
 from core.json_safe import json_safe
 
+from .stat_keys import stat_storage_key
+from .package_options import (
+    COMPETITION_FORMAT_FIELD,
+    field_team_code,
+    is_field_competition,
+    placeholder_teams,
+    skip_status_values,
+)
+
 from .contracts import (
     DetectedFile,
     EventDatetimeSpec,
@@ -63,9 +72,9 @@ def validate_normalization_spec(spec: NormalizationSpec) -> list[ValidationIssue
                 )
             )
         if source.source_role == SourceRole.EVENT_SOURCE:
-            _validate_event_source(slot_id, source, issues)
+            _validate_event_source(slot_id, source, issues, spec.competition_format)
         elif source.source_role == SourceRole.METRIC_SOURCE:
-            _validate_metric_source(slot_id, source, issues)
+            _validate_metric_source(slot_id, source, issues, spec.competition_format)
         elif source.source_role == SourceRole.ENTITY_SOURCE and entity_only:
             _validate_entity_source(slot_id, source, issues)
 
@@ -116,7 +125,9 @@ def execute_normalization_spec(
     metric_spec = _source_for_role(spec, SourceRole.METRIC_SOURCE)
     metric_file = _detected_for_spec_source(metric_spec, detected_files)
     if metric_spec is not None and metric_file is not None:
-        players, player_issues = _normalize_player_stats(metric_spec, metric_file)
+        players, player_issues = _normalize_player_stats(
+            metric_spec, metric_file, spec, settings
+        )
         issues.extend(player_issues)
 
     return NormalizedBundle(events=events, entities=entities, player_stats=players, issues=issues)
@@ -147,11 +158,24 @@ def preview_normalization_spec(
 
 
 def _validate_event_source(
-    slot_id: str, source: SourceNormalizationSpec, issues: list[ValidationIssue]
+    slot_id: str,
+    source: SourceNormalizationSpec,
+    issues: list[ValidationIssue],
+    competition_format: str,
 ) -> None:
+    is_field = competition_format == COMPETITION_FORMAT_FIELD
     has_home_away = {"home_team", "away_team"} <= set(source.field_mappings)
     has_matchup = source.matchup_split is not None
-    if not (has_home_away or has_matchup):
+    has_event_label = "event_display" in source.field_mappings or "event_name" in source.field_mappings
+    if is_field:
+        if not has_event_label:
+            issues.append(
+                _error(
+                    "invalid_event_mapping",
+                    f"Field event source {slot_id!r} needs event_display or event_name mapping",
+                )
+            )
+    elif not (has_home_away or has_matchup):
         issues.append(
             _error(
                 "invalid_event_mapping",
@@ -170,9 +194,15 @@ def _validate_event_source(
 
 
 def _validate_metric_source(
-    slot_id: str, source: SourceNormalizationSpec, issues: list[ValidationIssue]
+    slot_id: str,
+    source: SourceNormalizationSpec,
+    issues: list[ValidationIssue],
+    competition_format: str,
 ) -> None:
-    missing = [f for f in ("player_name", "team") if f not in source.field_mappings]
+    required = ["player_name"]
+    if competition_format != COMPETITION_FORMAT_FIELD:
+        required.append("team")
+    missing = [f for f in required if f not in source.field_mappings]
     if missing:
         issues.append(
             _error(
@@ -229,13 +259,34 @@ def _normalize_events(
     issues: list[ValidationIssue] = []
     date_filter = settings.get("date_filter") or {}
 
+    field_format = spec.competition_format == COMPETITION_FORMAT_FIELD
+    home_ph, away_ph = (
+        placeholder_teams(settings, spec.package_key) if field_format else ("", "")
+    )
+    skip_status = skip_status_values(settings, spec.package_key) if field_format else frozenset()
+
     team_tz = team_tz or {}
     skipped_by_filter = 0
     failed_parse = 0
     total_rows = len(detected.records)
     for idx, row in enumerate(detected.records, start=detected.header_row_index + 2):
         try:
-            home_team, away_team = _event_teams(row, source)
+            if field_format:
+                home_team, away_team = home_ph, away_ph
+            else:
+                home_team, away_team = _event_teams(row, source)
+            if skip_status:
+                status_col = source.metadata_mappings.get("status")
+                status_val = (
+                    str(row.get(status_col, "")).strip().lower() if status_col else ""
+                )
+                if status_val in skip_status:
+                    continue
+                name_raw = _cell(row, source.field_mappings.get("event_display")) or _cell(
+                    row, source.field_mappings.get("event_name")
+                )
+                if "cancelled" in name_raw.lower() or "canceled" in name_raw.lower():
+                    continue
             tz_override = team_tz.get(home_team.strip()) if team_tz else None
             dt = _event_datetime(row, source, date_filter, timezone_override=tz_override)
             if not _within_date_range(dt, date_filter):
@@ -243,6 +294,8 @@ def _normalize_events(
                 continue
             event_id = _event_id(row, source, idx)
             display = _cell(row, source.field_mappings.get("event_display"))
+            if not display:
+                display = _cell(row, source.field_mappings.get("event_name"))
             if not display and source.matchup_split is not None:
                 display = _cell(row, source.matchup_split.source_column)
             events.append(
@@ -296,24 +349,31 @@ def _normalize_events(
 
 
 def _normalize_player_stats(
-    source: SourceNormalizationSpec, detected: DetectedFile
+    source: SourceNormalizationSpec,
+    detected: DetectedFile,
+    spec: NormalizationSpec,
+    settings: Mapping[str, Any],
 ) -> tuple[list[PlayerStatRecord], list[ValidationIssue]]:
     players: list[PlayerStatRecord] = []
     issues: list[ValidationIssue] = []
     player_col = source.field_mappings["player_name"]
-    team_col = source.field_mappings["team"]
+    team_col = source.field_mappings.get("team")
+    field_format = spec.competition_format == COMPETITION_FORMAT_FIELD
+    default_team = field_team_code(settings, spec.package_key) if field_format else ""
 
     for idx, row in enumerate(detected.records, start=detected.header_row_index + 2):
         player_name = _cell(row, player_col)
-        team = _cell(row, team_col)
-        if not player_name or not team:
+        team = _cell(row, team_col) if team_col else default_team
+        if not player_name:
+            continue
+        if not team:
             continue
         stat_values: dict[str, float] = {}
-        for stat_key, column in source.metric_mappings.items():
+        for _stat_key, column in source.metric_mappings.items():
             raw = row.get(column)
             val = _coerce_float(raw)
             if val is not None:
-                stat_values[str(stat_key).upper()] = val
+                stat_values[stat_storage_key(column)] = val
         players.append(
             PlayerStatRecord(
                 player_name=player_name,

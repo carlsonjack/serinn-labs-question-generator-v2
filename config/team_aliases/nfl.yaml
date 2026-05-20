@@ -1,0 +1,166 @@
+package_key: nfl
+teams:
+- code: ARI
+  aliases:
+  - ARI
+  - Arizona Cardinals
+  - Cardinals
+- code: ATL
+  aliases:
+  - ATL
+  - Atlanta Falcons
+  - Falcons
+- code: BAL
+  aliases:
+  - BAL
+  - Baltimore Ravens
+  - Ravens
+- code: BUF
+  aliases:
+  - BUF
+  - Buffalo Bills
+  - Bills
+- code: CAR
+  aliases:
+  - CAR
+  - Carolina Panthers
+  - Panthers
+- code: CHI
+  aliases:
+  - CHI
+  - Chicago Bears
+  - Bears
+- code: CIN
+  aliases:
+  - CIN
+  - Cincinnati Bengals
+  - Bengals
+- code: CLE
+  aliases:
+  - CLE
+  - Cleveland Browns
+  - Browns
+- code: DAL
+  aliases:
+  - DAL
+  - Dallas Cowboys
+  - Cowboys
+- code: DEN
+  aliases:
+  - DEN
+  - Denver Broncos
+  - Broncos
+- code: DET
+  aliases:
+  - DET
+  - Detroit Lions
+  - Lions
+- code: GB
+  aliases:
+  - GB
+  - Green Bay Packers
+  - Packers
+- code: HOU
+  aliases:
+  - HOU
+  - Houston Texans
+  - Texans
+- code: IND
+  aliases:
+  - IND
+  - Indianapolis Colts
+  - Colts
+- code: JAX
+  aliases:
+  - JAX
+  - Jacksonville Jaguars
+  - Jaguars
+- code: KC
+  aliases:
+  - KC
+  - Kansas City Chiefs
+  - Chiefs
+- code: LAC
+  aliases:
+  - LAC
+  - Los Angeles Chargers
+  - Chargers
+  - LA Chargers
+- code: LAR
+  aliases:
+  - LAR
+  - Los Angeles Rams
+  - Rams
+  - LA Rams
+- code: LV
+  aliases:
+  - LV
+  - Las Vegas Raiders
+  - Raiders
+- code: MIA
+  aliases:
+  - MIA
+  - Miami Dolphins
+  - Dolphins
+- code: MIN
+  aliases:
+  - MIN
+  - Minnesota Vikings
+  - Vikings
+- code: NE
+  aliases:
+  - NE
+  - New England Patriots
+  - Patriots
+- code: 'NO'
+  aliases:
+  - 'NO'
+  - New Orleans Saints
+  - Saints
+- code: NYG
+  aliases:
+  - NYG
+  - New York Giants
+  - Giants
+- code: NYJ
+  aliases:
+  - NYJ
+  - New York Jets
+  - Jets
+- code: PHI
+  aliases:
+  - PHI
+  - Philadelphia Eagles
+  - Eagles
+- code: PIT
+  aliases:
+  - PIT
+  - Pittsburgh Steelers
+  - Steelers
+- code: SEA
+  aliases:
+  - SEA
+  - Seattle Seahawks
+  - Seahawks
+- code: SF
+  aliases:
+  - SF
+  - San Francisco 49ers
+  - 49ers
+- code: TB
+  aliases:
+  - TB
+  - Tampa Bay Buccaneers
+  - Buccaneers
+- code: TEN
+  aliases:
+  - TEN
+  - Tennessee Titans
+  - Titans
+- code: WAS
+  aliases:
+  - WAS
+  - Washington Commanders
+  - Commanders
+package_aliases:
+- NFL

@@ -26,6 +26,7 @@ from core.generation import (
     StockPlanner,
     resolve_topic_import_id,
 )
+from core.generation.deterministic_events import build_deterministic_questions
 from core.generation.token_tracker import RunCostSummary
 from core.parsers.contracts import (
     NormalizedBundle,
@@ -34,7 +35,12 @@ from core.parsers.contracts import (
     ValidationIssue,
     ValidationSeverity,
 )
-from core.parsers.mlb.common import TEAM_MAP, normalize_team_name
+from core.parsers.team_lookup import resolve_stats_team_code
+from core.parsers.stat_keys import stat_storage_key
+from core.parsers.package_options import (
+    ascending_stat_columns,
+    is_field_competition,
+)
 from core.parsers.service import load_normalized_bundle
 from core.qa_summary import QASummary, build_qa_summary
 from core.schema_validator import (
@@ -139,12 +145,37 @@ def top_players_for_team(
     team_label: str,
     stat_column: str,
     n: int,
+    *,
+    category_key: str | None = None,
 ) -> list[PlayerStatRecord]:
-    abbrev = normalize_team_name(TEAM_MAP.get(team_label, team_label))
-    stat_key = stat_column.upper()
+    abbrev = resolve_stats_team_code(team_label, category_key)
+    stat_key = stat_storage_key(stat_column)
     candidates = [r for r in player_stats if r.team == abbrev]
     return sorted(
         candidates,
+        key=lambda r: (-r.stat_values.get(stat_key, 0.0), r.player_name),
+    )[:n]
+
+
+def top_players_for_field(
+    player_stats: list[PlayerStatRecord],
+    stat_column: str,
+    n: int,
+    *,
+    category_key: str | None = None,
+    settings: Mapping[str, Any] | None = None,
+) -> list[PlayerStatRecord]:
+    """Return top N players from the entire field (non-team sports)."""
+
+    stat_key = stat_storage_key(stat_column)
+    ascending = stat_key in ascending_stat_columns(settings or {}, category_key)
+    if ascending:
+        return sorted(
+            player_stats,
+            key=lambda r: (r.stat_values.get(stat_key, float("inf")), r.player_name),
+        )[:n]
+    return sorted(
+        player_stats,
         key=lambda r: (-r.stat_values.get(stat_key, 0.0), r.player_name),
     )[:n]
 
@@ -171,6 +202,15 @@ def _format_generation_failure_message(batch_result: BatchResult) -> str:
     if "401" in err or "invalid_api_key" in lower or "incorrect api key" in lower:
         return f"OpenAI API key issue — detail: {err}"
     return f"All generation batches failed. First error: {err}"
+
+
+def _event_generation_use_llm(settings: Mapping[str, Any]) -> bool:
+    """When false (default), sports events are filled locally without OpenAI."""
+
+    raw = settings.get("event_generation")
+    if not isinstance(raw, dict):
+        return False
+    return bool(raw.get("use_llm", False))
 
 
 def _max_generated_questions(settings: Mapping[str, Any]) -> int | None:
@@ -338,6 +378,7 @@ def build_prompt_items(
     templates: list[QuestionTemplate],
     settings: Mapping[str, Any],
 ) -> list[PromptItem]:
+    category_key = get_inputs_category_key(settings)
     items: list[PromptItem] = []
     for event in bundle.events:
         for tpl in templates:
@@ -346,13 +387,30 @@ def build_prompt_items(
             elif tpl.question_family == "entity_stat":
                 n = resolve_top_n_per_team(tpl, settings)
                 stat = tpl.stat_column or "HR"
-                home_players = top_players_for_team(
-                    bundle.player_stats, event.home_team, stat, n
-                )
-                away_players = top_players_for_team(
-                    bundle.player_stats, event.away_team, stat, n
-                )
-                players = home_players + away_players
+                if is_field_competition(settings, category_key):
+                    players = top_players_for_field(
+                        bundle.player_stats,
+                        stat,
+                        n,
+                        category_key=category_key,
+                        settings=settings,
+                    )
+                else:
+                    home_players = top_players_for_team(
+                        bundle.player_stats,
+                        event.home_team,
+                        stat,
+                        n,
+                        category_key=category_key,
+                    )
+                    away_players = top_players_for_team(
+                        bundle.player_stats,
+                        event.away_team,
+                        stat,
+                        n,
+                        category_key=category_key,
+                    )
+                    players = home_players + away_players
                 if not players:
                     logger.warning(
                         "Skipping entity template %s for event %s — no players",
@@ -455,10 +513,37 @@ def run_pipeline(
             parser_warnings=warnings,
         )
 
+    return _run_events_pipeline(
+        settings=settings,
+        category_key=ck,
+        bundle=bundle,
+        templates=active,
+        subcategory=subcategory,
+        warnings=warnings,
+        progress=prog,
+    )
+
+
+def _run_events_pipeline(
+    *,
+    settings: dict[str, Any],
+    category_key: str,
+    bundle: NormalizedBundle,
+    templates: list[QuestionTemplate],
+    subcategory: str,
+    warnings: list[str],
+    progress: ProgressCallback,
+) -> PipelineResult:
+    """Generate sports/event rows (deterministic by default, optional LLM polish)."""
+
+    def prog(phase: str, cur: int = 0, total: int = 0) -> None:
+        progress(phase, cur, total)
+
     try:
-        items = build_prompt_items(bundle, active, settings)
+        items = build_prompt_items(bundle, templates, settings)
     except (TypeError, ValueError) as exc:
         return _client_failure(f"Generation settings error: {exc}", warnings)
+
     if not items:
         return PipelineResult(
             success=False,
@@ -477,52 +562,61 @@ def run_pipeline(
             parser_warnings=warnings,
         )
 
-    resolve_topic_import_id(settings, ck)
+    resolve_topic_import_id(settings, category_key)
 
-    api_key = settings.get("openai_api_key", "")
-    if not api_key:
-        return PipelineResult(
-            success=False,
-            message="OpenAI API key is not set. Add OPENAI_API_KEY to the environment or settings.",
-            parser_warnings=warnings,
+    use_llm = _event_generation_use_llm(settings)
+    batch_size = 100
+
+    if use_llm:
+        api_key = settings.get("openai_api_key", "")
+        if not api_key:
+            return PipelineResult(
+                success=False,
+                message="OpenAI API key is not set. Add OPENAI_API_KEY to the environment or settings.",
+                parser_warnings=warnings,
+            )
+        try:
+            batch_size = int(settings.get("batch_size", 100))
+        except (TypeError, ValueError):
+            return _client_failure(
+                f"Invalid batch_size: {settings.get('batch_size')!r}. Use a positive integer.",
+                warnings,
+            )
+        batches = _chunk_items(items, batch_size)
+        total_batches = len(batches)
+        prog("Starting generation", 0, total_batches)
+        executor = BatchExecutor(settings, prompt_builder=PromptBuilder())
+
+        def on_batch_done(batch_index: int, n_batches: int) -> None:
+            prog(f"API batch {batch_index}/{n_batches}", batch_index, n_batches)
+
+        batch_result = executor.execute(items, on_batch_done=on_batch_done)
+        if not batch_result.questions:
+            return PipelineResult(
+                success=False,
+                message=_format_generation_failure_message(batch_result),
+                batch_result=batch_result,
+                parser_warnings=warnings,
+            )
+        successful_items = _successful_prompt_items(items, batch_result, batch_size)
+    else:
+        prog("Assembling questions from templates", 0, 1)
+        questions = build_deterministic_questions(items)
+        batch_result = BatchResult(
+            questions=questions,
+            total_batches=0,
+            successful_batches=0,
         )
+        successful_items = items
+        prog("Assembling questions from templates", 1, 1)
 
-    try:
-        batch_size = int(settings.get("batch_size", 100))
-    except (TypeError, ValueError):
-        return _client_failure(
-            f"Invalid batch_size: {settings.get('batch_size')!r}. Use a positive integer.",
-            warnings,
-        )
-    batches = _chunk_items(items, batch_size)
-    total_batches = len(batches)
-
-    prog("Starting generation", 0, total_batches)
-
-    executor = BatchExecutor(settings, prompt_builder=PromptBuilder())
-
-    def on_batch_done(batch_index: int, n_batches: int) -> None:
-        prog(f"API batch {batch_index}/{n_batches}", batch_index, n_batches)
-
-    batch_result = executor.execute(items, on_batch_done=on_batch_done)
-
-    if not batch_result.questions:
-        return PipelineResult(
-            success=False,
-            message=_format_generation_failure_message(batch_result),
-            batch_result=batch_result,
-            parser_warnings=warnings,
-        )
-
-    successful_items = _successful_prompt_items(items, batch_result, batch_size)
-    assembler = RowAssembler(settings, category_key=ck)
+    assembler = RowAssembler(settings, category_key=category_key)
     rows = assembler.assemble_batch(batch_result.questions, successful_items)
 
-    prog("Validating and deduplicating", total_batches, total_batches)
+    prog("Validating and deduplicating", 1, 1)
 
     validation = validate_rows(rows)
-    dedup_input = validation.valid_rows
-    dedup = deduplicate(dedup_input)
+    dedup = deduplicate(validation.valid_rows)
 
     date_filter = settings.get("date_filter", {})
     try:

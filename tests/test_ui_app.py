@@ -12,7 +12,7 @@ import pytest
 from core.parsers.contracts import ContentEntity, NormalizedBundle
 from core.pipeline import PipelineResult
 from core.template_config.schema import QuestionTemplate
-from tests.fixtures.workbooks import write_stock_list_minimal
+from tests.fixtures.workbooks import write_mlb_schedule_minimal, write_stock_list_minimal
 import ui.app as ui_app
 from ui.app import create_app
 
@@ -43,6 +43,12 @@ def test_api_save_input_category_unknown_package(client):
 
 
 def test_api_save_input_category_persists_canonical_key(client, tmp_path, monkeypatch):
+    import ui.app as ui_app
+
+    inputs_dir = tmp_path / "inputs"
+    inputs_dir.mkdir()
+    monkeypatch.setattr(ui_app, "_inputs_directory", lambda _s: inputs_dir)
+
     cfg = tmp_path / "settings.yaml"
     monkeypatch.setattr("core.config._SETTINGS_PATH_OVERRIDE", cfg)
     monkeypatch.setattr("core.config._SETTINGS_LOCAL_PATH_OVERRIDE", tmp_path / "nope.local.yaml")
@@ -59,7 +65,11 @@ def test_api_save_input_category_persists_canonical_key(client, tmp_path, monkey
     )
     rv = client.post("/api/input-category", json={"category_key": "mls"})
     assert rv.status_code == 200
-    assert rv.get_json() == {"ok": True, "category_key": "MLS"}
+    assert rv.get_json() == {
+        "ok": True,
+        "category_key": "MLS",
+        "cleared_files": [],
+    }
     from core.config import load_settings_disk_only
 
     data = load_settings_disk_only()
@@ -221,9 +231,193 @@ def test_run_status_unknown_job(client):
     assert rv.status_code == 404
 
 
-def test_upload_requires_xlsx(client):
+def test_api_input_category_clears_shared_files_on_switch(client, tmp_path, monkeypatch):
+    import ui.app as ui_app
+
+    inputs_dir = tmp_path / "inputs"
+    inputs_dir.mkdir()
+    (inputs_dir / "schedule.xlsx").write_bytes(b"wnba-schedule")
+    (inputs_dir / "stats.xlsx").write_bytes(b"wnba-stats")
+
+    cfg = tmp_path / "settings.yaml"
+    monkeypatch.setattr("core.config._SETTINGS_PATH_OVERRIDE", cfg)
+    monkeypatch.setattr("core.config._SETTINGS_LOCAL_PATH_OVERRIDE", tmp_path / "nope.local.yaml")
+    cfg.write_text(
+        "inputs:\n"
+        "  directory: inputs\n"
+        "  category_key: wnba\n"
+        "  files:\n"
+        "    wnba:\n"
+        "      event_source: schedule.xlsx\n"
+        "      metric_source: stats.xlsx\n"
+        "    mlb:\n"
+        "      event_source: schedule.xlsx\n"
+        "      metric_source: stats.xlsx\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(ui_app, "_inputs_directory", lambda _s: inputs_dir)
+
+    rv = client.post("/api/input-category", json={"category_key": "mlb"})
+    assert rv.status_code == 200
+    j = rv.get_json()
+    assert j["category_key"] == "mlb"
+    assert sorted(j["cleared_files"]) == ["schedule.xlsx", "stats.xlsx"]
+    assert not (inputs_dir / "schedule.xlsx").exists()
+    assert not (inputs_dir / "stats.xlsx").exists()
+
+
+def test_upload_clears_unuploaded_slots(client, tmp_path, monkeypatch):
+    import pandas as pd
+    import ui.app as ui_app
+
+    inputs_dir = tmp_path / "inputs"
+    inputs_dir.mkdir()
+    (inputs_dir / "stats.xlsx").write_bytes(b"stale-stats")
+
+    monkeypatch.setattr(ui_app, "_inputs_directory", lambda _s: inputs_dir)
+    monkeypatch.setattr(ui_app, "save_settings_yaml", lambda _u: None)
+    monkeypatch.setattr(
+        ui_app,
+        "infer_date_range_from_excel_paths",
+        lambda _paths: (None, None),
+    )
+    monkeypatch.setattr(
+        ui_app,
+        "load_settings",
+        lambda: {
+            "inputs": {
+                "directory": "inputs",
+                "category_key": "mlb",
+                "files": {
+                    "mlb": {
+                        "event_source": "schedule.xlsx",
+                        "metric_source": "stats.xlsx",
+                    }
+                },
+            },
+        },
+    )
+
+    bio = io.BytesIO()
+    pd.DataFrame([{"Date": "2026-05-01"}]).to_excel(bio, index=False)
+    bio.seek(0)
+
+    rv = client.post(
+        "/upload",
+        data={"category_key": "mlb", "event_source": (bio, "schedule.xlsx")},
+        content_type="multipart/form-data",
+    )
+    assert rv.status_code == 200
+    j = rv.get_json()
+    assert j["cleared_files"] == ["stats.xlsx"]
+    assert (inputs_dir / "schedule.xlsx").is_file()
+    assert not (inputs_dir / "stats.xlsx").exists()
+
+
+def test_upload_requires_at_least_one_file(client):
     rv = client.post("/upload", data={})
     assert rv.status_code == 400
+
+
+def test_upload_accepts_csv_and_updates_configured_filename(client, tmp_path, monkeypatch):
+    import pandas as pd
+    import ui.app as ui_app
+
+    inputs_dir = tmp_path / "inputs"
+    inputs_dir.mkdir()
+    settings_path = tmp_path / "settings.yaml"
+    settings_path.write_text(
+        "inputs:\n  category_key: golf\n  files:\n    golf:\n"
+        "      event_source: schedule.xlsx\n      metric_source: stats.xlsx\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(ui_app, "_inputs_directory", lambda _s: inputs_dir)
+    monkeypatch.setattr(
+        ui_app,
+        "infer_date_range_from_excel_paths",
+        lambda _paths: (None, None),
+    )
+
+    writes: list[dict] = []
+
+    def spy_save(updates: dict) -> None:
+        writes.append(dict(updates))
+
+    monkeypatch.setattr(ui_app, "save_settings_yaml", spy_save)
+    monkeypatch.setattr(
+        ui_app,
+        "load_settings_disk_only",
+        lambda: {
+            "inputs": {
+                "category_key": "golf",
+                "files": {
+                    "golf": {
+                        "event_source": "schedule.xlsx",
+                        "metric_source": "stats.xlsx",
+                    }
+                },
+            },
+        },
+    )
+    monkeypatch.setattr(
+        ui_app,
+        "load_settings",
+        lambda: {
+            "inputs": {
+                "category_key": "golf",
+                "files": {
+                    "golf": {
+                        "event_source": "schedule.xlsx",
+                        "metric_source": "stats.xlsx",
+                    }
+                },
+            },
+        },
+    )
+
+    bio = io.BytesIO()
+    pd.DataFrame([{"start_date": "2026-05-01", "event_name": "Test Open"}]).to_csv(
+        bio, index=False
+    )
+    bio.seek(0)
+
+    rv = client.post(
+        "/upload",
+        data={"category_key": "golf", "event_source": (bio, "schedule.csv")},
+        content_type="multipart/form-data",
+    )
+    assert rv.status_code == 200
+    j = rv.get_json()
+    assert j["saved"][0]["filename"] == "schedule.csv"
+    assert (inputs_dir / "schedule.csv").is_file()
+    assert writes
+    assert writes[0]["inputs"]["files"]["golf"]["event_source"] == "schedule.csv"
+
+
+def test_upload_rejects_unsupported_extension(client, tmp_path, monkeypatch):
+    import ui.app as ui_app
+
+    inputs_dir = tmp_path / "inputs"
+    inputs_dir.mkdir()
+    monkeypatch.setattr(ui_app, "_inputs_directory", lambda _s: inputs_dir)
+    monkeypatch.setattr(
+        ui_app,
+        "load_settings",
+        lambda: {
+            "inputs": {
+                "category_key": "mlb",
+                "files": {"mlb": {"event_source": "schedule.xlsx"}},
+            },
+        },
+    )
+
+    rv = client.post(
+        "/upload",
+        data={"category_key": "mlb", "event_source": (io.BytesIO(b"data"), "schedule.json")},
+        content_type="multipart/form-data",
+    )
+    assert rv.status_code == 400
+    assert "Only" in rv.get_json()["error"]
 
 
 def test_upload_applies_inferred_date_range_to_settings(client, tmp_path, monkeypatch):
@@ -542,6 +736,44 @@ def test_api_input_slots_returns_package_filtered_templates(client, tmp_path, mo
     assert data["category_key"] == "mlb"
     assert [x["id"] for x in data["template_meta"]] == ["mlb_a"]
     assert data["template_subcategory"] == "MLB"
+
+
+def test_api_normalizer_analyze_mlb_schedule_only(client, tmp_path, monkeypatch):
+    inputs_dir = tmp_path / "inputs"
+    inputs_dir.mkdir()
+    write_mlb_schedule_minimal(inputs_dir / "schedule.xlsx")
+    settings = {
+        "openai_api_key": "",
+        "inputs": {
+            "directory": str(inputs_dir),
+            "category_key": "mlb",
+            "files": {
+                "mlb": {
+                    "event_source": "schedule.xlsx",
+                    "metric_source": "stats.xlsx",
+                },
+            },
+        },
+        "date_filter": {"start": "2026-05-01", "end": "2026-05-31"},
+    }
+
+    monkeypatch.setattr("ui.app.load_settings", lambda: settings)
+
+    rv = client.post(
+        "/api/normalizer/analyze",
+        json={"category_key": "mlb", "use_ai": True},
+    )
+
+    assert rv.status_code == 200
+    data = rv.get_json()
+    assert data["used_ai"] is False
+    assert "event_source" in data["spec"]["sources"]
+    assert not any(
+        src.get("source_role") == "metric_source"
+        for src in data["spec"]["sources"].values()
+    )
+    assert data["preview"]["event_count"] >= 1
+    assert data["preview"]["player_stat_count"] == 0
 
 
 def test_api_normalizer_analyze_stocks_returns_entity_preview(client, tmp_path, monkeypatch):

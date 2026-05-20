@@ -198,6 +198,36 @@ def test_content_planner_uses_resolution_date_spec_for_resolution() -> None:
     assert rows[0].resolution_date == "2026-06-06T00:00:00"
 
 
+def test_content_planner_start_spec_offset_hours_emits_clock_time() -> None:
+    entities = [_release("X", "Y", "June 5, 2026")]
+    tpl = QuestionTemplate(
+        id="time-start",
+        subcategory="Music",
+        question_family="content",
+        question="Will [ALBUM_OR_RELEASE] chart?",
+        answer_type="yes_no",
+        answer_options="",
+        priority=1,
+        requires_entities=False,
+        start_date_spec={
+            "kind": "offset_from_anchor",
+            "anchor": "release_date",
+            "offset_days": 0,
+            "offset_hours": -12,
+        },
+    )
+    rows = ContentPlanner(
+        entities,
+        [tpl],
+        {"date_filter": {"start": "2026-06-01", "end": "2026-06-30"}},
+        topic_import_id="tid",
+    ).generate()
+    assert len(rows) == 1
+    assert rows[0].start_date == "2026-06-04T12:00:00"
+    assert rows[0].expiration_date == "2026-06-04T00:00:00"
+    assert validate_import_rows(rows) == []
+
+
 def test_content_calendar_resolution_may_precede_expiration() -> None:
     """Calendar-based resolution (e.g. nomination season) may fall before title expiration."""
 

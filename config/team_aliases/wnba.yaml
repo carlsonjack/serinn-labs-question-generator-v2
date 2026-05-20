@@ -1,0 +1,79 @@
+package_key: wnba
+teams:
+- code: ATL
+  aliases:
+  - ATL
+  - Atlanta Dream
+  - Dream
+- code: CHI
+  aliases:
+  - CHI
+  - Chicago Sky
+  - Sky
+- code: CON
+  aliases:
+  - CON
+  - Connecticut Sun
+  - Sun
+- code: DAL
+  aliases:
+  - DAL
+  - Dallas Wings
+  - Wings
+- code: GS
+  aliases:
+  - GS
+  - Golden State Valkyries
+  - Valkyries
+- code: IND
+  aliases:
+  - IND
+  - Indiana Fever
+  - Fever
+- code: LV
+  aliases:
+  - LV
+  - Las Vegas Aces
+  - Aces
+- code: LA
+  aliases:
+  - LA
+  - Los Angeles Sparks
+  - Sparks
+- code: MIN
+  aliases:
+  - MIN
+  - Minnesota Lynx
+  - Lynx
+- code: NY
+  aliases:
+  - NY
+  - New York Liberty
+  - Liberty
+- code: PHX
+  aliases:
+  - PHX
+  - Phoenix Mercury
+  - Mercury
+- code: POR
+  aliases:
+  - POR
+  - Portland Fire
+  - Fire
+- code: SEA
+  aliases:
+  - SEA
+  - Seattle Storm
+  - Storm
+- code: TOR
+  aliases:
+  - TOR
+  - Toronto Tempo
+  - Tempo
+- code: WSH
+  aliases:
+  - WSH
+  - Washington Mystics
+  - Mystics
+package_aliases:
+- WNBA
