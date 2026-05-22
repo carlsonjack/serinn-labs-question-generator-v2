@@ -131,6 +131,22 @@ def test_filter_templates_for_package_accepts_aliases():
     assert [t.id for t in out] == ["t1"]
 
 
+def test_filter_templates_for_package_matches_stock_family_to_stocks_package():
+    stock = QuestionTemplate(
+        id="stocks_daily_close_higher",
+        subcategory="US Stock Market",
+        question_family="stock",
+        question="Will {ASSET} close higher on {DATE}?",
+        answer_type="yes_no",
+        answer_options="",
+        priority=1,
+        requires_entities=False,
+        timeframe="Daily",
+    )
+    out = filter_templates_for_package([stock], "stocks")
+    assert [t.id for t in out] == ["stocks_daily_close_higher"]
+
+
 def test_package_aliases_for_settings_normalizes_package_keys():
     settings = {"inputs": {"package_aliases": {"formula_one": ["F1", "Formula 1"]}}}
     assert package_aliases_for_settings(settings, "Formula-One") == ["F1", "Formula 1"]

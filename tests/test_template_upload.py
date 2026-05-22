@@ -69,6 +69,21 @@ def test_parse_template_csv_blocks_blank_priority_stays_blank():
     assert rows[0]["priority"] == ""
 
 
+def test_parse_content_template_wide_table_stock_family_normalizes_subcategory_and_timeframe():
+    text = (
+        "template_id,subcategory,timeframe,question_family,question,answer_type,answer_options,"
+        "requires_entities,priority\n"
+        "stocks_daily_close_higher,US Stock Market,Daily,stock,"
+        "Will {ASSET} close higher on {DATE}?,yes_no,,false,1\n"
+    )
+    rows = parse_uploaded_template_file("stocks.csv", text)
+    assert rows[0]["question_family"] == "stock"
+    assert rows[0]["subcategory"] == "stocks"
+    assert rows[0]["timeframe"] == "Daily"
+    assert "start_date_rule" not in rows[0]
+    parse_template_dict(rows[0])
+
+
 def test_parse_stock_template_table_csv():
     text = (
         "Template ID,Template Name,Timeframe,Question Template,Answer Type,Answer Options,Recommended Priority,Notes\n"

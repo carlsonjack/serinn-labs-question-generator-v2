@@ -63,6 +63,10 @@ def template_matches_package(
 ) -> bool:
     """Whether ``template`` belongs to ``package_key`` under normalized matching."""
 
+    pkg_norm = normalize_template_package(package_key)
+    if pkg_norm == "stocks" and template.question_family == "stock":
+        return True
+
     labels = _package_match_labels(package_key, aliases)
     if not labels:
         return False

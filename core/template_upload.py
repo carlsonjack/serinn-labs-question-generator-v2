@@ -325,6 +325,20 @@ def parse_content_template_table(text: str) -> list[dict[str, Any]]:
                 rec["top_n_per_team"] = 2
             else:
                 rec["top_n_per_team"] = _parse_int(str(top_raw).strip(), "top_n_per_team")
+        elif family == "stock":
+            rec["subcategory"] = "stocks"
+            timeframe = str(row.get("timeframe") or row.get("Timeframe") or "").strip()
+            if timeframe:
+                rec["timeframe"] = timeframe
+            template_name = str(row.get("template_name") or row.get("Template Name") or "").strip()
+            if template_name:
+                rec["template_name"] = template_name
+            for date_key in (
+                "start_date_rule",
+                "expiration_date_rule",
+                "resolution_date_rule",
+            ):
+                rec.pop(date_key, None)
 
         templates.append(rec)
     if not templates:

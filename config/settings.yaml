@@ -1,17 +1,17 @@
 openai_api_key: ''
 model: gpt-5.4
-topic_import_id: pga-us-open-2026
+topic_import_id: stocks-us-market
 topic_import_ids:
   mlb: mlb-regular-season
   f1: f1-race-winner
   music: music-new-releases-us-2026-06
   stocks: stocks-us-market
-subcategory: MLB
+subcategory: stocks
 top_n_per_team: 3
 templates_directory: templates
 date_filter:
-  start: '2026-05-15'
-  end: '2026-09-27'
+  start: '2024-01-01'
+  end: '2024-03-01'
 date_rules:
   default:
     start_offset_hours: -24
@@ -58,7 +58,7 @@ model_pricing:
     output: 10.0
 inputs:
   directory: inputs
-  category_key: mlb
+  category_key: stocks
   files:
     F1:
       schedule: f1_schedule.xlsx
@@ -129,3 +129,16 @@ templates_enabled:
   MLB-008: true
   MLB-009: true
   MLB-010: true
+  stocks_daily_close_higher: true
+  stocks_daily_close_lower: true
+  stocks_daily_direction_mc: true
+  stocks_daily_biggest_gainer: true
+  stocks_daily_biggest_loser: true
+  stocks_weekly_friday_higher: true
+  stocks_monthly_end_higher: true
+  stocks_monthly_finish_higher: true
+  stocks_quarterly_end_higher: true
+  stocks_monthly_biggest_gainer: true
+  stocks_monthly_biggest_loser: true
+  stocks_quarterly_biggest_gainer: true
+  stocks_quarterly_biggest_loser: true
