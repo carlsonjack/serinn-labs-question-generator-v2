@@ -20,10 +20,10 @@ Generated CSV rows include a **`topic_import_id`** column. That value comes from
 
 | Setting | Meaning |
 |--------|---------|
-| `topic_import_ids.<package>` | Per-package override. Keys are **lowercase** package ids (`mlb`, `world_cup`, `mls`, …). When present for the active package, this wins. |
-| `topic_import_id` | Fallback when there is no entry for the active package. |
+| `topic_import_id` | **Source of truth** — set in Step 6 (Topic Import ID) or in `settings.yaml`. Used on every generated row for the active package. |
+| `topic_import_ids.<package>` | Optional fallback when `topic_import_id` is empty. Keys are **lowercase** package ids (`mlb`, `world_cup`, `mls`, …). |
 
-Example: active package `world_cup` → use `topic_import_ids.world_cup` if set; else `topic_import_id`.
+Example: Step 6 set to `mlb-mlb-season-2026` → every row uses that ID, even if `topic_import_ids.mlb` is still `mlb-regular-season`.
 
 **Template `id`** (e.g. `world_cup_event_winner_mc`) is only the template’s name and `templates_enabled` switch—it is **not** the topic import id.
 
@@ -212,7 +212,7 @@ To add or update a league, edit or add a YAML file and run `python scripts/gener
 - **Templates:** Each JSON template’s `subcategory` must match the selected input package when normalized (case-insensitive), e.g. `F1` templates with package `F1`.
 - **Aliases:** If the input package key should differ from the template label or parser key, add `inputs.package_aliases`, e.g. `formula_one: [F1, Formula 1]`. The alias allows `formula_one` inputs to use `F1` templates and the registered F1 normalizer.
 - **New packages (e.g. MLS):** If there is no Python normalizer for your package key yet, configure **both** `event_source` and `metric_source` (or `schedule` + `stats` with role inference) so the pipeline can run the same schedule+stats composition as MLB; detection still uses your package key for saved profiles. Single-file calendar feeds should map with `package_aliases` to `f1` or add a dedicated normalizer.
-- **Export Topic Import ID:** Optional map `topic_import_ids` in `config/settings.yaml` (`mlb`, `f1`, …) keyed by lowercase package id; falls back to top-level `topic_import_id`.
+- **Export Topic Import ID:** Set in Step 6 (`topic_import_id` in settings). Optional `topic_import_ids.<package>` entries in `config/settings.yaml` are fallbacks only when Step 6 is empty.
 - **Calendar-style event labels:** Normalizers may set `event_display` on `NormalizedEvent`; the CSV `event` column uses it when present (otherwise `Away vs Home`).
 
 ### Field competitions (golf, F1)

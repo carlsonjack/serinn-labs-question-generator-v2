@@ -87,8 +87,8 @@ class StocksCategoryNormalizer(CategoryNormalizer):
         issues: list[ValidationIssue] = []
         seen_tickers: set[str] = set()
         expected_topic = str(
-            settings.get("topic_import_ids", {}).get("stocks")
-            or settings.get("topic_import_id")
+            settings.get("topic_import_id")
+            or settings.get("topic_import_ids", {}).get("stocks")
             or ""
         ).strip()
 

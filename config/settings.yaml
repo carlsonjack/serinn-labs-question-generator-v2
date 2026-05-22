@@ -6,12 +6,12 @@ topic_import_ids:
   f1: f1-race-winner
   music: music-new-releases-us-2026-06
   stocks: stocks-us-market
-subcategory: Golf
+subcategory: MLB
 top_n_per_team: 3
 templates_directory: templates
 date_filter:
-  start: '2026-01-08'
-  end: '2026-12-03'
+  start: '2026-05-15'
+  end: '2026-09-27'
 date_rules:
   default:
     start_offset_hours: -24
@@ -58,7 +58,7 @@ model_pricing:
     output: 10.0
 inputs:
   directory: inputs
-  category_key: golf
+  category_key: mlb
   files:
     F1:
       schedule: f1_schedule.xlsx
@@ -118,3 +118,14 @@ parsing:
   persist_profiles: true
   auto_detect_headers: true
   min_confidence: 0.5
+templates_enabled:
+  MLB-001: true
+  MLB-002: true
+  MLB-003: true
+  MLB-004: true
+  MLB-005: true
+  MLB-006: true
+  MLB-007: true
+  MLB-008: true
+  MLB-009: true
+  MLB-010: true

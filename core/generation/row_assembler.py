@@ -74,19 +74,27 @@ def build_event_string(event: NormalizedEvent) -> str:
 
 
 def resolve_topic_import_id(settings: dict[str, Any], category_key: str | None = None) -> str:
-    """Return the topic import ID for the selected package, or raise if missing."""
+    """Return the topic import ID for this run, or raise if missing.
+
+    Step 6 / ``topic_import_id`` in settings is the source of truth when set.
+    ``topic_import_ids.<package>`` is only a fallback when the top-level value
+    is empty (e.g. first run before the operator picks an ID).
+    """
+
+    explicit = settings.get("topic_import_id", "")
+    topic_import_id = str(explicit).strip() if explicit is not None else ""
+    if topic_import_id:
+        return topic_import_id
 
     pkg = (category_key if category_key is not None else get_inputs_category_key(settings)).strip().lower()
     topic_ids = settings.get("topic_import_ids")
     if isinstance(topic_ids, dict) and pkg in topic_ids:
         value = topic_ids.get(pkg)
-    else:
-        value = settings.get("topic_import_id", "")
+        topic_import_id = str(value).strip() if value is not None else ""
+        if topic_import_id:
+            return topic_import_id
 
-    topic_import_id = str(value).strip() if value is not None else ""
-    if not topic_import_id:
-        raise ValueError(TOPIC_IMPORT_ID_REQUIRED_MESSAGE)
-    return topic_import_id
+    raise ValueError(TOPIC_IMPORT_ID_REQUIRED_MESSAGE)
 
 
 class RowAssembler:

@@ -48,7 +48,9 @@ from core.resolution_date_spec import maybe_compile_resolution_for_template_data
 from core.template_placeholder_mapper import normalize_template_for_upload
 from core.template_ui import (
     filter_templates_for_package,
+    humanize_package_key,
     infer_subcategory_for_package,
+    normalize_template_package,
     package_aliases_for_settings,
     template_to_ui_dict,
 )
@@ -98,10 +100,15 @@ def _template_meta_for_package(
         template_to_ui_dict(t, enabled=bool(te.get(t.id, True)))
         for t in matched
     ]
+    subcategory_fallback = str(settings.get("subcategory") or "")
+    if normalize_template_package(subcategory_fallback) != normalize_template_package(
+        category_key
+    ):
+        subcategory_fallback = ""
     template_subcategory = infer_subcategory_for_package(
         templates.values(),
         category_key,
-        fallback=str(settings.get("subcategory") or ""),
+        fallback=subcategory_fallback or humanize_package_key(category_key),
         aliases=aliases,
     )
     return template_meta, template_subcategory
@@ -251,8 +258,16 @@ def create_app() -> Flask:
             input_dir.mkdir(parents=True, exist_ok=True)
             cleared = clear_category_input_files(input_dir, current, matched)
         save_settings_yaml({"inputs": {"category_key": matched}})
+        settings = load_settings()
+        template_meta, template_subcategory = _template_meta_for_package(settings, matched)
         return jsonify(
-            {"ok": True, "category_key": matched, "cleared_files": cleared}
+            {
+                "ok": True,
+                "category_key": matched,
+                "cleared_files": cleared,
+                "template_meta": template_meta,
+                "template_subcategory": template_subcategory,
+            }
         )
 
     @app.post("/api/topic-import-ids/catalog")

@@ -1157,6 +1157,24 @@
           });
         }
 
+        async function refreshTemplatesForPackage(cat) {
+          const r = await fetch(
+            "/api/input-slots?category=" + encodeURIComponent(cat)
+          );
+          const j = await r.json();
+          if (!r.ok) {
+            return {
+              ok: false,
+              error: j.error || "Could not load templates for this package",
+            };
+          }
+          refreshTemplateSection(
+            j.template_meta || [],
+            j.template_subcategory || cat
+          );
+          return { ok: true, j: j };
+        }
+
         async function fetchAndRenderInputSlots(cat, options) {
           options = options || {};
           const root = $("input-slots-root");
@@ -1206,10 +1224,12 @@
           j.slots.forEach(function (s) {
             wireSlot(s.slot_id);
           });
-          refreshTemplateSection(
-            j.template_meta || [],
-            j.template_subcategory || cat
-          );
+          if (!options.skipTemplateRefresh) {
+            refreshTemplateSection(
+              j.template_meta || [],
+              j.template_subcategory || cat
+            );
+          }
           return { ok: true, j: j };
         }
 
@@ -1456,6 +1476,7 @@
         wireAllSlots();
 
         renderInputsFilesEditor();
+        refreshTemplatesForPackage($("input_category_key").value);
         $("template-checkboxes").addEventListener("change", function (e) {
           if (
             e.target &&
@@ -1513,8 +1534,11 @@
           currentNormalizerSpec = null;
           $("normalizer-preview").hidden = true;
           $("normalizer-msg").textContent = "";
+          await refreshTemplatesForPackage(cat);
           try {
-            const res = await fetchAndRenderInputSlots(cat);
+            const res = await fetchAndRenderInputSlots(cat, {
+              skipTemplateRefresh: true,
+            });
             if (!res.ok) return;
             const pr = await fetch("/api/input-category", {
               method: "POST",
@@ -1532,6 +1556,10 @@
             if (pj.category_key && $("input_category_key").value !== pj.category_key) {
               $("input_category_key").value = pj.category_key;
             }
+            refreshTemplateSection(
+              pj.template_meta || [],
+              pj.template_subcategory || pj.category_key || cat
+            );
             const cleared = pj.cleared_files || [];
             if (cleared.length) {
               $("upload-msg").textContent =

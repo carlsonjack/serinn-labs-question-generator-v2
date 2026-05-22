@@ -63,17 +63,75 @@ def test_api_save_input_category_persists_canonical_key(client, tmp_path, monkey
         "      event_source: a.xlsx\n",
         encoding="utf-8",
     )
+    monkeypatch.setattr("ui.app.resolve_templates_directory", lambda _s: tmp_path)
+    monkeypatch.setattr("ui.app.load_template_dir", lambda _p: {})
     rv = client.post("/api/input-category", json={"category_key": "mls"})
     assert rv.status_code == 200
-    assert rv.get_json() == {
-        "ok": True,
-        "category_key": "MLS",
-        "cleared_files": [],
-    }
+    j = rv.get_json()
+    assert j["ok"] is True
+    assert j["category_key"] == "MLS"
+    assert j["cleared_files"] == []
+    assert j["template_meta"] == []
+    assert j["template_subcategory"] == "MLS"
     from core.config import load_settings_disk_only
 
     data = load_settings_disk_only()
     assert data["inputs"]["category_key"] == "MLS"
+
+
+def test_api_save_input_category_returns_package_templates(client, tmp_path, monkeypatch):
+    import ui.app as ui_app
+    from core.template_config.schema import QuestionTemplate
+
+    inputs_dir = tmp_path / "inputs"
+    inputs_dir.mkdir()
+    monkeypatch.setattr(ui_app, "_inputs_directory", lambda _s: inputs_dir)
+
+    cfg = tmp_path / "settings.yaml"
+    monkeypatch.setattr("core.config._SETTINGS_PATH_OVERRIDE", cfg)
+    monkeypatch.setattr("core.config._SETTINGS_LOCAL_PATH_OVERRIDE", tmp_path / "nope.local.yaml")
+    cfg.write_text(
+        "subcategory: Golf\n"
+        "inputs:\n"
+        "  directory: inputs\n"
+        "  category_key: golf\n"
+        "  files:\n"
+        "    golf:\n"
+        "      event_source: schedule.xlsx\n"
+        "    mlb:\n"
+        "      event_source: schedule.xlsx\n",
+        encoding="utf-8",
+    )
+    templates = {
+        "golf_a": QuestionTemplate(
+            id="golf_a",
+            subcategory="Golf",
+            question_family="event",
+            question="Golf?",
+            answer_type="yes_no",
+            answer_options="Yes||No",
+            priority="",
+            requires_entities=False,
+        ),
+        "mlb_a": QuestionTemplate(
+            id="mlb_a",
+            subcategory="MLB",
+            question_family="event",
+            question="MLB?",
+            answer_type="yes_no",
+            answer_options="Yes||No",
+            priority="",
+            requires_entities=False,
+        ),
+    }
+    monkeypatch.setattr("ui.app.resolve_templates_directory", lambda _s: tmp_path)
+    monkeypatch.setattr("ui.app.load_template_dir", lambda _p: templates)
+
+    rv = client.post("/api/input-category", json={"category_key": "mlb"})
+    assert rv.status_code == 200
+    j = rv.get_json()
+    assert [x["id"] for x in j["template_meta"]] == ["mlb_a"]
+    assert j["template_subcategory"] == "MLB"
 
 
 def test_load_topic_import_ids_catalog_normalizes_entries(tmp_path):

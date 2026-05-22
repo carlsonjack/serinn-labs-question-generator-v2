@@ -214,9 +214,24 @@ class TestRowAssemblerSingle:
         row = self.assembler.assemble(_gen_q(), _item())
         assert row.topic_import_id == "mlb-regular-season"
 
-    def test_topic_import_ids_override_per_package(self):
+    def test_step6_topic_import_id_wins_over_package_map(self):
         settings = {
             **SETTINGS,
+            "topic_import_id": "mlb-mlb-season-2026",
+            "inputs": {
+                "category_key": "mlb",
+                "files": {"mlb": {"schedule": "x.xlsx"}},
+            },
+            "topic_import_ids": {"mlb": "mlb-regular-season"},
+        }
+        assembler = RowAssembler(settings)
+        row = assembler.assemble(_gen_q(), _item())
+        assert row.topic_import_id == "mlb-mlb-season-2026"
+
+    def test_topic_import_ids_fallback_when_step6_empty(self):
+        settings = {
+            **SETTINGS,
+            "topic_import_id": "",
             "inputs": {
                 "category_key": "f1",
                 "files": {"f1": {"schedule": "x.xlsx"}},
