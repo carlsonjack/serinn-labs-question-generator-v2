@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from datetime import date
@@ -127,14 +128,14 @@ class StockPlanner:
         selected: dict[str, ContentEntity] = {}
 
         if _needs_option_assets(template):
-            assets = self._available_assets(counts, needed=4)[:4]
-            if len(assets) < 4:
+            assets = self._select_option_assets(
+                template,
+                question_date,
+                counts,
+                used_mc_sets,
+            )
+            if assets is None:
                 return None
-            option_key = tuple(sorted(asset.entity_id for asset in assets))
-            if option_key in used_mc_sets:
-                return None
-            used_mc_sets.add(option_key)
-            self._commit_assets(counts, assets)
             for pos, asset in enumerate(assets, start=1):
                 selected[f"ASSET_{pos}"] = asset
             answer_options = _fill_placeholders(template.answer_options, question_date, selected)
@@ -168,6 +169,48 @@ class StockPlanner:
     def _commit_assets(self, counts: dict[str, int], assets: Sequence[ContentEntity]) -> None:
         for asset in assets:
             counts[asset.entity_id] = counts.get(asset.entity_id, 0) + 1
+
+    def _select_option_assets(
+        self,
+        template: QuestionTemplate,
+        question_date: date,
+        counts: dict[str, int],
+        used_mc_sets: set[tuple[str, ...]],
+    ) -> list[ContentEntity] | None:
+        """Pick four distinct watchlist names for multi-asset MC templates.
+
+        Selection varies by trading date and template id so the same four names are
+        not reused on every day. Within a single day, ``used_mc_sets`` prevents
+        duplicate option sets across rows.
+        """
+
+        ordered = sorted(self.entities, key=lambda a: a.entity_id)
+        if len(ordered) < 4:
+            return None
+
+        seed = hashlib.sha256(
+            f"{question_date.isoformat()}:{template.id}".encode("utf-8")
+        ).digest()
+        start = int.from_bytes(seed[:4], "big") % len(ordered)
+
+        for bump in range(len(ordered)):
+            offset = (start + bump * 3) % len(ordered)
+            assets: list[ContentEntity] = []
+            for step in range(len(ordered)):
+                asset = ordered[(offset + step) % len(ordered)]
+                if all(asset.entity_id != picked.entity_id for picked in assets):
+                    assets.append(asset)
+                if len(assets) == 4:
+                    break
+            if len(assets) < 4:
+                continue
+            option_key = tuple(sorted(asset.entity_id for asset in assets))
+            if option_key in used_mc_sets:
+                continue
+            used_mc_sets.add(option_key)
+            self._commit_assets(counts, assets)
+            return assets
+        return None
 
     def _available_assets(self, counts: dict[str, int], *, needed: int) -> list[ContentEntity]:
         under_cap = [asset for asset in self.entities if counts.get(asset.entity_id, 0) < 2]

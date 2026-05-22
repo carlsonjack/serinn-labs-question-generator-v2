@@ -149,6 +149,34 @@ def test_stock_planner_fills_placeholders_and_unique_mc_sets() -> None:
     assert any(row.answer_type == "yes_no" and row.answer_options == "" for row in rows)
 
 
+def test_stock_planner_varies_four_asset_mc_sets_across_trading_days() -> None:
+    templates = [
+        _template(
+            "stocks_daily_biggest_gainer",
+            "Which gains most on {DATE}?",
+            answer_type="multiple_choice",
+            answer_options="{ASSET_1}||{ASSET_2}||{ASSET_3}||{ASSET_4}||None",
+        ),
+    ]
+    rows = StockPlanner(
+        _entities(20),
+        templates,
+        {
+            "date_filter": {"start": "2026-05-30", "end": "2026-06-05"},
+            "stocks": {"questions_per_day": 1},
+        },
+        topic_import_id="stocks-us-market",
+    ).generate()
+
+    mc_sets = {
+        tuple(option for option in row.answer_options.split("||") if option != "None")
+        for row in rows
+        if row.answer_type == "multiple_choice"
+    }
+    assert len(rows) >= 3
+    assert len(mc_sets) >= 3
+
+
 def test_stock_planner_respects_top_level_max_generated_questions() -> None:
     """UI saves ``max_generated_questions`` at settings root; stocks must honor it."""
 
