@@ -142,3 +142,10 @@ templates_enabled:
   stocks_monthly_biggest_loser: true
   stocks_quarterly_biggest_gainer: true
   stocks_quarterly_biggest_loser: true
+  music-yn-01: true
+  music-yn-02: true
+  music-mc-02: true
+  music-mc-01: true
+  music-mc-03: true
+  music-mc-04: true
+  music-award-01: true

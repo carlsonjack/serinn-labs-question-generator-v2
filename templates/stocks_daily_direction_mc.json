@@ -1,0 +1,12 @@
+{
+  "id": "stocks_daily_direction_mc",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "How will {ASSET} finish on {DATE} compared to its previous closing price during regular trading hours?",
+  "answer_type": "multiple_choice",
+  "answer_options": "Higher||Lower",
+  "priority": 2,
+  "requires_entities": false,
+  "timeframe": "Daily",
+  "_comment": null
+}

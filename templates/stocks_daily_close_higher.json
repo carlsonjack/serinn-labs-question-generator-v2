@@ -1,0 +1,12 @@
+{
+  "id": "stocks_daily_close_higher",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "Will {ASSET} close higher on {DATE} than its previous closing price during regular trading hours?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 1,
+  "requires_entities": false,
+  "timeframe": "Daily",
+  "_comment": null
+}

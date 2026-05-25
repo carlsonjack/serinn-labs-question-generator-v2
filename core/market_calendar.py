@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import calendar
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
 
 @dataclass(frozen=True)
@@ -111,6 +111,12 @@ def last_calendar_day_of_quarter(value: date) -> date:
     return value.replace(month=last_month, day=last_day)
 
 
+def _format_calendar_datetime(value: date) -> str:
+    """Naive ISO 8601 with time, matching sports/content export date columns."""
+
+    return datetime.combine(value, time.min).isoformat(timespec="seconds")
+
+
 def stock_question_dates(question_date: date, timeframe: str) -> StockQuestionDates:
     tf = (timeframe or "daily").strip().lower()
     if tf == "weekly":
@@ -130,8 +136,8 @@ def stock_question_dates(question_date: date, timeframe: str) -> StockQuestionDa
         expiration = question_date
         resolution = question_date + timedelta(days=1)
     return StockQuestionDates(
-        start_date=start.isoformat(),
-        expiration_date=expiration.isoformat(),
-        resolution_date=resolution.isoformat(),
+        start_date=_format_calendar_datetime(start),
+        expiration_date=_format_calendar_datetime(expiration),
+        resolution_date=_format_calendar_datetime(resolution),
     )
 

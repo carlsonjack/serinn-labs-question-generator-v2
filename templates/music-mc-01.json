@@ -1,0 +1,78 @@
+{
+  "id": "music-mc-01",
+  "subcategory": "Music",
+  "question_family": "content",
+  "question": "Which release will chart higher on the Billboard 200 in the first 7 days?",
+  "answer_type": "multiple_choice",
+  "answer_options": "[RELEASE_A]||[RELEASE_B]",
+  "priority": 2,
+  "requires_entities": false,
+  "template_type": "Album Comparison",
+  "required_dataset_fields": "release_a; release_b; chart_week; topic_import_id",
+  "placeholder_mappings": {
+    "RELEASE_A": {
+      "canonical_placeholder": "RELEASE_A",
+      "target": "selected_entities[0].release",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "pairwise release option"
+    },
+    "RELEASE_B": {
+      "canonical_placeholder": "RELEASE_B",
+      "target": "selected_entities[1].release",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "pairwise release option"
+    }
+  },
+  "notes": "Resolution date should be start_date + 8 days.",
+  "_comment": null,
+  "resolution_date_rule": "Resolution date should be start_date + 8 days.",
+  "resolution_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "question_start",
+    "metadata_key": null,
+    "offset_days": 8,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  },
+  "start_date_rule": "7 days before release date",
+  "start_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": -7,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  },
+  "expiration_date_rule": "release date at midnight",
+  "expiration_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": 0,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  }
+}

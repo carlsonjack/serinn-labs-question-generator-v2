@@ -1,0 +1,71 @@
+{
+  "id": "music-yn-02",
+  "subcategory": "Music",
+  "question_family": "content",
+  "question": "Will [ALBUM_OR_ARTIST] debut in the Top 25 on the Billboard 200?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "template_type": "Top 10 Album Debut",
+  "required_dataset_fields": "album_or_artist; release_date; topic_import_id",
+  "placeholder_mappings": {
+    "ALBUM_OR_ARTIST": {
+      "canonical_placeholder": "ALBUM_OR_ARTIST",
+      "target": "album_or_artist",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    }
+  },
+  "notes": "Resolution date should be start_date + 7 days.",
+  "_comment": null,
+  "resolution_date_rule": "Resolution date should be start_date + 7 days.",
+  "resolution_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "question_start",
+    "metadata_key": null,
+    "offset_days": 7,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  },
+  "start_date_rule": "7 days before release date",
+  "start_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": -7,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  },
+  "expiration_date_rule": "release date at midnight",
+  "expiration_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": 0,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  }
+}

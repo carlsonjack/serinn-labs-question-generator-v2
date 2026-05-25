@@ -1,0 +1,12 @@
+{
+  "id": "stocks_monthly_finish_higher",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "Will {ASSET} finish {MONTH} higher than it started?",
+  "answer_type": "yes_no",
+  "answer_options": "",
+  "priority": 2,
+  "requires_entities": false,
+  "timeframe": "Monthly",
+  "_comment": null
+}

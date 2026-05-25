@@ -93,29 +93,29 @@ def test_stock_question_dates_match_client_june_examples() -> None:
     import datetime as dt
 
     daily = stock_question_dates(dt.date(2026, 6, 1), "Daily")
-    assert daily.start_date == "2026-05-30"
-    assert daily.expiration_date == "2026-06-01"
-    assert daily.resolution_date == "2026-06-02"
+    assert daily.start_date == "2026-05-30T00:00:00"
+    assert daily.expiration_date == "2026-06-01T00:00:00"
+    assert daily.resolution_date == "2026-06-02T00:00:00"
 
     next_daily = stock_question_dates(dt.date(2026, 6, 2), "Daily")
-    assert next_daily.start_date == "2026-05-31"
-    assert next_daily.expiration_date == "2026-06-02"
-    assert next_daily.resolution_date == "2026-06-03"
+    assert next_daily.start_date == "2026-05-31T00:00:00"
+    assert next_daily.expiration_date == "2026-06-02T00:00:00"
+    assert next_daily.resolution_date == "2026-06-03T00:00:00"
 
     weekly = stock_question_dates(dt.date(2026, 6, 1), "Weekly")
-    assert weekly.start_date == "2026-05-30"
-    assert weekly.expiration_date == "2026-06-01"
-    assert weekly.resolution_date == "2026-06-06"
+    assert weekly.start_date == "2026-05-30T00:00:00"
+    assert weekly.expiration_date == "2026-06-01T00:00:00"
+    assert weekly.resolution_date == "2026-06-06T00:00:00"
 
     monthly = stock_question_dates(dt.date(2026, 6, 1), "Monthly")
-    assert monthly.start_date == "2026-06-01"
-    assert monthly.expiration_date == "2026-06-10"
-    assert monthly.resolution_date == "2026-07-01"
+    assert monthly.start_date == "2026-06-01T00:00:00"
+    assert monthly.expiration_date == "2026-06-10T00:00:00"
+    assert monthly.resolution_date == "2026-07-01T00:00:00"
 
     quarterly = stock_question_dates(dt.date(2026, 6, 1), "Quarterly")
-    assert quarterly.start_date == "2026-04-01"
-    assert quarterly.expiration_date == "2026-04-30"
-    assert quarterly.resolution_date == "2026-07-01"
+    assert quarterly.start_date == "2026-04-01T00:00:00"
+    assert quarterly.expiration_date == "2026-04-30T00:00:00"
+    assert quarterly.resolution_date == "2026-07-01T00:00:00"
 
 
 def test_stock_planner_fills_placeholders_and_unique_mc_sets() -> None:
@@ -286,19 +286,19 @@ def test_stock_export_uses_client_date_windows_and_delayed_resolution(tmp_path: 
     assert len(exported) == 3
     assert all(row["Expiration Date"] < row["Resolution Date"] for row in exported)
     assert (exported[0]["Start Date"], exported[0]["Expiration Date"], exported[0]["Resolution Date"]) == (
-        "2026-05-30",
-        "2026-06-01",
-        "2026-06-02",
+        "2026-05-30T00:00:00",
+        "2026-06-01T00:00:00",
+        "2026-06-02T00:00:00",
     )
     assert (exported[1]["Start Date"], exported[1]["Expiration Date"], exported[1]["Resolution Date"]) == (
-        "2026-05-30",
-        "2026-06-01",
-        "2026-06-06",
+        "2026-05-30T00:00:00",
+        "2026-06-01T00:00:00",
+        "2026-06-06T00:00:00",
     )
     assert (exported[2]["Start Date"], exported[2]["Expiration Date"], exported[2]["Resolution Date"]) == (
-        "2026-06-01",
-        "2026-06-10",
-        "2026-07-01",
+        "2026-06-01T00:00:00",
+        "2026-06-10T00:00:00",
+        "2026-07-01T00:00:00",
     )
 
 
@@ -319,7 +319,7 @@ def test_stock_planner_filters_rows_before_window_start_and_keeps_boundary() -> 
         topic_import_id="stocks-us-market",
     ).generate()
 
-    assert [row.start_date for row in rows] == ["2026-06-09"]
+    assert [row.start_date for row in rows] == ["2026-06-09T00:00:00"]
     assert rows[0].question.endswith("2026-06-11?")
 
 

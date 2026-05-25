@@ -1,0 +1,71 @@
+{
+  "id": "music-mc-04",
+  "subcategory": "Music",
+  "question_family": "content",
+  "question": "How many songs from [ALBUM_OR_RELEASE] will make the Billboard Hot 100 during its first 30 days of release?",
+  "answer_type": "multiple_choice",
+  "answer_options": "0 songs||1-2 songs||3-5 songs||6+ songs",
+  "priority": 2,
+  "requires_entities": false,
+  "template_type": "Album Song Count",
+  "required_dataset_fields": "album_or_release; release_date; topic_import_id",
+  "placeholder_mappings": {
+    "ALBUM_OR_RELEASE": {
+      "canonical_placeholder": "ALBUM_OR_RELEASE",
+      "target": "album_or_release",
+      "confidence": 1.0,
+      "source": "heuristic",
+      "reason": "already supported"
+    }
+  },
+  "notes": "Resolution date should be start_date + 31 days.",
+  "_comment": null,
+  "resolution_date_rule": "Resolution date should be start_date + 31 days.",
+  "resolution_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "question_start",
+    "metadata_key": null,
+    "offset_days": 31,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  },
+  "start_date_rule": "7 days before release date",
+  "start_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": -7,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  },
+  "expiration_date_rule": "release date at midnight",
+  "expiration_date_spec": {
+    "kind": "offset_from_anchor",
+    "anchor": "release_date",
+    "metadata_key": null,
+    "offset_days": 0,
+    "offset_hours": 0,
+    "calendar_month": null,
+    "calendar_day": null,
+    "calendar_year": null,
+    "year_policy": null,
+    "end_offset_days": null,
+    "local_hour": null,
+    "local_minute": null,
+    "iana_timezone": null
+  }
+}

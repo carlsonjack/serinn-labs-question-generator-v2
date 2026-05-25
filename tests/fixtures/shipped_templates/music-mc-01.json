@@ -4,27 +4,11 @@
   "question_family": "content",
   "question": "Which release will chart higher on the Billboard 200 in the first 7 days?",
   "answer_type": "multiple_choice",
-  "answer_options": "[RELEASE]||[RELEASE]",
+  "answer_options": "[RELEASE_A]||[RELEASE_B]",
   "priority": 2,
   "requires_entities": false,
   "template_type": "Album Comparison",
   "required_dataset_fields": "release_a; release_b; chart_week; topic_import_id",
-  "placeholder_mappings": {
-    "RELEASE_A": {
-      "canonical_placeholder": "RELEASE",
-      "target": "release",
-      "confidence": 0.8,
-      "source": "heuristic",
-      "reason": "fuzzy match"
-    },
-    "RELEASE_B": {
-      "canonical_placeholder": "RELEASE",
-      "target": "release",
-      "confidence": 0.8,
-      "source": "heuristic",
-      "reason": "fuzzy match"
-    }
-  },
   "_comment": null,
   "resolution_date_rule": "Resolution date should be start_date + 8 days.",
   "resolution_date_spec": {

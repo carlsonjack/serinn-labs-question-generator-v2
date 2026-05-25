@@ -50,6 +50,39 @@ def test_normalize_template_for_upload_maps_movie_title_typo() -> None:
     assert "Mapped [MOVIE_TITE] to [TITLE]." in result.warnings
 
 
+def test_normalize_template_for_upload_preserves_pairwise_release_placeholders() -> None:
+    result = normalize_template_for_upload(
+        {
+            "id": "music-mc-01",
+            "subcategory": "Music",
+            "question_family": "content",
+            "question": "Which release will chart higher on the Billboard 200 in the first 7 days?",
+            "answer_type": "multiple_choice",
+            "answer_options": "[RELEASE_A]||[RELEASE_B]",
+            "priority": 2,
+            "requires_entities": False,
+        },
+        {"openai_api_key": ""},
+        category_key="music",
+        entities=[
+            ContentEntity(
+                entity_id="a",
+                display_name="Alpha by Artist A",
+                metadata={"title": "Alpha", "artist": "Artist A", "release_date": "2026-06-05"},
+            ),
+            ContentEntity(
+                entity_id="b",
+                display_name="Bravo by Artist B",
+                metadata={"title": "Bravo", "artist": "Artist B", "release_date": "2026-06-05"},
+            ),
+        ],
+    )
+
+    assert result.data["answer_options"] == "[RELEASE_A]||[RELEASE_B]"
+    assert "generation_strategy" not in result.data
+    assert not any("Mapped [RELEASE_" in warning for warning in result.warnings)
+
+
 def test_normalize_template_for_upload_detects_multi_entity_choices() -> None:
     result = normalize_template_for_upload(
         {

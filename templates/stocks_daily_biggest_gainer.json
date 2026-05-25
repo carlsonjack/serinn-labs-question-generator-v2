@@ -1,0 +1,12 @@
+{
+  "id": "stocks_daily_biggest_gainer",
+  "subcategory": "stocks",
+  "question_family": "stock",
+  "question": "Which of these stocks will gain the most during regular trading hours on {DATE}?",
+  "answer_type": "multiple_choice",
+  "answer_options": "{ASSET_1}||{ASSET_2}||{ASSET_3}||{ASSET_4}||None",
+  "priority": 1,
+  "requires_entities": false,
+  "timeframe": "Daily",
+  "_comment": null
+}

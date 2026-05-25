@@ -1,19 +1,21 @@
 version: 1
 package_key: music
 sources:
-  music.xlsx#June 2026 Albums:
+  music.xlsx::June 2026 Albums:
     source_role: entity_source
     file_pattern: music.xlsx
     sheet_name: June 2026 Albums
     header_row_index: 0
     field_mappings:
       artist: Artist
+      content_type: Album
+      genre: Genre
       release_date: Release Date
       title: Album Title
     metric_mappings: {}
     metadata_mappings:
-      content_type: album
-      genre: Genre
+      Artist: Artist
+      Genre: Genre
     matchup_split: null
     event_datetime: null
     event_id: null
@@ -28,7 +30,7 @@ shape_signature:
       - Genre
       header_row_index: 0
       sheet_name: June 2026 Albums
-notes: Mapped album release list as entity_source. Primary title column mapped to
-  title, release date column mapped to release_date, artist mapped directly, and Genre
-  preserved in metadata_mappings. Added content_type metadata as album based on sheet
-  context.
+notes: Content release list. Map Album Title to title and Release Date to release_date;
+  preserve descriptive columns as metadata. content_type is set to constant value
+  'Album' based on sheet context.
+competition_format: team_sport

@@ -197,6 +197,7 @@ def build_placeholder_context(
                 f"ENTITY_{letter}",
                 f"TITLE_{letter}",
                 f"MOVIE_{letter}",
+                f"RELEASE_{letter}",
                 f"RELEASE_DATE_{letter}",
             }
         )
@@ -241,6 +242,8 @@ def _heuristic_canonical_placeholder(
     if lettered:
         prefix = lettered.group("prefix")
         letter = lettered.group("letter")
+        if prefix == "RELEASE":
+            return token, 1.0, "pairwise release option"
         if prefix in {"MOVIE", "FILM"} or prefix == _package_singular(context.package_key):
             return f"ENTITY_{letter}", 0.95, "multi-entity option"
         if prefix == "ENTITY":
@@ -384,7 +387,10 @@ def _is_allowed_placeholder(placeholder: str, context: PlaceholderContext) -> bo
     if token in context.placeholders:
         return True
     match = _LETTERED_PLACEHOLDER_RE.match(token)
-    return bool(match and match.group("prefix") in {"ENTITY", "TITLE", "MOVIE", "RELEASE_DATE"})
+    return bool(
+        match
+        and match.group("prefix") in {"ENTITY", "TITLE", "MOVIE", "RELEASE", "RELEASE_DATE"}
+    )
 
 
 def _target_for_canonical(canonical: str) -> str:
