@@ -1,0 +1,2 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,stat_column,top_n_per_team,generation_scope,start_date_rule,expiration_date_rule,resolution_date_rule,_comment
+WNBA-009,WNBA,entity_stat,Who will finish the season with the highest rebounds average?,multiple_choice,{entity_options},1,true,REB,20,season,2026-06-01,2026-06-21,2026-10-21,Season-scoped: one row; answer options = top 20 league-wide by REB from stats workbook.

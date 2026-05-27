@@ -118,6 +118,8 @@ def resolve_top_n_per_team(template: QuestionTemplate, settings: Mapping[str, An
         return max(1, int(override))
     if template.top_n_per_team is not None:
         return max(1, int(template.top_n_per_team))
+    if is_season_scope(template) and template.question_family == "entity_stat":
+        return 20
     return 2
 
 

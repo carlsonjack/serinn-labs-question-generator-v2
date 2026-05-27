@@ -12,6 +12,36 @@ from typing import Any
 import pandas as pd
 
 
+_GAME_PLACEHOLDER_RE = re.compile(
+    r"\{home_team\}|\{away_team\}|\[HOME_TEAM\]|\[AWAY_TEAM\]",
+    re.IGNORECASE,
+)
+
+
+def _question_has_game_placeholders(question: str) -> bool:
+    return bool(_GAME_PLACEHOLDER_RE.search(question or ""))
+
+
+def _infer_generation_scope(
+    *,
+    family: str,
+    question: str,
+    finalized_opts: str,
+    explicit_scope: str,
+) -> str:
+    if explicit_scope:
+        return explicit_scope
+    opts = finalized_opts.strip()
+    if opts in ("{schedule_teams}", "{team_options}"):
+        return "season"
+    if family == "entity_stat" and (
+        opts == "{entity_options}" or (family == "entity_stat" and not opts)
+    ):
+        if not _question_has_game_placeholders(question):
+            return "season"
+    return ""
+
+
 def parse_uploaded_template_file(name: str, raw_bytes: bytes | str) -> list[dict[str, Any]]:
     """Return one or more template dicts from an uploaded JSON, CSV, or Excel file."""
 
@@ -295,8 +325,12 @@ def parse_content_template_table(text: str) -> list[dict[str, Any]]:
         finalized_opts = _finalize_wide_answer_options(answer_type, answer_opts, family)
 
         scope_raw = str(row.get("generation_scope") or "").strip().lower()
-        if not scope_raw and finalized_opts.strip() in ("{schedule_teams}", "{team_options}"):
-            scope_raw = "season"
+        scope_raw = _infer_generation_scope(
+            family=family,
+            question=question,
+            finalized_opts=finalized_opts,
+            explicit_scope=scope_raw,
+        )
 
         rec: dict[str, Any] = {
             "id": template_id,
@@ -328,7 +362,7 @@ def parse_content_template_table(text: str) -> list[dict[str, Any]]:
             if top_raw is None or str(top_raw).strip() == "":
                 top_raw = row.get("top_n")
             if top_raw is None or str(top_raw).strip() == "":
-                rec["top_n_per_team"] = 2
+                rec["top_n_per_team"] = 20 if scope_raw == "season" else 2
             else:
                 rec["top_n_per_team"] = _parse_int(str(top_raw).strip(), "top_n_per_team")
         elif family == "stock":

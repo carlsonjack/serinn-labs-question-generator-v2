@@ -192,11 +192,23 @@ def test_parse_content_template_wide_table_entity_stat_default_top_n_and_options
     text = (
         "template_id,subcategory,question_family,answer_type,question_template,answer_options_pattern,"
         "stat_column,default_priority\n"
-        "t1,WNBA,entity_stat,multiple_choice,Who scores?,,PTS,1\n"
+        "t1,WNBA,entity_stat,multiple_choice,Who will lead the league in points?,,PTS,1\n"
+    )
+    rows = parse_uploaded_template_file("wnba.csv", text)
+    assert rows[0]["top_n_per_team"] == 20
+    assert rows[0]["generation_scope"] == "season"
+    assert rows[0]["answer_options"] == "{entity_options}"
+
+
+def test_parse_content_template_wide_table_per_game_entity_stat_keeps_default_top_n():
+    text = (
+        "template_id,subcategory,question_family,answer_type,question_template,answer_options_pattern,"
+        "stat_column,default_priority\n"
+        "t1,WNBA,entity_stat,multiple_choice,Who scores for {home_team}?,,PTS,1\n"
     )
     rows = parse_uploaded_template_file("wnba.csv", text)
     assert rows[0]["top_n_per_team"] == 2
-    assert rows[0]["answer_options"] == "{entity_options}"
+    assert "generation_scope" not in rows[0]
 
 
 def test_parse_content_template_wide_table_infers_entity_stat_when_stat_column_set():
@@ -258,3 +270,17 @@ def test_parse_content_template_table_infers_generation_scope_for_schedule_teams
     rows = parse_uploaded_template_file("wnba.csv", text)
     assert rows[0]["generation_scope"] == "season"
     assert rows[0]["answer_options"] == "{schedule_teams}"
+
+
+def test_parse_content_template_table_infers_generation_scope_for_season_entity_stat():
+    text = (
+        "template_id,subcategory,question_family,answer_type,question,answer_options,"
+        "stat_column,requires_entities,default_priority\n"
+        "WNBA-008,WNBA,entity_stat,multiple_choice,"
+        "Who will finish the season with the highest points average?,"
+        "{entity_options},PTS,true,1\n"
+    )
+    rows = parse_uploaded_template_file("wnba.csv", text)
+    assert rows[0]["generation_scope"] == "season"
+    assert rows[0]["top_n_per_team"] == 20
+    assert rows[0]["answer_options"] == "{entity_options}"

@@ -94,20 +94,21 @@ Schedule team labels must resolve to stats **TEAM** codes (e.g. `Los Angeles Spa
 
 ### 3. Season-scoped questions (`generation_scope` = `season`)
 
-Use for **one question per season window** — not tied to a single game. Works across team sports (WNBA, NBA, NFL, MLB, MLS, etc.) when the schedule lists all teams in home/away columns.
+Use for **one question per season window** — not tied to a single game. **WNBA-007, WNBA-008, and WNBA-009 share the same rule** for all team sports: set `generation_scope=season` → **one output row** per template.
 
 | Pattern | `question_family` | `generation_scope` | `answer_options` | Inputs |
 |---------|-------------------|--------------------|------------------|--------|
-| **Championship / league winner** | `event` | `season` | `{schedule_teams}` (alias `{team_options}`) | Schedule only |
-| **Season stat leader** | `entity_stat` | `season` | `{entity_options}` | Schedule + stats |
+| **Championship / league winner** (007-style) | `event` | `season` | `{schedule_teams}` (alias `{team_options}`) | Schedule only |
+| **Season stat leader** (008/009-style) | `entity_stat` | `season` | `{entity_options}` | Schedule + stats |
 | **Season yes/no or static MC** | `event` | `season` | `Yes||No` or literal `A||B||C` | Schedule (for dates/context) |
 
 | Field | What to put |
 |--------|-------------|
 | **`generation_scope`** | **`season`**. Omit or use `event` for per-game templates (default). |
-| **`question`** | Season wording with **no** `{home_team}` / `{away_team}` unless you intentionally reference a game. |
+| **`question`** | Season wording with **no** `{home_team}` / `{away_team}` / `[HOME_TEAM]` / `[AWAY_TEAM]` unless you intentionally reference a game. If those placeholders appear, the template stays **per-game** even for stat leaders. |
 | **`answer_options`** | **`{schedule_teams}`** for all teams from the schedule, or **`{entity_options}`** for league-wide player lists. |
-| **`stat_column`** / **`top_n_per_team`** | **Season stat leader only.** Use real stat headers (`PTS`, `REB`, `HR`). For `season`, **`top_n_per_team`** = top N players **league-wide** (not per team). |
+| **`stat_column`** | **Season stat leader only.** Must match that league’s stats workbook headers — WNBA: `PTS`, `REB`, `AST`; MLB: `HR`, `RBI`, `SB`; etc. Do **not** invent columns like `PPG` or `RPG`. |
+| **`top_n_per_team`** | **Season stat leader only.** Top N players **league-wide** (not per team). Recommended default: **`20`**. Assists follow the same pattern with `AST` (WNBA) or the equivalent column in other leagues. |
 | **Date columns** | Usually **fixed season dates** (`start_date_rule`, `expiration_date_rule`, `resolution_date_rule`) — not relative to a single tip-off. |
 
 **Export behavior:** one output row per season template. The **`event`** column is a synthetic label like `WNBA 2026 Season` (subcategory + year from the run date window).
@@ -115,6 +116,8 @@ Use for **one question per season window** — not tied to a single game. Works 
 **Examples (CSV):**
 
 - Championship: [`samples/wnba_season_championship_one_question.csv`](../samples/wnba_season_championship_one_question.csv)
+- Scoring leader: [`samples/wnba_season_scoring_leader_one_question.csv`](../samples/wnba_season_scoring_leader_one_question.csv)
+- Rebounds leader: [`samples/wnba_season_rebounds_leader_one_question.csv`](../samples/wnba_season_rebounds_leader_one_question.csv)
 - Per-game winner (contrast): [`samples/wnba_schedule_game_winner_one_question.csv`](../samples/wnba_schedule_game_winner_one_question.csv)
 
 ```csv
@@ -126,12 +129,17 @@ Season stat leader (needs stats; `top_n_per_team` = league-wide N):
 
 ```csv
 id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,stat_column,top_n_per_team,generation_scope,start_date_rule,expiration_date_rule,resolution_date_rule
-WNBA-008,WNBA,entity_stat,Who will finish the season with the highest points per game average?,multiple_choice,{entity_options},1,true,PTS,10,season,2026-06-01,2026-06-21,2026-09-25
+WNBA-008,WNBA,entity_stat,Who will finish the season with the highest points average?,multiple_choice,{entity_options},1,true,PTS,20,season,2026-06-01,2026-06-21,2026-10-21
 ```
 
-On wide-table upload, **`generation_scope`** may be inferred as `season` when **`answer_options`** is `{schedule_teams}` or `{team_options}`.
+On wide-table upload, **`generation_scope`** may be inferred as `season` when:
 
-**NOT in scope for this pattern:** MVP nominee lists, division/conference winners (without division data), field sports (golf/F1), standings-dependent props.
+- **`answer_options`** is `{schedule_teams}` or `{team_options}` (007-style), or
+- **`question_family`** is `entity_stat` with `{entity_options}` and the question has **no** `{home_team}` / `{away_team}` placeholders (008/009-style).
+
+When inferred as season, omitted **`top_n_per_team`** defaults to **20** (per-game entity_stat still defaults to 2).
+
+**Exceptions / not in scope:** MVP nominee lists, division/conference winners (without division data), content/stock templates (season scope rejected), stats-only packages with no schedule (synthetic season event still needs schedule today). **F1** season championship templates need driver standings input first — use 008-style once that data exists.
 
 ---
 
@@ -141,10 +149,16 @@ When there is no home/away team:
 
 | Field | Value |
 |--------|--------|
-| **`question`** | Use `{event_name}` for the tournament (from schedule `event_name`). |
+| **`question`** | Per-tournament: use `{event_name}`. **Season championship** (FedEx Cup, etc.): season wording with **no** `{event_name}` — same one-row rule as WNBA-008/009. |
 | **`answer_options`** (event) | Placeholders or yes/no until pairing data exists. |
+| **`answer_options`** (season championship) | **`{entity_options}`** — top N from rankings/standings, **not** `{schedule_teams}` (schedule placeholders are not contenders). |
+| **`generation_scope`** | **`season`** for one-row season questions (FedEx Cup, future F1 Drivers' Championship). |
 | **`stat_column`** | Spreadsheet column from rankings, e.g. `AVG POINTS`, `RANK`. |
-| **`top_n_per_team`** | Top **N in the entire field** (not per team). |
+| **`top_n_per_team`** | Top **N in the entire field** (not per team). Default **20** when season-scoped and omitted on upload. |
+
+**Golf season championship today:** use **008-style** (`entity_stat` + `{entity_options}` + `generation_scope=season` + rankings file). Example question: `Who will win the FedEx Cup?`
+
+**F1 season championship (follow-up):** same 008-style pattern once driver standings / championship points are added to the F1 input package. The F1 normalizer is schedule-only today — no driver list in `player_stats` yet.
 
 ---
 
@@ -484,8 +498,10 @@ stocks_daily_close_higher,Daily Close Higher,Daily,Will {ASSET} close higher on 
 | Date rules on stock templates | Remove them; set **`timeframe`** instead. |
 | Bare `Los Angeles` in schedule without team map | Use full team names from schedule (`Los Angeles Sparks`). |
 | Championship as `entity_stat` + `{entity_options}` | Use `event` + `{schedule_teams}` + `generation_scope=season`. |
-| Season question without `generation_scope=season` | Emits one row **per game** (duplicates). Set `generation_scope=season`. |
-| Fake stat columns (`Teams`, `PPG`) | Use real stats headers (`PTS`, `REB`, etc.) from the stats workbook. |
+| Season stat leader with `{home_team}` in question | Stays **per-game** (one row per game). Remove team placeholders for season scope. |
+| Season question without `generation_scope=season` | Emits one row **per game** (duplicates). Set `generation_scope=season` or use season wording without home/away so upload auto-infers it. |
+| Fake stat columns (`Teams`, `PPG`, `RPG`) | Use real stats headers (`PTS`, `REB`, `AST`, `HR`, etc.) from the stats workbook. |
+| Golf/F1 season winner with `{schedule_teams}` | Use 008-style: `entity_stat` + `{entity_options}` + rankings/standings stat column. |
 | Mismatched `subcategory` | `WNBA` templates only run when package is `wnba`; `Music` when package is `music`. |
 
 ---
@@ -503,7 +519,7 @@ Save under `templates/<id>.json`. Same fields as CSV. Example: [`templates/WNBA-
 3. **Sports schedule-only** → `question_family` = `event`, no `stat_column` / `top_n_per_team`.
 4. **Sports player props** → `entity_stat` + `stat_column` + `top_n_per_team` + stats file.
 5. **Season championship / league winner** → `event` + `{schedule_teams}` + `generation_scope=season` + schedule only.
-6. **Season stat leader** → `entity_stat` + `{entity_options}` + `generation_scope=season` + stats file (`top_n_per_team` = league-wide N).
+6. **Season stat leader** → `entity_stat` + `{entity_options}` + `generation_scope=season` + stats file (`top_n_per_team` = league-wide N; default **20**).
 7. **Entertainment** → `question_family` = `content`, release list input, bracket placeholders, optional `resolution_date_rule`.
 8. **Stocks** → PascalCase client CSV or JSON with `timeframe`; watchlist input; no date rule columns.
 9. Enable template ids in `templates_enabled` in settings (or UI).

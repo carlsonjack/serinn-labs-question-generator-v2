@@ -12,6 +12,7 @@ from core.generation.season_scope import (
     uses_schedule_teams,
 )
 from core.parsers.contracts import NormalizedEvent
+from core.pipeline import resolve_top_n_per_team
 from core.template_config.schema import QuestionTemplate, parse_template_dict
 
 
@@ -84,6 +85,22 @@ class TestSeasonScopeHelpers:
             schedule_teams=teams,
         )
         assert opts == "Atlanta Dream||Chicago Sky"
+
+    def test_resolve_top_n_defaults_to_20_for_season_entity_stat(self):
+        tpl = QuestionTemplate(
+            id="WNBA-008",
+            subcategory="WNBA",
+            question_family="entity_stat",
+            question="Who will lead the league in points?",
+            answer_type="multiple_choice",
+            answer_options="{entity_options}",
+            priority=1,
+            requires_entities=True,
+            stat_column="PTS",
+            generation_scope="season",
+        )
+        assert resolve_top_n_per_team(tpl, {}) == 20
+        assert resolve_top_n_per_team(tpl, {"top_n_per_team": 5}) == 5
 
 
 class TestSeasonSchemaValidation:
