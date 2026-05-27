@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from core.parsers.contracts import NormalizedEvent, PlayerStatRecord
+from core.generation.season_scope import uses_schedule_teams
 from core.template_config.schema import QuestionTemplate
 
 _BRACKET_PLACEHOLDER_RE = re.compile(r"\[([A-Za-z0-9_]+)\]")
@@ -88,11 +89,20 @@ def resolve_event_answer_options(
     template: QuestionTemplate,
     event: NormalizedEvent,
     players: list[PlayerStatRecord],
+    *,
+    schedule_teams: list[str] | None = None,
 ) -> str:
     """Build answer_options locally for one template × event (no LLM)."""
 
     if template.answer_type == "yes_no":
         return normalize_yes_no_options(template.answer_options)
+
+    if uses_schedule_teams(template):
+        if not schedule_teams:
+            raise ValueError(
+                f"Template {template.id!r} requires schedule teams but none were provided"
+            )
+        return "||".join(schedule_teams)
 
     if template.question_family == "entity_stat":
         if not players:

@@ -1,0 +1,2 @@
+id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,generation_scope,start_date_rule,expiration_date_rule,resolution_date_rule,_comment
+WNBA-007,WNBA,event,Who will win the WNBA Championship?,multiple_choice,{schedule_teams},1,false,season,2026-06-01,2026-06-21,2026-10-21,Season-scoped: one row; answer options = all teams from schedule (no separate team list file).

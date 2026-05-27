@@ -16,6 +16,7 @@ from core.parsers.contracts import NormalizedEvent, PlayerStatRecord
 from core.template_config.schema import QuestionTemplate
 
 from .event_fill import fill_sports_template_text, resolve_event_answer_options
+from .season_scope import uses_schedule_teams
 
 
 # ---------------------------------------------------------------------------
@@ -49,6 +50,7 @@ class PromptItem:
     template: QuestionTemplate
     event: NormalizedEvent
     players: List[PlayerStatRecord] = field(default_factory=list)
+    schedule_teams: List[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -193,10 +195,18 @@ class PromptBuilder:
 
         if tpl.question_family == "event":
             lines.append(
-                f"Answer options: {resolve_event_answer_options(tpl, event, item.players)}"
+                f"Answer options: {resolve_event_answer_options(tpl, event, item.players, schedule_teams=item.schedule_teams)}"
             )
         elif tpl.question_family == "entity_stat":
-            if not item.players:
+            if uses_schedule_teams(tpl):
+                if not item.schedule_teams:
+                    raise ValueError(
+                        f"Entity template {tpl.id!r} requires schedule teams but none provided"
+                    )
+                lines.append(
+                    f"Answer options: {resolve_event_answer_options(tpl, event, item.players, schedule_teams=item.schedule_teams)}"
+                )
+            elif not item.players:
                 raise ValueError(
                     f"Entity template {tpl.id!r} requires players but "
                     f"none provided for event {event.event_id}"
@@ -206,7 +216,7 @@ class PromptBuilder:
                 f"Entities (use ONLY these as answer options): {', '.join(player_names)}"
             )
             lines.append(
-                f"Answer options: {resolve_event_answer_options(tpl, event, item.players)}"
+                f"Answer options: {resolve_event_answer_options(tpl, event, item.players, schedule_teams=item.schedule_teams)}"
             )
             lines.append(f"Stat: {tpl.stat_column}")
 

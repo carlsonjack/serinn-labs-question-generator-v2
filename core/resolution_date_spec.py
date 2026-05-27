@@ -356,6 +356,8 @@ def evaluate_template_datetime_for_event(
         base = _event_anchor_datetime(ctx, spec)
         if base is None:
             return None
+        if spec.offset_days:
+            base = base + timedelta(days=spec.offset_days)
         return _local_wall_time_to_naive_utc(
             base,
             local_hour=spec.local_hour,
@@ -534,9 +536,11 @@ For kind absolute_calendar_date:
 
 For kind local_time_on_anchor_date:
 - anchor as for offset_from_anchor (same question_family rules)
+- offset_days: integer calendar-day shift applied to the anchor before setting wall clock (default 0)
 - local_hour: 0-23, local_minute: 0-59
 - iana_timezone: IANA name e.g. America/New_York
 - For event/sports: wall time on the anchor instant's calendar date in that zone, stored as naive UTC.
+- When the rule says "day after" the event/game date, set offset_days to 1 (not 0).
 
 For kind metadata_date:
 - metadata_key: field containing an ISO or calendar date
@@ -555,7 +559,11 @@ Field-specific guidance:
 Map informal phrases:
 - For question_family "content", **start_date** / question start / when the question **opens** → anchor **question_start** (not release_date unless text says release/premiere).
 - Sports kickoff / first pitch / game time = **event_datetime**.
-- Phrases like "11am Eastern on event day" → local_time_on_anchor_date with iana_timezone America/New_York.
+- Phrases like "11am Eastern on event day" → local_time_on_anchor_date with iana_timezone America/New_York and offset_days 0.
+- "12:01am Eastern the day after event date" → local_time_on_anchor_date, anchor event_datetime, offset_days 1, local_hour 0, local_minute 1, iana_timezone America/New_York.
+- "10am Eastern on event date" → local_time_on_anchor_date, anchor event_datetime, offset_days 0, local_hour 10, local_minute 0, iana_timezone America/New_York.
+- "N hours before event time/date" → offset_from_anchor, anchor event_datetime, offset_hours -N.
+- "24 hours after expiration_date_rule" or "N hours after expiration/question expiration" → offset_from_anchor, anchor question_expiration, offset_hours N (expiration_date_rule names the expiration anchor, not a separate field).
 
 Rules:
 """

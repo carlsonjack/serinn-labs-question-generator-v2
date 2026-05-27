@@ -44,3 +44,28 @@ def test_top_players_for_team_wnba_matches_stats_team_column():
     ]
     found = top_players_for_team(stats, "Las Vegas Aces", "PTS", 2, category_key="wnba")
     assert [p.player_name for p in found] == ["A'ja Wilson"]
+
+
+def test_top_players_for_team_mls_matches_full_name_stats_column() -> None:
+    stats = [
+        PlayerStatRecord(
+            player_name="Denis Bouanga",
+            team="LAFC",
+            source_team="LAFC",
+            stat_values={"G": 24.0},
+            source_sheet=None,
+            row_number=1,
+        ),
+        PlayerStatRecord(
+            player_name="Other Striker",
+            team="Chicago Fire FC",
+            source_team="Chicago Fire FC",
+            stat_values={"G": 10.0},
+            source_sheet=None,
+            row_number=2,
+        ),
+    ]
+    lafc = top_players_for_team(stats, "LAFC", "G", 2, category_key="mls")
+    assert [p.player_name for p in lafc] == ["Denis Bouanga"]
+    chicago = top_players_for_team(stats, "Chicago Fire FC", "G", 2, category_key="mls")
+    assert [p.player_name for p in chicago] == ["Other Striker"]

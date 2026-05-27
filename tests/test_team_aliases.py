@@ -35,6 +35,7 @@ def test_all_yaml_files_load_without_duplicate_aliases() -> None:
         ("mls", "Los Angeles FC", "LAFC"),
         ("mls", "LA Galaxy", "LAG"),
         ("mls", "Galaxy", "LAG"),
+        ("mls", "Red Bull New York", "NYRB"),
         ("nba", "Los Angeles Lakers", "LAL"),
         ("nba", "Los Angeles Clippers", "LAC"),
         ("nfl", "Los Angeles Rams", "LAR"),

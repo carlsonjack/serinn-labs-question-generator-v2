@@ -294,6 +294,10 @@ def parse_content_template_table(text: str) -> list[dict[str, Any]]:
         requires_entities = _resolve_wide_requires_entities(family, req_cell, row_number=row_number)
         finalized_opts = _finalize_wide_answer_options(answer_type, answer_opts, family)
 
+        scope_raw = str(row.get("generation_scope") or "").strip().lower()
+        if not scope_raw and finalized_opts.strip() in ("{schedule_teams}", "{team_options}"):
+            scope_raw = "season"
+
         rec: dict[str, Any] = {
             "id": template_id,
             "subcategory": subcategory,
@@ -310,6 +314,8 @@ def parse_content_template_table(text: str) -> list[dict[str, Any]]:
             "start_date_rule": str(row.get("start_date_rule") or "").strip(),
             "expiration_date_rule": str(row.get("expiration_date_rule") or "").strip(),
         }
+        if scope_raw:
+            rec["generation_scope"] = scope_raw
         if family == "entity_stat":
             stat_column = str(row.get("stat_column") or "").strip()
             if not stat_column:

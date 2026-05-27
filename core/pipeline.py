@@ -27,6 +27,12 @@ from core.generation import (
     resolve_topic_import_id,
 )
 from core.generation.deterministic_events import build_deterministic_questions
+from core.generation.season_scope import (
+    build_season_event,
+    is_season_scope,
+    unique_schedule_teams,
+    uses_schedule_teams,
+)
 from core.generation.token_tracker import RunCostSummary
 from core.parsers.contracts import (
     NormalizedBundle,
@@ -150,7 +156,11 @@ def top_players_for_team(
 ) -> list[PlayerStatRecord]:
     abbrev = resolve_stats_team_code(team_label, category_key)
     stat_key = stat_storage_key(stat_column)
-    candidates = [r for r in player_stats if r.team == abbrev]
+    candidates = [
+        r
+        for r in player_stats
+        if resolve_stats_team_code(r.team, category_key) == abbrev
+    ]
     return sorted(
         candidates,
         key=lambda r: (-r.stat_values.get(stat_key, 0.0), r.player_name),
@@ -379,9 +389,61 @@ def build_prompt_items(
     settings: Mapping[str, Any],
 ) -> list[PromptItem]:
     category_key = get_inputs_category_key(settings)
+    date_filter = settings.get("date_filter") or {}
+    schedule_teams = unique_schedule_teams(bundle.events)
+    season_templates = [t for t in templates if is_season_scope(t)]
+    event_templates = [t for t in templates if not is_season_scope(t)]
     items: list[PromptItem] = []
+
+    for tpl in season_templates:
+        season_event = build_season_event(tpl.subcategory, bundle.events, date_filter)
+        if uses_schedule_teams(tpl):
+            if not schedule_teams:
+                logger.warning(
+                    "Skipping season template %s — no teams in schedule",
+                    tpl.id,
+                )
+                continue
+            items.append(
+                PromptItem(
+                    template=tpl,
+                    event=season_event,
+                    players=[],
+                    schedule_teams=schedule_teams,
+                )
+            )
+        elif tpl.question_family == "entity_stat":
+            n = resolve_top_n_per_team(tpl, settings)
+            stat = tpl.stat_column or "HR"
+            players = top_players_for_field(
+                bundle.player_stats,
+                stat,
+                n,
+                category_key=category_key,
+                settings=settings,
+            )
+            if not players:
+                logger.warning(
+                    "Skipping season entity template %s — no players in stats",
+                    tpl.id,
+                )
+                continue
+            items.append(
+                PromptItem(template=tpl, event=season_event, players=players)
+            )
+        elif tpl.question_family == "event":
+            items.append(
+                PromptItem(template=tpl, event=season_event, players=[])
+            )
+        else:
+            logger.warning(
+                "Skipping season template %s — unsupported question_family %s",
+                tpl.id,
+                tpl.question_family,
+            )
+
     for event in bundle.events:
-        for tpl in templates:
+        for tpl in event_templates:
             if tpl.question_family == "event":
                 items.append(PromptItem(template=tpl, event=event, players=[]))
             elif tpl.question_family == "entity_stat":

@@ -383,6 +383,59 @@ def test_local_time_on_anchor_eastern_maps_to_naive_utc() -> None:
     assert out.hour == 15  # 11:00 Eastern → 15:00 UTC on this date (EDT)
 
 
+def test_compile_mls_resolution_24_hours_after_expiration_rule_openai() -> None:
+    client = MagicMock()
+    payload = {
+        "items": [
+            {
+                "template_id": "MLS-006",
+                "field": "resolution",
+                "spec": {
+                    "kind": "offset_from_anchor",
+                    "anchor": "question_expiration",
+                    "offset_days": 0,
+                    "offset_hours": 24,
+                },
+            }
+        ]
+    }
+    client.chat.completions.create.return_value = MagicMock(
+        choices=[MagicMock(message=MagicMock(content=json.dumps(payload), refusal=None))]
+    )
+    data = {
+        "id": "MLS-006",
+        "question_family": "event",
+        "resolution_date_rule": "24 hours after expiration_date_rule",
+    }
+    merged = maybe_compile_resolution_for_template_data(
+        data, {"openai_api_key": "sk-test", "model": "gpt-test"}, client=client
+    )
+    assert merged["resolution_date_spec"]["anchor"] == "question_expiration"
+    assert merged["resolution_date_spec"]["offset_hours"] == 24
+
+
+def test_local_time_day_after_event_resolves_after_expiration() -> None:
+    spec = ResolutionDateSpec(
+        kind="local_time_on_anchor_date",
+        anchor="event_datetime",
+        offset_days=1,
+        local_hour=0,
+        local_minute=1,
+        iana_timezone="America/New_York",
+    )
+    event = datetime(2026, 7, 17, 0, 30, 0)
+    expiration = datetime(2026, 7, 16, 14, 0, 0)
+    ctx = EventResolutionContext(
+        event_datetime=event,
+        question_start=event + timedelta(hours=-48),
+        question_expiration=expiration,
+        metadata={},
+    )
+    out = compute_resolution_datetime_for_event(spec, ctx)
+    assert out == datetime(2026, 7, 17, 4, 1, 0)
+    assert out > expiration
+
+
 @pytest.mark.live_openai
 def test_live_openai_compiles_natural_language_resolution_rules() -> None:
     """Call the real Chat Completions API (opt-in: RUN_LIVE_OPENAI_TESTS=1 + OPENAI_API_KEY).

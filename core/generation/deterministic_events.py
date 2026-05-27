@@ -19,7 +19,7 @@ def build_deterministic_questions(items: list[PromptItem]) -> list[GeneratedQues
                 event_id=event.event_id,
                 question=fill_sports_template_text(tpl.question, event, tpl),
                 answer_options=resolve_event_answer_options(
-                    tpl, event, item.players
+                    tpl, event, item.players, schedule_teams=item.schedule_teams
                 ),
             )
         )

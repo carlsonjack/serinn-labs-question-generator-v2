@@ -36,10 +36,12 @@ ALLOWED_KEYS: frozenset[str] = frozenset(
         "start_date_spec",
         "expiration_date_rule",
         "expiration_date_spec",
+        "generation_scope",
     }
 )
 
 QUESTION_FAMILIES: frozenset[str] = frozenset({"event", "entity_stat", "stock", "content"})
+GENERATION_SCOPES: frozenset[str] = frozenset({"event", "season"})
 ANSWER_TYPES: frozenset[str] = frozenset({"yes_no", "multiple_choice"})
 
 
@@ -73,6 +75,7 @@ class QuestionTemplate:
     start_date_spec: dict[str, Any] | None = None
     expiration_date_rule: str | None = None
     expiration_date_spec: dict[str, Any] | None = None
+    generation_scope: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize for tests and downstream JSON-friendly consumers."""
@@ -130,6 +133,7 @@ def parse_template_dict(data: dict[str, Any]) -> QuestionTemplate:
     start_date_spec_raw = data.get("start_date_spec")
     expiration_date_rule = data.get("expiration_date_rule")
     expiration_date_spec_raw = data.get("expiration_date_spec")
+    generation_scope_raw = data.get("generation_scope")
 
     if stat_column is not None and not isinstance(stat_column, str):
         raise ValueError("stat_column must be a string or omitted")
@@ -167,6 +171,16 @@ def parse_template_dict(data: dict[str, Any]) -> QuestionTemplate:
         raise ValueError("start_date_rule must be a string or omitted")
     if expiration_date_rule is not None and not isinstance(expiration_date_rule, str):
         raise ValueError("expiration_date_rule must be a string or omitted")
+    if generation_scope_raw is not None and not isinstance(generation_scope_raw, str):
+        raise ValueError("generation_scope must be a string or omitted")
+    generation_scope_str = (
+        generation_scope_raw.strip().lower() if generation_scope_raw else None
+    )
+    if generation_scope_str and generation_scope_str not in GENERATION_SCOPES:
+        raise ValueError(
+            f"Invalid generation_scope: {generation_scope_raw!r} "
+            f"(expected one of {sorted(GENERATION_SCOPES)})"
+        )
     resolution_date_rule_str = resolution_date_rule.strip() if resolution_date_rule else None
     start_date_rule_str = start_date_rule.strip() if start_date_rule else None
     expiration_date_rule_str = expiration_date_rule.strip() if expiration_date_rule else None
@@ -224,6 +238,13 @@ def parse_template_dict(data: dict[str, Any]) -> QuestionTemplate:
             raise ValueError("content templates must not set stat_column or top_n_per_team")
         top_n = None
 
+    _validate_generation_scope(
+        generation_scope_str,
+        question_family,
+        answer_options,
+        requires_entities,
+    )
+
     _validate_answer_options(answer_type, answer_options, requires_entities, question_family)
 
     return QuestionTemplate(
@@ -253,6 +274,7 @@ def parse_template_dict(data: dict[str, Any]) -> QuestionTemplate:
         start_date_spec=start_date_spec,
         expiration_date_rule=expiration_date_rule_str or None,
         expiration_date_spec=expiration_date_spec,
+        generation_scope=generation_scope_str or None,
     )
 
 
@@ -291,6 +313,38 @@ def _priority_field(data: dict[str, Any], key: str) -> int | str:
     raise ValueError("priority must be an integer or blank")
 
 
+def _uses_schedule_teams_placeholder(answer_options: str) -> bool:
+    return (answer_options or "").strip() in ("{schedule_teams}", "{team_options}")
+
+
+def _validate_generation_scope(
+    generation_scope: str | None,
+    question_family: str,
+    answer_options: str,
+    requires_entities: bool,
+) -> None:
+    if generation_scope != "season":
+        return
+    if question_family in {"content", "stock"}:
+        raise ValueError(
+            "generation_scope=season is only valid for sports event or entity_stat templates"
+        )
+    if _uses_schedule_teams_placeholder(answer_options):
+        if question_family != "event":
+            raise ValueError(
+                "season templates with {schedule_teams} must use question_family=event"
+            )
+        if requires_entities:
+            raise ValueError(
+                "season templates with {schedule_teams} must set requires_entities to false"
+            )
+    elif requires_entities:
+        if question_family != "entity_stat":
+            raise ValueError(
+                "season templates with {entity_options} must use question_family=entity_stat"
+            )
+
+
 def _validate_answer_options(
     answer_type: str,
     answer_options: str,
@@ -309,6 +363,8 @@ def _validate_answer_options(
         if "||" in answer_options:
             return
         ao = (answer_options or "").strip()
+        if ao in ("{schedule_teams}", "{team_options}"):
+            return
         if question_family == "event" and ao and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", ao):
             return
         raise ValueError("multiple_choice event templates must use || in answer_options")

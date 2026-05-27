@@ -1,17 +1,17 @@
 openai_api_key: ''
 model: gpt-5.4
-topic_import_id: stocks-us-market
+topic_import_id: wnba-wnba-season-2026-2027
 topic_import_ids:
   mlb: mlb-regular-season
   f1: f1-race-winner
   music: music-new-releases-us-2026-06
   stocks: stocks-us-market
-subcategory: stocks
+subcategory: WNBA
 top_n_per_team: 3
 templates_directory: templates
 date_filter:
-  start: '2024-01-01'
-  end: '2024-03-01'
+  start: '2026-05-08'
+  end: '2026-09-24'
 date_rules:
   default:
     start_offset_hours: -24
@@ -58,7 +58,7 @@ model_pricing:
     output: 10.0
 inputs:
   directory: inputs
-  category_key: stocks
+  category_key: wnba
   files:
     F1:
       schedule: f1_schedule.xlsx
@@ -149,3 +149,4 @@ templates_enabled:
   music-mc-03: true
   music-mc-04: true
   music-award-01: true
+  WNBA-007: true

@@ -246,3 +246,15 @@ def test_parse_content_template_wide_table_rejects_entity_stat_with_requires_ent
     )
     with pytest.raises(ValueError, match="entity_stat"):
         parse_uploaded_template_file("wnba.csv", text)
+
+
+def test_parse_content_template_table_infers_generation_scope_for_schedule_teams():
+    text = (
+        "template_id,subcategory,question_family,answer_type,question,answer_options,"
+        "requires_entities,default_priority\n"
+        "WNBA-007,WNBA,event,multiple_choice,Who will win the WNBA Championship?,"
+        "{schedule_teams},false,1\n"
+    )
+    rows = parse_uploaded_template_file("wnba.csv", text)
+    assert rows[0]["generation_scope"] == "season"
+    assert rows[0]["answer_options"] == "{schedule_teams}"
