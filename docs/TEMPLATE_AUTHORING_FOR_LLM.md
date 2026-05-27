@@ -4,7 +4,7 @@ Use this document when you are asked to **create question templates** (CSV or Ex
 
 **Typical user prompts:**
 
-> Create 10 WNBA questions. I attached `schedule.xlsx` and `stats.xlsx`. Follow the template column guide. Start date = 24 hours after event time; expiration = 2 days after event; resolution = January 15 (of the event year).
+> Create 10 WNBA questions. I attached the **schedule workbook** and **player stats workbook** (filenames can be anything, e.g. `WNBA_2026_Schedule.xlsx`, `WNBA_Player_Stats_2025_2026.xlsx`). **Open the stats file first** and copy exact column headers into `stat_column`. Follow the template column guide. Start date = 24 hours after event time; expiration = 2 days after event; resolution = January 15 (of the event year).
 
 > Create music release templates for June 2026. Use `[ALBUM_OR_RELEASE]` placeholders. Resolution = start date + 8 days.
 
@@ -33,12 +33,54 @@ The app filters which schedule rows, releases, or trading days get output rows b
 
 | Input | Required for | Notes |
 |--------|----------------|-------|
-| **Schedule** (`event_source` / `schedule.xlsx`) | Sports `event` and `entity_stat` | One row per game or tournament; team sports use home/away columns; **field sports** (golf, F1) use `event_name` + date. |
-| **Stats** (`metric_source` / `stats.xlsx`) | Sports `entity_stat` only | Team sports: player rows with a **TEAM** code. **Field sports:** global rankings without `TEAM` (e.g. world rankings). |
+| **Schedule** (`event_source`) | Sports `event` and `entity_stat` | Games/fixtures file — **any filename** (e.g. `WNBA_2026_Schedule.xlsx`, `2026 Schedule.xlsx`). Mapped as schedule in app settings, not a fixed name. |
+| **Stats** (`metric_source`) | Sports `entity_stat` only | Player/goal/ranking workbook — **any filename** (e.g. `WNBA_Player_Stats_2025_2026.xlsx`, `Updated 2 years Goal Stats.xlsx`). Team sports: rows with **TEAM** (or squad) codes. **Field sports:** global rankings without `TEAM`. |
 | **Release list** (`releases` / `music.xlsx`, `movies.xlsx`, …) | `content` | One row per album, movie, show, etc. Each entity needs a **release date** (or `premiere_date` / `air_date`) in metadata. |
 | **Stock watchlist** (`metric_source` / `top-150-stocks.xlsx`) | `stock` | One row per ticker; columns include **Company Name** and **Ticker**. |
 | **`subcategory`** | All templates | Must match the input package when normalized (e.g. `WNBA` ↔ `wnba`, `Music` ↔ `music`, `stocks` ↔ `stocks`). |
 | **`openai_api_key`** (in app settings) | Optional | Needed to **compile** natural-language `*_date_rule` columns on upload if you do not ship pre-built `*_date_spec` JSON. **Not used for stock templates** (dates are computed from market calendar + `timeframe`). |
+
+**When you author templates in Claude (or any LLM):** attach **both** input workbooks the client will use — the **schedule** file and the **statistics** file (whatever they are named). Any row with `question_family` = `entity_stat` **must** be written only after reading the stats workbook headers (see [Read the stats file first](#read-the-stats-file-first-required-for-entity_stat) below).
+
+---
+
+## Read the stats file first (required for `entity_stat`)
+
+For every player-prop or season-leader template, **`stat_column` is not a label you invent** — it must be the **exact header** of the numeric column you want to rank on, as it appears in the uploaded stats spreadsheet (after you identify the correct sheet and header row).
+
+### Authoring workflow (do this before filling `stat_column`)
+
+1. **Open the stats workbook** the client will upload — use the **actual file they provide** (any name: goal stats, player stats, rankings, etc.).
+2. **Pick the sheet** used for ranking (e.g. `2025 Season`, `2026 Season`, `2025 Goals`, `World Rankings`). If multiple season sheets exist, note which one the operator will use at generation time.
+3. **Find the header row** (often row 1 or 2; the row that contains `NAME` / `Player`, `TEAM` / `Squad`, and stat columns).
+4. **List the exact stat column headers** you will rank on — copy them character-for-character into `stat_column` (spacing and casing matter).
+5. **Confirm the column is numeric** (points, goals, rebounds, rank, etc.) and that player names live in the column mapped as `NAME` or `Player`.
+6. **Set `top_n_per_team`** on the template row (see [How many names in the answer list](#how-many-names-top_n_per_team) below).
+
+If you skip this step and use shorthand (`PPG`, `RPG`, `G`) that does not appear in the file, the generator cannot rank players correctly. Answer options may look **random** or **alphabetical** even when season scope is correct (one row per season question).
+
+### Use exact headers — common mismatches
+
+| League / file | Wrong `stat_column` (not in file) | Use instead (from typical client files) |
+|---------------|-------------------------------------|----------------------------------------|
+| WNBA player stats | `PPG`, `RPG`, `APG` | `PTS`, `REB`, `AST` (headers on the season sheet) |
+| MLS goal stats | `G`, `Goals`, `GOALS` | `Gls` (header on `2025 Goals` / `2026 Goals` sheets) |
+| MLB (profile-dependent) | `Home Runs` | `HR` or whatever the sheet header literally says |
+
+**Rule:** Question wording can say “points per game” or “Golden Boot” — but **`stat_column` must still match the spreadsheet header**, not the English phrase.
+
+### Assists / secondary stats
+
+Only add a template (e.g. season assist leader) if the **same stats file** (or a second uploaded stats file) contains that column. Example: MLS season assist leader needs a column such as `A` or `Ast` on an **assists** sheet — a goals-only workbook cannot power an assists template.
+
+### How many names (`top_n_per_team`)
+
+| Template type | `top_n_per_team` on the template row | What the export shows |
+|---------------|--------------------------------------|------------------------|
+| **Per-game** player prop (`{home_team}` / `{away_team}` in question) | `2` (typical) | Top N **per side** (up to 2×N names) |
+| **Season** stat leader (`generation_scope` = `season`, no team placeholders) | **`20`** (recommended) | Top N **league-wide** |
+
+**App-wide setting:** If the operator’s [`config/settings.yaml`](../config/settings.yaml) (or UI) sets **`top_n_per_team`** globally (e.g. `3`), that value **overrides** the template and limits how many names appear (e.g. three options even when the template says `20`). For season leaderboards, set the global value to **`20`** or remove it so the template value applies.
 
 ---
 
@@ -83,8 +125,8 @@ Questions where answer choices are **player names** from the stats workbook.
 |--------|-------------|
 | **`question_family`** | `entity_stat` |
 | **`requires_entities`** | `true` |
-| **`stat_column`** | **Required.** Spreadsheet column header from stats data (normalized), e.g. `PTS`, `REB`, `HR`, `GOAL_PROBABILITY`, `FG%`. |
-| **`top_n_per_team`** | **Required in practice.** Integer: how many top players **per team** (home + away) to include, e.g. `2` → up to 4 names in the option list. Default in app is `2` if omitted on wide-table upload. |
+| **`stat_column`** | **Required.** **Exact** header from the attached stats file (see [Read the stats file first](#read-the-stats-file-first-required-for-entity_stat)). Examples: `PTS`, `REB`, `Gls`, `HR`. Not conceptual names (`PPG`, `G`) unless that text literally appears in the sheet. |
+| **`top_n_per_team`** | **Required in practice.** Per-game: `2` (top players per home/away). Season (`generation_scope=season`): **`20`**. Omitted on upload → defaults to `2` (per-game) or `20` (season). Global app `top_n_per_team` overrides the template if set. |
 | **`question`** | Game context: `Which player will score the most points in {home_team} vs {away_team}?` |
 | **`answer_options`** | **`{entity_options}`** only (or leave blank on wide upload → app sets `{entity_options}`). |
 
@@ -313,8 +355,9 @@ Do **not** build Excel with alternating “field name row / value row” pairs (
 | **`answer_options_pattern`** / **`answer_options`** | MC: required pattern; yes_no: optional | Use `||` between choices. |
 | **`question_family`** | Recommended | `event`, `entity_stat`, or `content`. If blank and `stat_column` is set → `entity_stat`; otherwise inferred from placeholders/rules. |
 | **`requires_entities`** | Recommended | `false` for event/content; `true` for entity_stat. |
-| **`stat_column`** | entity_stat only | e.g. `PTS` |
-| **`top_n_per_team`** / **`top_n`** | entity_stat only | e.g. `2` |
+| **`stat_column`** | entity_stat only | **Exact** stats sheet header (read file first), e.g. `PTS`, `Gls` |
+| **`top_n_per_team`** / **`top_n`** | entity_stat only | Per-game: `2`; season: `20` |
+| **`generation_scope`** | season templates | `season` (or infer via `{schedule_teams}` / season `entity_stat` question) |
 | **`template_type`** | content only (optional) | e.g. `Album Comparison` |
 | **`required_dataset_fields`** | content only (optional) | e.g. `release_a; release_b; chart_week` |
 | **`timeframe`** | stock only (in JSON or client CSV) | `Daily`, `Weekly`, `Monthly`, `Quarterly` |
@@ -389,8 +432,9 @@ Same columns as JSON templates: `stat_column`, `top_n_per_team`, `start_date_rul
 
 | Column | Value |
 |--------|--------|
-| **`stat_column`** | Spreadsheet column header (normalized), e.g. `PTS`, `HR`, `FG%` |
-| **`top_n_per_team`** | e.g. `2` |
+| **`stat_column`** | **Exact** header from stats workbook (e.g. `PTS`, `Gls`) — [read stats file first](#read-the-stats-file-first-required-for-entity_stat) |
+| **`top_n_per_team`** | Per-game: `2`; season: `20` |
+| **`generation_scope`** | `season` for one-row season questions; omit for per-game |
 | **`requires_entities`** | `true` |
 
 ### Date columns (optional; sports `event` / `entity_stat` and `content`)
@@ -447,7 +491,7 @@ id,subcategory,question_family,question,answer_type,answer_options,priority,requ
 WNBA-002,WNBA,entity_stat,Which player will score the most points in {home_team} vs {away_team}?,multiple_choice,{entity_options},1,true,PTS,2,event_date_minus_48_hours,2 days after event start,January 15 of the event calendar year
 ```
 
-Requires **both** schedule and stats files.
+Requires **both** the schedule workbook and the stats workbook (any filenames).
 
 ---
 
@@ -500,7 +544,10 @@ stocks_daily_close_higher,Daily Close Higher,Daily,Will {ASSET} close higher on 
 | Championship as `entity_stat` + `{entity_options}` | Use `event` + `{schedule_teams}` + `generation_scope=season`. |
 | Season stat leader with `{home_team}` in question | Stays **per-game** (one row per game). Remove team placeholders for season scope. |
 | Season question without `generation_scope=season` | Emits one row **per game** (duplicates). Set `generation_scope=season` or use season wording without home/away so upload auto-infers it. |
-| Fake stat columns (`Teams`, `PPG`, `RPG`) | Use real stats headers (`PTS`, `REB`, `AST`, `HR`, etc.) from the stats workbook. |
+| Fake or shorthand stat columns (`PPG`, `RPG`, `G` when sheet has `Gls`) | Open the stats file; put the **literal column header** in `stat_column` (`PTS`, `REB`, `Gls`, …). |
+| Season leader shows 3 names instead of 20 | Set `top_n_per_team` to **`20`** on the template **and** check app settings — global `top_n_per_team: 3` overrides the template. |
+| Season leader options look random / not top scorers | Usually wrong `stat_column` (ranking column missing → name order). Re-read stats headers. |
+| MLS assist leader with goals-only stats file | Add an assists workbook/sheet with an assists column, or disable the assist template until that file exists. |
 | Golf/F1 season winner with `{schedule_teams}` | Use 008-style: `entity_stat` + `{entity_options}` + rankings/standings stat column. |
 | Mismatched `subcategory` | `WNBA` templates only run when package is `wnba`; `Music` when package is `music`. |
 
@@ -517,12 +564,13 @@ Save under `templates/<id>.json`. Same fields as CSV. Example: [`templates/WNBA-
 1. Templates use `subcategory` matching the input package (`WNBA`, `Music`, `stocks`, …).
 2. **All question text is forward-looking** — future events only; no past-tense or "who won / did X happen" wording.
 3. **Sports schedule-only** → `question_family` = `event`, no `stat_column` / `top_n_per_team`.
-4. **Sports player props** → `entity_stat` + `stat_column` + `top_n_per_team` + stats file.
+4. **Sports player props** → `entity_stat` + stats file; **`stat_column` = exact header from that file**; `top_n_per_team` set (per-game `2`).
 5. **Season championship / league winner** → `event` + `{schedule_teams}` + `generation_scope=season` + schedule only.
-6. **Season stat leader** → `entity_stat` + `{entity_options}` + `generation_scope=season` + stats file (`top_n_per_team` = league-wide N; default **20**).
-7. **Entertainment** → `question_family` = `content`, release list input, bracket placeholders, optional `resolution_date_rule`.
-8. **Stocks** → PascalCase client CSV or JSON with `timeframe`; watchlist input; no date rule columns.
-9. Enable template ids in `templates_enabled` in settings (or UI).
-10. Upload templates via UI **Templates** step (CSV/XLSX/JSON).
+6. **Season stat leader** → `entity_stat` + `{entity_options}` + `generation_scope=season` + stats file; **`stat_column` copied from stats sheet**; **`top_n_per_team`: `20`**; confirm global app setting is not forcing `3`.
+7. **LLM authoring** → Attach the client’s schedule + stats workbooks (any names) in the same prompt; never guess `stat_column` from question wording alone.
+8. **Entertainment** → `question_family` = `content`, release list input, bracket placeholders, optional `resolution_date_rule`.
+9. **Stocks** → PascalCase client CSV or JSON with `timeframe`; watchlist input; no date rule columns.
+10. Enable template ids in `templates_enabled` in settings (or UI).
+11. Upload templates via UI **Templates** step (CSV/XLSX/JSON).
 
 For machine-readable team aliases and package keys, see [`config/team_aliases/README.md`](../config/team_aliases/README.md) and the main [`README.md`](../README.md).
