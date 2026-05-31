@@ -102,6 +102,21 @@ class TestSeasonScopeHelpers:
         assert resolve_top_n_per_team(tpl, {}) == 20
         assert resolve_top_n_per_team(tpl, {"top_n_per_team": 5}) == 5
 
+    def test_resolve_top_n_template_value_beats_global_override(self):
+        tpl = QuestionTemplate(
+            id="GOLF01",
+            subcategory="GOLF",
+            question_family="entity_stat",
+            question="Who will win the {event_name}?",
+            answer_type="multiple_choice",
+            answer_options="{entity_options}",
+            priority=1,
+            requires_entities=True,
+            stat_column="FedExCup Rank",
+            top_n_per_team=35,
+        )
+        assert resolve_top_n_per_team(tpl, {"top_n_per_team": 3}) == 35
+
 
 class TestSeasonSchemaValidation:
     def test_parses_season_championship_template(self):

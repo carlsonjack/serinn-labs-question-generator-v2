@@ -1,0 +1,15 @@
+category_key: golf
+confidence: 1.0
+field_mappings:
+  event_date: event_date
+  event_id: event_id
+  event_name: event_name
+  event_display: event_name
+file_pattern: '*Schedule*.xlsx'
+fingerprint: null
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: golf_schedule
+sheet_name: PGA 2026 Schedule
+source_role: event_source

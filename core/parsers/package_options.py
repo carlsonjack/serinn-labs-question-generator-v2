@@ -6,6 +6,8 @@ from typing import Any, Mapping
 
 from core.template_ui import normalize_template_package
 
+from .stat_keys import stat_storage_key
+
 COMPETITION_FORMAT_TEAM = "team_sport"
 COMPETITION_FORMAT_FIELD = "field"
 
@@ -70,7 +72,14 @@ def ascending_stat_columns(
     raw = get_package_options(settings, category_key).get("ascending_stat_columns") or []
     if not isinstance(raw, (list, tuple)):
         return frozenset()
-    return frozenset(str(c).strip().upper() for c in raw if str(c).strip())
+    keys: set[str] = set()
+    for column in raw:
+        text = str(column).strip()
+        if not text:
+            continue
+        keys.add(text.upper())
+        keys.add(stat_storage_key(text))
+    return frozenset(keys)
 
 
 def skip_status_values(settings: Mapping[str, Any], category_key: str | None) -> frozenset[str]:

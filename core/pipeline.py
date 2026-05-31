@@ -120,11 +120,11 @@ def _bundle_has_errors(issues: list[ValidationIssue]) -> bool:
 
 
 def resolve_top_n_per_team(template: QuestionTemplate, settings: Mapping[str, Any]) -> int:
+    if template.top_n_per_team is not None:
+        return max(1, int(template.top_n_per_team))
     override = settings.get("top_n_per_team")
     if override is not None:
         return max(1, int(override))
-    if template.top_n_per_team is not None:
-        return max(1, int(template.top_n_per_team))
     if is_season_scope(template) and template.question_family == "entity_stat":
         return 20
     return 2

@@ -33,7 +33,7 @@ def _golf_settings() -> dict:
                     "placeholder_home_team": "Golfer_A",
                     "placeholder_away_team": "Golfer_B",
                     "field_team_code": "FIELD",
-                    "ascending_stat_columns": ["RANK"],
+                    "ascending_stat_columns": ["RANK", "FedExCup Rank"],
                     "skip_status_values": ["complete", "cancelled", "canceled"],
                 }
             },
@@ -226,6 +226,47 @@ def test_top_players_for_field_rank_vs_avg_points() -> None:
     by_avg = [p.player_name for p in top_players_for_field(stats, "AVG POINTS", 2, category_key="golf", settings=settings)]
     assert by_rank == ["Rory McIlroy", "Scottie Scheffler"]
     assert by_avg == ["Scottie Scheffler", "Rory McIlroy"]
+
+
+def test_top_players_for_field_fedexcup_rank_ascending() -> None:
+    from core.parsers.contracts import PlayerStatRecord
+    from core.parsers.stat_keys import stat_storage_key
+
+    stats = [
+        PlayerStatRecord(
+            player_name="Ludvig Aberg",
+            team="FIELD",
+            source_team="FIELD",
+            stat_values={stat_storage_key("FedExCup Rank"): 1.0},
+            source_sheet=None,
+            row_number=1,
+        ),
+        PlayerStatRecord(
+            player_name="Adrien Saddier",
+            team="FIELD",
+            source_team="FIELD",
+            stat_values={stat_storage_key("FedExCup Rank"): 173.0},
+            source_sheet=None,
+            row_number=2,
+        ),
+        PlayerStatRecord(
+            player_name="Akshay Bhatia",
+            team="FIELD",
+            source_team="FIELD",
+            stat_values={stat_storage_key("FedExCup Rank"): 2.0},
+            source_sheet=None,
+            row_number=3,
+        ),
+    ]
+    settings = _golf_settings()
+    top = [
+        p.player_name
+        for p in top_players_for_field(
+            stats, "FedExCup Rank", 2, category_key="golf", settings=settings
+        )
+    ]
+    assert top == ["Ludvig Aberg", "Akshay Bhatia"]
+    assert "Adrien Saddier" not in top
 
 
 def test_build_prompt_items_field_entity_stat(tmp_path: Path) -> None:

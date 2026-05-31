@@ -109,6 +109,7 @@ inputs:
       field_team_code: FIELD
       ascending_stat_columns:
       - RANK
+      - FedExCup Rank
       skip_status_values:
       - complete
       - cancelled

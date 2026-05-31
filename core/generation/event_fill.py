@@ -10,7 +10,7 @@ from core.template_config.schema import QuestionTemplate
 _BRACKET_PLACEHOLDER_RE = re.compile(r"\[([A-Za-z0-9_]+)\]")
 _BRACE_PLACEHOLDER_RE = re.compile(r"\{([A-Za-z0-9_]+)\}")
 _PLAYER_TOKEN_RE = re.compile(
-    r"\[PLAYER\]|\{player\}|\[DRIVER\]|\{driver\}",
+    r"\[PLAYER\]|\{player\}|\[DRIVER\]|\{driver\}|\[GOLFER\]|\{golfer\}",
     re.IGNORECASE,
 )
 _TEAM_TOKEN_RE = re.compile(r"\[TEAM\]|\{team\}", re.IGNORECASE)
@@ -111,8 +111,10 @@ def fill_sports_template_text(
     if player is not None:
         context["PLAYER"] = player.player_name
         context["DRIVER"] = player.player_name
+        context["GOLFER"] = player.player_name
         lower_ctx["player"] = player.player_name
         lower_ctx["driver"] = player.player_name
+        lower_ctx["golfer"] = player.player_name
     if team is not None and str(team).strip():
         context["TEAM"] = str(team).strip()
         lower_ctx["team"] = str(team).strip()

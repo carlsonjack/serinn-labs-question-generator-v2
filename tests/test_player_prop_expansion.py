@@ -91,6 +91,16 @@ class TestUsesPlayerQuestionExpansion:
         )
         assert uses_player_question_expansion(tpl) is True
 
+    def test_detects_bracket_golfer(self) -> None:
+        tpl = _player_prop_tpl(
+            id="GOLF02",
+            subcategory="GOLF",
+            question="Will [GOLFER] record more than 3 birdies in a round?",
+            answer_type="yes_no",
+            answer_options="Yes||No",
+        )
+        assert uses_player_question_expansion(tpl) is True
+
 
 class TestFillSportsTemplateTextWithPlayer:
     def test_substitutes_player_name(self) -> None:
@@ -109,6 +119,18 @@ class TestFillSportsTemplateTextWithPlayer:
         player = _player("George Russell", "Mercedes", 88.0)
         out = fill_sports_template_text(tpl.question, _event(), tpl, player=player)
         assert out == "Will George Russell finish in the top 10?"
+
+    def test_substitutes_golfer_token(self) -> None:
+        tpl = _player_prop_tpl(
+            id="GOLF02",
+            subcategory="GOLF",
+            question="Will [GOLFER] record more than 3 birdies in a round?",
+            answer_type="yes_no",
+        )
+        player = _player("Scottie Scheffler", "FIELD", 1.0)
+        out = fill_sports_template_text(tpl.question, _event(subcategory="GOLF"), tpl, player=player)
+        assert out == "Will Scottie Scheffler record more than 3 birdies in a round?"
+        assert "[GOLFER]" not in out
 
     def test_event_driver_fallback_to_literal_word(self) -> None:
         tpl = QuestionTemplate(

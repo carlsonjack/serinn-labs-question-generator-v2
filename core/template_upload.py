@@ -16,10 +16,18 @@ _GAME_PLACEHOLDER_RE = re.compile(
     r"\{home_team\}|\{away_team\}|\[HOME_TEAM\]|\[AWAY_TEAM\]",
     re.IGNORECASE,
 )
+_EVENT_PLACEHOLDER_RE = re.compile(
+    r"\{event_name\}|\{event\}|\[EVENT_NAME\]|\[EVENT\]",
+    re.IGNORECASE,
+)
 
 
 def _question_has_game_placeholders(question: str) -> bool:
     return bool(_GAME_PLACEHOLDER_RE.search(question or ""))
+
+
+def _question_has_event_placeholders(question: str) -> bool:
+    return bool(_EVENT_PLACEHOLDER_RE.search(question or ""))
 
 
 def _infer_generation_scope(
@@ -37,7 +45,9 @@ def _infer_generation_scope(
     if family == "entity_stat" and (
         opts == "{entity_options}" or (family == "entity_stat" and not opts)
     ):
-        if not _question_has_game_placeholders(question):
+        if not _question_has_game_placeholders(question) and not _question_has_event_placeholders(
+            question
+        ):
             return "season"
     return ""
 

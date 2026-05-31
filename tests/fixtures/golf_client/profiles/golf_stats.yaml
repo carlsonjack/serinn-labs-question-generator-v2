@@ -1,0 +1,12 @@
+category_key: golf
+confidence: 1.0
+field_mappings:
+  player_name: Player Name
+file_pattern: '*Schwab*stats*.xlsx'
+fingerprint: null
+format_name: xlsx
+header_row_index: 0
+normalizer_options: {}
+profile_name: golf_stats
+sheet_name: Charles Schwab Challenge
+source_role: metric_source

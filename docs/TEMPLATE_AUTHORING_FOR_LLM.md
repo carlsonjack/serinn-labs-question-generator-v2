@@ -80,7 +80,7 @@ Only add a template (e.g. season assist leader) if the **same stats file** (or a
 | **Per-game** player prop (`{home_team}` / `{away_team}` in question) | `2` (typical) | Top N **per side** (up to 2×N names) |
 | **Season** stat leader (`generation_scope` = `season`, no team placeholders) | **`20`** (recommended) | Top N **league-wide** |
 
-**App-wide setting:** If the operator’s [`config/settings.yaml`](../config/settings.yaml) (or UI) sets **`top_n_per_team`** globally (e.g. `3`), that value **overrides** the template and limits how many names appear (e.g. three options even when the template says `20`). For season leaderboards, set the global value to **`20`** or remove it so the template value applies.
+**App-wide setting:** If the operator’s [`config/settings.yaml`](../config/settings.yaml) (or UI) sets **`top_n_per_team`** globally (e.g. `3`), that value applies **only when the template row omits `top_n_per_team`**. An explicit value on the template row always wins (e.g. template `20` is not capped to global `3`).
 
 ---
 
@@ -140,9 +140,11 @@ Questions where answer choices are **player names** from the stats workbook.
 
 Use when the **player is named in the question** and **stat buckets** (or yes/no) are the answers — e.g. “How many points will [PLAYER] score in Game 1?”
 
+**Entity-in-question placeholder (all sports):** Always use **`[PLAYER]`** or **`{player}`** when an athlete’s name appears in the question text. Do **not** invent sport-specific tokens such as `[GOLFER]`, `[SCORER]`, `[RUNNER]`, or `[DRIVER]`. The app accepts a few legacy synonyms at runtime, but **`[PLAYER]` is the only token you should author** — it works for NBA, WNBA, MLS, golf, F1, and every other sport.
+
 | Field | What to put |
 |--------|-------------|
-| **`question`** | Include **`[PLAYER]`** or **`{player}`** (one row per top-N player). Example: `How many points will [PLAYER] score in Game 1 of the 2025-2026 NBA Finals?` |
+| **`question`** | Include **`[PLAYER]`** or **`{player}`** (one row per top-N player). Example: `How many points will [PLAYER] score in Game 1 of the 2025-2026 NBA Finals?` Golf example: `Will [PLAYER] finish in the top 10 in {event_name}?` |
 | **`answer_options`** | Literal buckets: `Under 18||18-22||23-27||28-32||33+` — **not** `{entity_options}`. For yes/no props: leave blank or `Yes||No`. |
 | **`stat_column`** | Column used to rank which players get rows (same as classic). |
 | **`top_n_per_team`** | Same as classic — controls how many players expand per side. |
@@ -210,18 +212,36 @@ When there is no home/away team:
 
 | Field | Value |
 |--------|--------|
+| **`subcategory`** | Must match the input package — use **`GOLF`** for PGA golf (not `PGA`). |
 | **`question`** | Per-tournament: use `{event_name}`. **Season championship** (FedEx Cup, etc.): season wording with **no** `{event_name}` — same one-row rule as WNBA-008/009. |
 | **`answer_options`** (event) | Placeholders or yes/no until pairing data exists. |
 | **`answer_options`** (season championship) | **`{entity_options}`** — top N from rankings/standings, **not** `{schedule_teams}` (schedule placeholders are not contenders). |
-| **`generation_scope`** | **`season`** for one-row season questions (FedEx Cup, future F1 Drivers' Championship). |
-| **`stat_column`** | Spreadsheet column from rankings, e.g. `AVG POINTS`, `RANK`. |
-| **`top_n_per_team`** | Top **N in the entire field** (not per team). Default **20** when season-scoped and omitted on upload. |
+| **`generation_scope`** | **`season`** only for one-row season questions (FedEx Cup, F1 Drivers' Championship). Per-tournament MC with `{event_name}` stays **per-event** (omit `generation_scope` or set `event`). |
+| **`stat_column`** | Spreadsheet column from rankings, e.g. `AVG POINTS`, `RANK`, `FedExCup Rank`. |
+| **`top_n_per_team`** | Top **N in the entire field** (not per team). Set explicitly on the template row (e.g. `35` for tournament winner MC, `5` for player props). |
 
-**Golf season championship today:** use **008-style** (`entity_stat` + `{entity_options}` + `generation_scope=season` + rankings file). Example question: `Who will win the FedEx Cup?`
+**Per-tournament winner MC (golf):** `entity_stat` + `{entity_options}` + `{event_name}` + stats file. Example: `Who will win the {event_name}?` — one row **per tournament** in the date window, answer list = top N from rankings.
 
-**F1 driver standings (optional `stats` / `metric_source` slot):** Upload a workbook with `DRIVER`, `TEAM`, and stat columns (e.g. `PTS`). Use **`[DRIVER]`** or **`[PLAYER]`** in `entity_stat` questions for one row per top-N driver per race; use **`[TEAM]`** in `event` yes/no questions for one row per constructor. **`stat_column`** must match a header in the standings file (e.g. `PTS`). Schedule-only runs still work; `entity_stat` and `[TEAM]` templates are skipped when no standings are uploaded.
+**Golfer yes/no props:** `entity_stat` + `[PLAYER]` + `top_n_per_team` (e.g. `5`) + stats file. Example: `Will [PLAYER] finish in the top 10 in {event_name}?` — one row per top-N golfer per tournament.
+
+**Golf season championship:** use **008-style** (`entity_stat` + `{entity_options}` + **`generation_scope=season`** + rankings file). Example question: `Who will win the FedEx Cup?` — no `{event_name}` in the question.
+
+**Rank columns (lower = better):** Columns such as `RANK` or `FedExCup Rank` must be listed under `inputs.packages.golf.ascending_stat_columns` in settings (exact header or normalized form). Otherwise the app sorts them as “higher number = better” and answer lists look random.
+
+**F1 driver standings (optional `stats` / `metric_source` slot):** Upload a workbook with `DRIVER`, `TEAM`, and stat columns (e.g. `PTS`). Use **`[PLAYER]`** in `entity_stat` questions for one row per top-N driver per race (`[DRIVER]` still works on legacy templates); use **`[TEAM]`** in `event` yes/no questions for one row per constructor. **`stat_column`** must match a header in the standings file (e.g. `PTS`). Schedule-only runs still work; `entity_stat` and `[TEAM]` templates are skipped when no standings are uploaded.
 
 **F1 season championship:** same 008-style pattern (`entity_stat` + `{entity_options}` + `generation_scope=season` + standings) when you want driver lists from the metrics file instead of a static `answer_options` list.
+
+**Golf worked example (tournament winner + player prop):**
+
+```csv
+template_id,subcategory,question_family,question,answer_type,answer_options,priority,requires_entities,stat_column,top_n_per_team,generation_scope
+GOLF01,GOLF,entity_stat,Who will win the {event_name}?,multiple_choice,{entity_options},1,true,FedExCup Rank,35,
+GOLF02,GOLF,entity_stat,Will [PLAYER] finish in the top 10 in {event_name}?,yes_no,Yes||No,2,true,FedExCup Rank,5,
+GOLF33,GOLF,entity_stat,Who will win the FedEx Cup?,multiple_choice,{entity_options},1,true,FedExCup Rank,20,season
+```
+
+**Visual sample:** [`samples/golf_client_generation_sample.csv`](../samples/golf_client_generation_sample.csv)
 
 ---
 
@@ -566,11 +586,15 @@ stocks_daily_close_higher,Daily Close Higher,Daily,Will {ASSET} close higher on 
 | Season stat leader with `{home_team}` in question | Stays **per-game** (one row per game). Remove team placeholders for season scope. |
 | Season question without `generation_scope=season` | Emits one row **per game** (duplicates). Set `generation_scope=season` or use season wording without home/away so upload auto-infers it. |
 | Fake or shorthand stat columns (`PPG`, `RPG`, `G` when sheet has `Gls`) | Open the stats file; put the **literal column header** in `stat_column` (`PTS`, `REB`, `Gls`, …). |
-| Season leader shows 3 names instead of 20 | Set `top_n_per_team` to **`20`** on the template **and** check app settings — global `top_n_per_team: 3` overrides the template. |
-| Season leader options look random / not top scorers | Usually wrong `stat_column` (ranking column missing → name order). Re-read stats headers. |
+| Season leader shows 3 names instead of 20 | Set `top_n_per_team` to **`20`** on the template row (explicit template value beats the global UI default). |
+| Season leader options look random / not top scorers | Usually wrong `stat_column` or rank column not in `ascending_stat_columns`. Re-read stats headers. |
+| `[GOLFER]` / sport-specific entity tokens in question | Use **`[PLAYER]`** only — see [player-prop buckets](#b-player-prop-buckets-player-in-the-question). |
+| “Who will win {event_name}?” becomes a season question | Per-tournament MC should omit `generation_scope=season`; use `{event_name}` in the question. Set `generation_scope=event` if unsure. |
+| Wrong golfers in MC answer list (worst-ranked names) | Add the rank column (e.g. `FedExCup Rank`) to `ascending_stat_columns` in golf package settings. |
+| Template says 35 names but export shows 3 | Set `top_n_per_team` on the template row — explicit template value wins over global UI default. |
 | MLS assist leader with goals-only stats file | Add an assists workbook/sheet with an assists column, or disable the assist template until that file exists. |
 | Golf/F1 season winner with `{schedule_teams}` | Use 008-style: `entity_stat` + `{entity_options}` + rankings/standings stat column. |
-| Mismatched `subcategory` | `WNBA` templates only run when package is `wnba`; `Music` when package is `music`. |
+| Mismatched `subcategory` | `WNBA` templates only run when package is `wnba`; `GOLF` when package is `golf` (not `PGA`); `Music` when package is `music`. |
 
 ---
 
@@ -585,13 +609,14 @@ Save under `templates/<id>.json`. Same fields as CSV. Example: [`templates/WNBA-
 1. Templates use `subcategory` matching the input package (`WNBA`, `Music`, `stocks`, …).
 2. **All question text is forward-looking** — future events only; no past-tense or "who won / did X happen" wording.
 3. **Sports schedule-only** → `question_family` = `event`, no `stat_column` / `top_n_per_team`.
-4. **Sports player props** → `entity_stat` + stats file; **`stat_column` = exact header from that file**; `top_n_per_team` set (per-game `2`).
+4. **Sports player props** → `entity_stat` + stats file; use **`[PLAYER]`** in the question (never `[GOLFER]`, `[DRIVER]`, etc.); **`stat_column` = exact header from that file**; set `top_n_per_team` on the template row.
 5. **Season championship / league winner** → `event` + `{schedule_teams}` + `generation_scope=season` + schedule only.
-6. **Season stat leader** → `entity_stat` + `{entity_options}` + `generation_scope=season` + stats file; **`stat_column` copied from stats sheet**; **`top_n_per_team`: `20`**; confirm global app setting is not forcing `3`.
-7. **LLM authoring** → Attach the client’s schedule + stats workbooks (any names) in the same prompt; never guess `stat_column` from question wording alone.
-8. **Entertainment** → `question_family` = `content`, release list input, bracket placeholders, optional `resolution_date_rule`.
-9. **Stocks** → PascalCase client CSV or JSON with `timeframe`; watchlist input; no date rule columns.
-10. Enable template ids in `templates_enabled` in settings (or UI).
-11. Upload templates via UI **Templates** step (CSV/XLSX/JSON).
+6. **Season stat leader** → `entity_stat` + `{entity_options}` + `generation_scope=season` + stats file; **`stat_column` copied from stats sheet**; **`top_n_per_team`: `20`** on the template row.
+7. **Golf per-tournament MC** → `entity_stat` + `{entity_options}` + `{event_name}` + stats; **`subcategory=GOLF`**; rank columns in `ascending_stat_columns`.
+8. **LLM authoring** → Attach the client’s schedule + stats workbooks (any names) in the same prompt; never guess `stat_column` from question wording alone.
+9. **Entertainment** → `question_family` = `content`, release list input, bracket placeholders, optional `resolution_date_rule`.
+10. **Stocks** → PascalCase client CSV or JSON with `timeframe`; watchlist input; no date rule columns.
+11. Enable template ids in `templates_enabled` in settings (or UI).
+12. Upload templates via UI **Templates** step (CSV/XLSX/JSON).
 
 For machine-readable team aliases and package keys, see [`config/team_aliases/README.md`](../config/team_aliases/README.md) and the main [`README.md`](../README.md).

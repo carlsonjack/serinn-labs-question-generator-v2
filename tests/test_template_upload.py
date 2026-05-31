@@ -284,3 +284,16 @@ def test_parse_content_template_table_infers_generation_scope_for_season_entity_
     assert rows[0]["generation_scope"] == "season"
     assert rows[0]["top_n_per_team"] == 20
     assert rows[0]["answer_options"] == "{entity_options}"
+
+
+def test_parse_content_template_table_does_not_infer_season_for_event_name_entity_stat():
+    text = (
+        "template_id,subcategory,question_family,answer_type,question,answer_options,"
+        "stat_column,requires_entities,default_priority\n"
+        "GOLF01,GOLF,entity_stat,multiple_choice,"
+        "Who will win the {event_name}?,"
+        "{entity_options},FedExCup Rank,true,1\n"
+    )
+    rows = parse_uploaded_template_file("golf.csv", text)
+    assert "generation_scope" not in rows[0]
+    assert rows[0]["top_n_per_team"] == 2
