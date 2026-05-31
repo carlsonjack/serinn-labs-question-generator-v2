@@ -9,17 +9,45 @@ from core.template_config.schema import QuestionTemplate
 
 _BRACKET_PLACEHOLDER_RE = re.compile(r"\[([A-Za-z0-9_]+)\]")
 _BRACE_PLACEHOLDER_RE = re.compile(r"\{([A-Za-z0-9_]+)\}")
-_PLAYER_TOKEN_RE = re.compile(r"\[PLAYER\]|\{player\}", re.IGNORECASE)
+_PLAYER_TOKEN_RE = re.compile(
+    r"\[PLAYER\]|\{player\}|\[DRIVER\]|\{driver\}",
+    re.IGNORECASE,
+)
+_TEAM_TOKEN_RE = re.compile(r"\[TEAM\]|\{team\}", re.IGNORECASE)
+_DRIVER_EVENT_FALLBACK_RE = re.compile(r"\[DRIVER\]|\{driver\}", re.IGNORECASE)
 
 YES_NO_OPTIONS = "Yes||No"
+_DRIVER_LITERAL = "driver"
 
 
 def uses_player_question_expansion(template: QuestionTemplate) -> bool:
-    """True when ``entity_stat`` expands one row per player via ``[PLAYER]`` / ``{player}``."""
+    """True when ``entity_stat`` expands one row per player via player/driver tokens."""
 
     return template.question_family == "entity_stat" and bool(
         _PLAYER_TOKEN_RE.search(template.question or "")
     )
+
+
+def uses_team_question_expansion(template: QuestionTemplate) -> bool:
+    """True when ``event`` expands one row per constructor via ``[TEAM]`` / ``{team}``."""
+
+    return template.question_family == "event" and bool(
+        _TEAM_TOKEN_RE.search(template.question or "")
+    )
+
+
+def unique_teams_from_stats(player_stats: list[PlayerStatRecord]) -> list[str]:
+    """Sorted unique constructor labels from standings ``TEAM`` column."""
+
+    seen: set[str] = set()
+    teams: list[str] = []
+    for record in player_stats:
+        label = str(record.source_team or "").strip()
+        if not label or label in seen:
+            continue
+        seen.add(label)
+        teams.append(label)
+    return sorted(teams, key=str.casefold)
 
 
 def player_instance_key(player: PlayerStatRecord) -> str:
@@ -27,6 +55,13 @@ def player_instance_key(player: PlayerStatRecord) -> str:
 
     slug = re.sub(r"[^a-z0-9]+", "-", player.player_name.lower()).strip("-")
     return slug or player.player_name
+
+
+def team_instance_key(team_label: str) -> str:
+    """Stable slug for matching expanded team-prop rows."""
+
+    slug = re.sub(r"[^a-z0-9]+", "-", team_label.lower()).strip("-")
+    return slug or team_label
 
 
 def event_placeholder_context(
@@ -50,12 +85,21 @@ def event_placeholder_context(
     return ctx
 
 
+def _apply_driver_event_fallback(text: str, template: QuestionTemplate) -> str:
+    """Replace driver tokens with the word ``driver`` on event templates without a player."""
+
+    if template.question_family != "event":
+        return text
+    return _DRIVER_EVENT_FALLBACK_RE.sub(_DRIVER_LITERAL, text)
+
+
 def fill_sports_template_text(
     text: str,
     event: NormalizedEvent,
     template: QuestionTemplate,
     *,
     player: PlayerStatRecord | None = None,
+    team: str | None = None,
 ) -> str:
     """Replace ``[KEY]`` and ``{key}`` placeholders using event + template context."""
 
@@ -66,7 +110,12 @@ def fill_sports_template_text(
     }
     if player is not None:
         context["PLAYER"] = player.player_name
+        context["DRIVER"] = player.player_name
         lower_ctx["player"] = player.player_name
+        lower_ctx["driver"] = player.player_name
+    if team is not None and str(team).strip():
+        context["TEAM"] = str(team).strip()
+        lower_ctx["team"] = str(team).strip()
     if event.event_display and str(event.event_display).strip():
         label = str(event.event_display).strip()
         lower_ctx["event_name"] = label
@@ -92,7 +141,10 @@ def fill_sports_template_text(
         return match.group(0)
 
     out = _BRACKET_PLACEHOLDER_RE.sub(repl, text)
-    return _BRACE_PLACEHOLDER_RE.sub(brace_repl, out)
+    out = _BRACE_PLACEHOLDER_RE.sub(brace_repl, out)
+    if player is None:
+        out = _apply_driver_event_fallback(out, template)
+    return out
 
 
 def normalize_yes_no_options(raw: str) -> str:
@@ -112,6 +164,7 @@ def resolve_event_answer_options(
     players: list[PlayerStatRecord],
     *,
     schedule_teams: list[str] | None = None,
+    team: str | None = None,
 ) -> str:
     """Build answer_options locally for one template × event (no LLM)."""
 
@@ -128,7 +181,10 @@ def resolve_event_answer_options(
     if template.question_family == "entity_stat":
         if uses_player_question_expansion(template):
             return fill_sports_template_text(
-                template.answer_options, event, template
+                template.answer_options or "",
+                event,
+                template,
+                player=players[0] if players else None,
             )
         if not players:
             raise ValueError(
@@ -137,4 +193,9 @@ def resolve_event_answer_options(
             )
         return "||".join(p.player_name for p in players)
 
-    return fill_sports_template_text(template.answer_options, event, template)
+    return fill_sports_template_text(
+        template.answer_options or "",
+        event,
+        template,
+        team=team,
+    )

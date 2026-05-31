@@ -62,6 +62,7 @@ inputs:
   files:
     F1:
       schedule: f1_schedule.xlsx
+      stats: f1_standings.xlsx
     golf:
       event_source: schedule.xlsx
       metric_source: stats.xlsx
@@ -88,6 +89,7 @@ inputs:
   file_roles:
     F1:
       schedule: event_source
+      stats: metric_source
     stocks:
       asset_source: entity_source
       metric_source: entity_source

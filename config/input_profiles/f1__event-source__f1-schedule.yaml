@@ -7,7 +7,7 @@ field_mappings:
   event_name: event_name
   home_participant: home_participant
   session_type: session_type
-file_pattern: F1_schedule*.xlsx
+file_pattern: f1_schedule.xlsx
 fingerprint: null
 format_name: xlsx
 header_row_index: 0

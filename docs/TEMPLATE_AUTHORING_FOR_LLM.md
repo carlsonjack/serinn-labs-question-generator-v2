@@ -219,7 +219,9 @@ When there is no home/away team:
 
 **Golf season championship today:** use **008-style** (`entity_stat` + `{entity_options}` + `generation_scope=season` + rankings file). Example question: `Who will win the FedEx Cup?`
 
-**F1 season championship (follow-up):** same 008-style pattern once driver standings / championship points are added to the F1 input package. The F1 normalizer is schedule-only today — no driver list in `player_stats` yet.
+**F1 driver standings (optional `stats` / `metric_source` slot):** Upload a workbook with `DRIVER`, `TEAM`, and stat columns (e.g. `PTS`). Use **`[DRIVER]`** or **`[PLAYER]`** in `entity_stat` questions for one row per top-N driver per race; use **`[TEAM]`** in `event` yes/no questions for one row per constructor. **`stat_column`** must match a header in the standings file (e.g. `PTS`). Schedule-only runs still work; `entity_stat` and `[TEAM]` templates are skipped when no standings are uploaded.
+
+**F1 season championship:** same 008-style pattern (`entity_stat` + `{entity_options}` + `generation_scope=season` + standings) when you want driver lists from the metrics file instead of a static `answer_options` list.
 
 ---
 

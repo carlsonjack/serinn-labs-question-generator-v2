@@ -27,7 +27,13 @@ from core.generation import (
     resolve_topic_import_id,
 )
 from core.generation.deterministic_events import build_deterministic_questions
-from core.generation.event_fill import player_instance_key, uses_player_question_expansion
+from core.generation.event_fill import (
+    player_instance_key,
+    team_instance_key,
+    unique_teams_from_stats,
+    uses_player_question_expansion,
+    uses_team_question_expansion,
+)
 from core.generation.season_scope import (
     build_season_event,
     is_season_scope,
@@ -466,7 +472,27 @@ def build_prompt_items(
     for event in bundle.events:
         for tpl in event_templates:
             if tpl.question_family == "event":
-                items.append(PromptItem(template=tpl, event=event, players=[]))
+                if uses_team_question_expansion(tpl):
+                    teams = unique_teams_from_stats(bundle.player_stats)
+                    if not teams:
+                        logger.warning(
+                            "Skipping team template %s for event %s — no teams in stats",
+                            tpl.id,
+                            event.event_id,
+                        )
+                        continue
+                    for team_label in teams:
+                        items.append(
+                            PromptItem(
+                                template=tpl,
+                                event=event,
+                                players=[],
+                                team_label=team_label,
+                                instance_key=team_instance_key(team_label),
+                            )
+                        )
+                else:
+                    items.append(PromptItem(template=tpl, event=event, players=[]))
             elif tpl.question_family == "entity_stat":
                 n = resolve_top_n_per_team(tpl, settings)
                 stat = tpl.stat_column or "HR"

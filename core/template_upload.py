@@ -486,8 +486,8 @@ def _parse_bool(raw: str, key: str) -> bool:
 
 def _parse_int(raw: str, key: str) -> int:
     try:
-        return int(raw)
-    except ValueError as exc:
+        return int(float(raw))
+    except (TypeError, ValueError) as exc:
         raise ValueError(f"{key} must be an integer value.") from exc
 
 

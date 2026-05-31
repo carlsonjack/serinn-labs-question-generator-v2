@@ -22,6 +22,7 @@ FIELD_ALIASES: dict[str, set[str]] = {
     "event_id": {"event id", "event_id", "game id", "id"},
     "event_name": {"event name", "event_name", "matchup", "event"},
     "event_date": {"event date", "event_date", "date", "game date", "start_date"},
+    "session_type": {"session type", "session_type", "session"},
     "event_time": {"event time", "event_time", "time", "start time"},
     "player_id": {
         "player id",
@@ -35,7 +36,7 @@ FIELD_ALIASES: dict[str, set[str]] = {
     },
     "home_team": {"home team", "home_team", "home"},
     "away_team": {"away team", "away_team", "away"},
-    "player_name": {"player", "player name", "name", "batter"},
+    "player_name": {"player", "player name", "name", "batter", "driver"},
     "team": {"team", "club"},
     "company_name": {"company name", "company", "asset", "asset name"},
     "ticker": {"ticker", "symbol", "stock ticker"},

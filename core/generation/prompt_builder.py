@@ -55,6 +55,7 @@ class PromptItem:
     event: NormalizedEvent
     players: List[PlayerStatRecord] = field(default_factory=list)
     schedule_teams: List[str] = field(default_factory=list)
+    team_label: str = ""
     instance_key: str = ""
 
 
@@ -252,9 +253,12 @@ def fill_template_placeholders(
     event: NormalizedEvent,
     *,
     player: PlayerStatRecord | None = None,
+    team: str | None = None,
 ) -> str:
     """Replace event placeholders in template question text (bracket and brace forms)."""
-    return fill_sports_template_text(template.question, event, template, player=player)
+    return fill_sports_template_text(
+        template.question, event, template, player=player, team=team
+    )
 
 
 def fill_event_answer_options(

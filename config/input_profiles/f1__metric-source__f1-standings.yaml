@@ -1,0 +1,13 @@
+category_key: f1
+confidence: 1.0
+field_mappings:
+  player_name: DRIVER
+  team: TEAM
+file_pattern: '*F1*Standings*.xlsx'
+fingerprint: null
+format_name: xlsx
+header_row_index: 1
+normalizer_options: {}
+profile_name: f1_standings
+sheet_name: 2026 Drivers' Standings
+source_role: metric_source

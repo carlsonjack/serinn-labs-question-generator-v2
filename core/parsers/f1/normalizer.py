@@ -1,4 +1,4 @@
-"""Formula 1 calendar normalization (schedule workbook → NormalizedEvent)."""
+"""Formula 1 calendar + driver standings normalization."""
 
 from __future__ import annotations
 
@@ -12,11 +12,14 @@ from ..contracts import (
     DetectedFile,
     NormalizedBundle,
     NormalizedEvent,
+    PlayerStatRecord,
     SourceRole,
     ValidationIssue,
     ValidationSeverity,
 )
+from ..package_options import field_team_code, placeholder_teams
 from ..registry import register_category_normalizer
+from ..stat_keys import stat_storage_key
 from ..validators import validate_date_filter_results, validate_required_fields
 
 
@@ -45,9 +48,24 @@ def _parse_row_datetime(raw: Any) -> datetime:
     return ts.to_pydatetime()
 
 
+def _cell(row: Mapping[str, Any], column: str | None) -> str:
+    if not column:
+        return ""
+    return str(row.get(column, "")).strip()
+
+
+def _coerce_float(raw: Any) -> float | None:
+    if raw in ("", None):
+        return None
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return None
+
+
 @register_category_normalizer("f1")
 class F1CategoryNormalizer(CategoryNormalizer):
-    """Normalize F1 schedule rows into events (Race sessions by default)."""
+    """Normalize F1 schedule rows and optional driver standings."""
 
     def normalize(
         self,
@@ -57,8 +75,8 @@ class F1CategoryNormalizer(CategoryNormalizer):
         opts = _f1_package_options(settings)
         race_vals = opts.get("race_session_values") or ["Race"]
         race_norm = {str(v).strip().lower() for v in race_vals if str(v).strip()}
-        home_ph = str(opts.get("placeholder_home_team") or "Driver_A").strip()
-        away_ph = str(opts.get("placeholder_away_team") or "Driver_B").strip()
+        home_ph, away_ph = placeholder_teams(settings, "f1")
+        field_code = field_team_code(settings, "f1")
 
         event_file = next(
             (d for d in detected_files if d.source_role == SourceRole.EVENT_SOURCE),
@@ -66,6 +84,11 @@ class F1CategoryNormalizer(CategoryNormalizer):
         )
         if event_file is None:
             raise ValueError("F1 normalization requires an event_source workbook.")
+
+        metric_file = next(
+            (d for d in detected_files if d.source_role == SourceRole.METRIC_SOURCE),
+            None,
+        )
 
         issues = validate_required_fields(
             file_path=str(event_file.file_path),
@@ -116,13 +139,64 @@ class F1CategoryNormalizer(CategoryNormalizer):
                 )
             )
 
+        players: list[PlayerStatRecord] = []
+        if metric_file is not None:
+            mfm = metric_file.field_mappings
+            player_col = mfm.get("player_name") or "DRIVER"
+            team_col = mfm.get("team")
+            skip_cols = {player_col}
+            if team_col:
+                skip_cols.add(team_col)
+            for idx, row in enumerate(
+                metric_file.records,
+                start=metric_file.header_row_index + 2,
+            ):
+                player_name = _cell(row, player_col)
+                if not player_name:
+                    continue
+                constructor = _cell(row, team_col) if team_col else ""
+                stat_values: dict[str, float] = {}
+                for col in metric_file.columns:
+                    if col in skip_cols:
+                        continue
+                    val = _coerce_float(row.get(col))
+                    if val is not None:
+                        stat_values[stat_storage_key(col)] = val
+                players.append(
+                    PlayerStatRecord(
+                        player_name=player_name,
+                        team=field_code,
+                        source_team=constructor,
+                        stat_values=stat_values,
+                        source_sheet=metric_file.sheet_name,
+                        row_number=idx,
+                        metadata={},
+                    )
+                )
+
         issues_out = [*warnings, *validate_date_filter_results(events)]
-        prof = event_file.profile_used
-        profiles = [prof] if prof is not None else []
+        if metric_file is not None and not players:
+            issues_out.append(
+                ValidationIssue(
+                    code="no_player_stats_normalized",
+                    message="No driver standings rows were normalized.",
+                    severity=ValidationSeverity.WARNING,
+                    file_path=str(metric_file.file_path),
+                )
+            )
+
+        profiles = [
+            p
+            for p in (
+                event_file.profile_used,
+                metric_file.profile_used if metric_file else None,
+            )
+            if p is not None
+        ]
 
         return NormalizedBundle(
             events=events,
-            player_stats=[],
+            player_stats=players,
             issues=issues_out,
             profiles=profiles,
         )

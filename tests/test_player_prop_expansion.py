@@ -82,6 +82,15 @@ class TestUsesPlayerQuestionExpansion:
     def test_false_for_classic_entity_stat(self) -> None:
         assert uses_player_question_expansion(_classic_entity_tpl()) is False
 
+    def test_detects_bracket_driver(self) -> None:
+        tpl = _player_prop_tpl(
+            id="FORM05",
+            question="Will [DRIVER] finish in the top 10?",
+            answer_type="yes_no",
+            answer_options="Yes||No",
+        )
+        assert uses_player_question_expansion(tpl) is True
+
 
 class TestFillSportsTemplateTextWithPlayer:
     def test_substitutes_player_name(self) -> None:
@@ -90,6 +99,30 @@ class TestFillSportsTemplateTextWithPlayer:
         out = fill_sports_template_text(tpl.question, _event(), tpl, player=player)
         assert out == "How many points will Jalen Brunson score in Game 1?"
         assert "[PLAYER]" not in out
+
+    def test_substitutes_driver_token(self) -> None:
+        tpl = _player_prop_tpl(
+            id="FORM05",
+            question="Will [DRIVER] finish in the top 10?",
+            answer_type="yes_no",
+        )
+        player = _player("George Russell", "Mercedes", 88.0)
+        out = fill_sports_template_text(tpl.question, _event(), tpl, player=player)
+        assert out == "Will George Russell finish in the top 10?"
+
+    def test_event_driver_fallback_to_literal_word(self) -> None:
+        tpl = QuestionTemplate(
+            id="FORM06",
+            subcategory="F1",
+            question_family="event",
+            question="Which [DRIVER] will start from pole position?",
+            answer_type="multiple_choice",
+            answer_options="A||B",
+            priority=1,
+            requires_entities=False,
+        )
+        out = fill_sports_template_text(tpl.question, _event(), tpl)
+        assert out == "Which driver will start from pole position?"
 
 
 class TestResolveEventAnswerOptionsPlayerProp:
@@ -155,6 +188,44 @@ class TestBuildPromptItemsFanOut:
         assert len(items) == 1
         assert len(items[0].players) == 2
         assert items[0].instance_key == ""
+
+    def test_driver_entity_stat_fans_out(self) -> None:
+        tpl = _player_prop_tpl(
+            id="FORM05",
+            subcategory="F1",
+            question="Will [DRIVER] finish in the top 10?",
+            answer_type="yes_no",
+            answer_options="Yes||No",
+            top_n_per_team=2,
+        )
+        bundle = NormalizedBundle(
+            events=[_event(subcategory="F1")],
+            player_stats=[
+                PlayerStatRecord(
+                    player_name="Antonelli",
+                    team="FIELD",
+                    source_team="Mercedes",
+                    stat_values={"PTS": 131.0},
+                    source_sheet=None,
+                    row_number=1,
+                ),
+                PlayerStatRecord(
+                    player_name="Russell",
+                    team="FIELD",
+                    source_team="Mercedes",
+                    stat_values={"PTS": 88.0},
+                    source_sheet=None,
+                    row_number=2,
+                ),
+            ],
+        )
+        settings: dict[str, object] = {
+            "inputs": {"category_key": "f1", "packages": {"f1": {"competition_format": "field"}}},
+            "top_n_per_team": 2,
+        }
+        items = build_prompt_items(bundle, [tpl], settings)
+        assert len(items) == 2
+        assert all(item.instance_key for item in items)
 
 
 class TestBuildDeterministicQuestionsPlayerProp:
