@@ -207,7 +207,7 @@ class RowAssembler:
         their ``template_id`` / ``event_id`` pairs align.  When the lists
         arrive pre-matched (same order), positional pairing is used directly.
         When the LLM reorders results, the assembler falls back to key-based
-        matching on ``(template_id, event_id)``.
+        matching on ``(template_id, event_id, instance_key)``.
         """
         if not generated_questions:
             return []
@@ -220,6 +220,14 @@ class RowAssembler:
     # -- internals ---------------------------------------------------------
 
     @staticmethod
+    def _item_key(item: PromptItem) -> tuple[str, str, str]:
+        return (item.template.id, item.event.event_id, item.instance_key or "")
+
+    @staticmethod
+    def _question_key(question: GeneratedQuestion) -> tuple[str, str, str]:
+        return (question.template_id, question.event_id, question.instance_key or "")
+
+    @staticmethod
     def _positional_match(
         questions: list[GeneratedQuestion],
         items: list[PromptItem],
@@ -227,7 +235,7 @@ class RowAssembler:
         if len(questions) != len(items):
             return False
         return all(
-            q.template_id == it.template.id and q.event_id == it.event.event_id
+            RowAssembler._question_key(q) == RowAssembler._item_key(it)
             for q, it in zip(questions, items)
         )
 
@@ -243,19 +251,20 @@ class RowAssembler:
         questions: list[GeneratedQuestion],
         items: list[PromptItem],
     ) -> list[OutputRow]:
-        item_map: dict[tuple[str, str], PromptItem] = {
-            (it.template.id, it.event.event_id): it for it in items
+        item_map: dict[tuple[str, str, str], PromptItem] = {
+            self._item_key(it): it for it in items
         }
         rows: list[OutputRow] = []
         for q in questions:
-            key = (q.template_id, q.event_id)
+            key = self._question_key(q)
             item = item_map.get(key)
             if item is None:
                 logger.warning(
                     "No matching PromptItem for generated question "
-                    "(template_id=%r, event_id=%r) — skipping row",
+                    "(template_id=%r, event_id=%r, instance_key=%r) — skipping row",
                     q.template_id,
                     q.event_id,
+                    q.instance_key,
                 )
                 continue
             rows.append(self.assemble(q, item))

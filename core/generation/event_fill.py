@@ -9,8 +9,24 @@ from core.template_config.schema import QuestionTemplate
 
 _BRACKET_PLACEHOLDER_RE = re.compile(r"\[([A-Za-z0-9_]+)\]")
 _BRACE_PLACEHOLDER_RE = re.compile(r"\{([A-Za-z0-9_]+)\}")
+_PLAYER_TOKEN_RE = re.compile(r"\[PLAYER\]|\{player\}", re.IGNORECASE)
 
 YES_NO_OPTIONS = "Yes||No"
+
+
+def uses_player_question_expansion(template: QuestionTemplate) -> bool:
+    """True when ``entity_stat`` expands one row per player via ``[PLAYER]`` / ``{player}``."""
+
+    return template.question_family == "entity_stat" and bool(
+        _PLAYER_TOKEN_RE.search(template.question or "")
+    )
+
+
+def player_instance_key(player: PlayerStatRecord) -> str:
+    """Stable slug for matching expanded player-prop rows."""
+
+    slug = re.sub(r"[^a-z0-9]+", "-", player.player_name.lower()).strip("-")
+    return slug or player.player_name
 
 
 def event_placeholder_context(
@@ -38,6 +54,8 @@ def fill_sports_template_text(
     text: str,
     event: NormalizedEvent,
     template: QuestionTemplate,
+    *,
+    player: PlayerStatRecord | None = None,
 ) -> str:
     """Replace ``[KEY]`` and ``{key}`` placeholders using event + template context."""
 
@@ -46,6 +64,9 @@ def fill_sports_template_text(
         "home_team": event.home_team,
         "away_team": event.away_team,
     }
+    if player is not None:
+        context["PLAYER"] = player.player_name
+        lower_ctx["player"] = player.player_name
     if event.event_display and str(event.event_display).strip():
         label = str(event.event_display).strip()
         lower_ctx["event_name"] = label
@@ -105,6 +126,10 @@ def resolve_event_answer_options(
         return "||".join(schedule_teams)
 
     if template.question_family == "entity_stat":
+        if uses_player_question_expansion(template):
+            return fill_sports_template_text(
+                template.answer_options, event, template
+            )
         if not players:
             raise ValueError(
                 f"Entity template {template.id!r} requires players but "

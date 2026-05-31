@@ -1,0 +1,74 @@
+version: 1
+package_key: nba
+sources:
+  event_source:
+    source_role: event_source
+    file_pattern: NBA_Finals_2026_schedule.xlsx
+    sheet_name: NBA Finals Schedule
+    header_row_index: 0
+    field_mappings:
+      away_team: away_team
+      event_datetime: event_datetime
+      home_team: home_team
+    metric_mappings: {}
+    metadata_mappings:
+      round: round
+      topic_name: topic_name
+    matchup_split: null
+    event_datetime:
+      datetime_column: event_datetime
+      date_column: null
+      time_column: null
+      timezone: America/New_York
+    event_id:
+      source_columns:
+      - event_datetime
+      - home_team
+      - away_team
+      strategy: hash
+  metric_source:
+    source_role: metric_source
+    file_pattern: COMBINED_NYK_vs_OKC_Stats.xlsx
+    sheet_name: NYK vs OKC Stats
+    header_row_index: 0
+    field_mappings:
+      player_name: NAME
+      team: TEAM
+    metric_mappings:
+      ASSISTS: AST
+      BLOCKS: BLK
+      POINTS: PTS
+      REBOUNDS: REB
+      STEALS: STL
+    metadata_mappings: {}
+    matchup_split: null
+    event_datetime: null
+    event_id: null
+shape_signature:
+  event_source:
+    filename: NBA_Finals_2026_schedule.xlsx
+    sheets:
+    - columns:
+      - topic_import_id
+      - topic_name
+      - event_datetime
+      - round
+      - home_team
+      - away_team
+      header_row_index: 0
+      sheet_name: NBA Finals Schedule
+  metric_source:
+    filename: COMBINED_NYK_vs_OKC_Stats.xlsx
+    sheets:
+    - columns:
+      - NAME
+      - TEAM
+      - PTS
+      - REB
+      - AST
+      - STL
+      - BLK
+      header_row_index: 0
+      sheet_name: NYK vs OKC Stats
+notes: NBA Finals schedule + combined team stats workbook (client Finals format).
+competition_format: team_sport

@@ -13,11 +13,15 @@ def build_deterministic_questions(items: list[PromptItem]) -> list[GeneratedQues
     for item in items:
         tpl = item.template
         event = item.event
+        player = item.players[0] if item.players else None
         out.append(
             GeneratedQuestion(
                 template_id=tpl.id,
                 event_id=event.event_id,
-                question=fill_sports_template_text(tpl.question, event, tpl),
+                instance_key=item.instance_key,
+                question=fill_sports_template_text(
+                    tpl.question, event, tpl, player=player
+                ),
                 answer_options=resolve_event_answer_options(
                     tpl, event, item.players, schedule_teams=item.schedule_teams
                 ),

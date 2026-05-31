@@ -27,6 +27,7 @@ from core.generation import (
     resolve_topic_import_id,
 )
 from core.generation.deterministic_events import build_deterministic_questions
+from core.generation.event_fill import player_instance_key, uses_player_question_expansion
 from core.generation.season_scope import (
     build_season_event,
     is_season_scope,
@@ -385,6 +386,26 @@ def _run_content_pipeline(
     )
 
 
+def _append_entity_stat_items(
+    items: list[PromptItem],
+    tpl: QuestionTemplate,
+    event: NormalizedEvent,
+    players: list[PlayerStatRecord],
+) -> None:
+    if uses_player_question_expansion(tpl):
+        for player in players:
+            items.append(
+                PromptItem(
+                    template=tpl,
+                    event=event,
+                    players=[player],
+                    instance_key=player_instance_key(player),
+                )
+            )
+        return
+    items.append(PromptItem(template=tpl, event=event, players=players))
+
+
 def build_prompt_items(
     bundle: NormalizedBundle,
     templates: list[QuestionTemplate],
@@ -430,9 +451,7 @@ def build_prompt_items(
                     tpl.id,
                 )
                 continue
-            items.append(
-                PromptItem(template=tpl, event=season_event, players=players)
-            )
+            _append_entity_stat_items(items, tpl, season_event, players)
         elif tpl.question_family == "event":
             items.append(
                 PromptItem(template=tpl, event=season_event, players=[])
@@ -482,7 +501,7 @@ def build_prompt_items(
                         event.event_id,
                     )
                     continue
-                items.append(PromptItem(template=tpl, event=event, players=players))
+                _append_entity_stat_items(items, tpl, event, players)
     return items
 
 

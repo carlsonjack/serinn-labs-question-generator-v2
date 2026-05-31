@@ -15,7 +15,11 @@ from pydantic import BaseModel
 from core.parsers.contracts import NormalizedEvent, PlayerStatRecord
 from core.template_config.schema import QuestionTemplate
 
-from .event_fill import fill_sports_template_text, resolve_event_answer_options
+from .event_fill import (
+    fill_sports_template_text,
+    resolve_event_answer_options,
+    uses_player_question_expansion,
+)
 from .season_scope import uses_schedule_teams
 
 
@@ -51,6 +55,7 @@ class PromptItem:
     event: NormalizedEvent
     players: List[PlayerStatRecord] = field(default_factory=list)
     schedule_teams: List[str] = field(default_factory=list)
+    instance_key: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +70,7 @@ class GeneratedQuestion(BaseModel):
     event_id: str
     question: str
     answer_options: str
+    instance_key: str = ""
 
 
 class GeneratedQuestionBatch(BaseModel):
@@ -99,12 +105,15 @@ question objects — one per input item.
    - "event_id"     — echo the event ID from the input
    - "question"     — polished, natural-sounding question text
    - "answer_options" — pipe-delimited string (e.g. "Mets||Yankees")
+   - "instance_key" — echo the instance key from the input (empty string if omitted)
 3. Do NOT invent question types or add questions beyond what is requested.
 4. Do NOT hallucinate or fabricate entity names, participant names, or statistics.
 5. For yes/no questions, answer_options must be exactly "Yes||No".
 6. For multiple-choice event questions, use the provided answer option labels.
-7. For entity questions, use ONLY the entity names from the \
-provided list — do not reorder, rename, or add entities.
+7. For classic entity questions (player names are the answer choices), use ONLY \
+the entity names from the provided list — do not reorder, rename, or add entities. \
+For player-prop questions (stat buckets already provided), keep the supplied \
+answer option labels exactly.
 8. Make question text grammatically correct and natural-sounding. You may \
 rephrase the template for clarity and flow but must not change meaning.
 9. Include event context in entity questions so each \
@@ -182,11 +191,14 @@ class PromptBuilder:
 
         lines.append(f"Template ID: {tpl.id}")
         lines.append(f"Event ID: {event.event_id}")
+        if item.instance_key:
+            lines.append(f"Instance key: {item.instance_key}")
         lines.append(f"Content unit: {event.event_display or f'{event.home_team} vs {event.away_team}'}")
         lines.append(f"Event datetime: {event.event_datetime}")
         lines.append(f"Subcategory: {event.subcategory}")
 
-        filled_q = fill_template_placeholders(tpl, event)
+        player = item.players[0] if item.players else None
+        filled_q = fill_template_placeholders(tpl, event, player=player)
         lines.append(f"Question template: {filled_q}")
         lines.append(f"Answer type: {tpl.answer_type}")
 
@@ -211,14 +223,20 @@ class PromptBuilder:
                     f"Entity template {tpl.id!r} requires players but "
                     f"none provided for event {event.event_id}"
                 )
-            player_names = [p.player_name for p in item.players]
-            lines.append(
-                f"Entities (use ONLY these as answer options): {', '.join(player_names)}"
-            )
-            lines.append(
-                f"Answer options: {resolve_event_answer_options(tpl, event, item.players, schedule_teams=item.schedule_teams)}"
-            )
-            lines.append(f"Stat: {tpl.stat_column}")
+            if uses_player_question_expansion(tpl):
+                lines.append(
+                    f"Answer options: {resolve_event_answer_options(tpl, event, item.players, schedule_teams=item.schedule_teams)}"
+                )
+                lines.append(f"Stat: {tpl.stat_column}")
+            else:
+                player_names = [p.player_name for p in item.players]
+                lines.append(
+                    f"Entities (use ONLY these as answer options): {', '.join(player_names)}"
+                )
+                lines.append(
+                    f"Answer options: {resolve_event_answer_options(tpl, event, item.players, schedule_teams=item.schedule_teams)}"
+                )
+                lines.append(f"Stat: {tpl.stat_column}")
 
         lines.append("")
         return "\n".join(lines)
@@ -232,9 +250,11 @@ class PromptBuilder:
 def fill_template_placeholders(
     template: QuestionTemplate,
     event: NormalizedEvent,
+    *,
+    player: PlayerStatRecord | None = None,
 ) -> str:
     """Replace event placeholders in template question text (bracket and brace forms)."""
-    return fill_sports_template_text(template.question, event, template)
+    return fill_sports_template_text(template.question, event, template, player=player)
 
 
 def fill_event_answer_options(

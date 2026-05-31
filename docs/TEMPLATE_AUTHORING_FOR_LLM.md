@@ -119,6 +119,10 @@ Questions about the **game or teams** (winner, yes/no props, totals wording). An
 
 ### 2. Player / stat questions (`question_family` = `entity_stat`)
 
+Two patterns — pick one per template row.
+
+#### A. Classic “which player” (player names are the answers)
+
 Questions where answer choices are **player names** from the stats workbook.
 
 | Field | What to put |
@@ -131,6 +135,21 @@ Questions where answer choices are **player names** from the stats workbook.
 | **`answer_options`** | **`{entity_options}`** only (or leave blank on wide upload → app sets `{entity_options}`). |
 
 **Example (CSV):** [`samples/wnba_entity_points_one_question.csv`](../samples/wnba_entity_points_one_question.csv)
+
+#### B. Player-prop buckets (`[PLAYER]` in the question)
+
+Use when the **player is named in the question** and **stat buckets** (or yes/no) are the answers — e.g. “How many points will [PLAYER] score in Game 1?”
+
+| Field | What to put |
+|--------|-------------|
+| **`question`** | Include **`[PLAYER]`** or **`{player}`** (one row per top-N player). Example: `How many points will [PLAYER] score in Game 1 of the 2025-2026 NBA Finals?` |
+| **`answer_options`** | Literal buckets: `Under 18||18-22||23-27||28-32||33+` — **not** `{entity_options}`. For yes/no props: leave blank or `Yes||No`. |
+| **`stat_column`** | Column used to rank which players get rows (same as classic). |
+| **`top_n_per_team`** | Same as classic — controls how many players expand per side. |
+
+**Export behavior:** **one output row per top-N player per event** (like `[ALBUM_OR_RELEASE]` on content templates). Player name is substituted into the question; `answer_options` stay as authored.
+
+**Visual sample:** [`samples/nba_player_prop_generation_sample.csv`](../samples/nba_player_prop_generation_sample.csv) (full client Finals pack).
 
 Schedule team labels must resolve to stats **TEAM** codes (e.g. `Los Angeles Sparks` → `LA`). See [`config/team_aliases/README.md`](../config/team_aliases/README.md). **Field sports (golf):** omit team columns; use `{event_name}` and rank by spreadsheet stat columns (e.g. `AVG POINTS`, `RANK`).
 
