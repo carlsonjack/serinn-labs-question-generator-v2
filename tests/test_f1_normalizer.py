@@ -128,3 +128,60 @@ def test_f1_normalizer_loads_driver_standings() -> None:
     assert bundle.player_stats[0].player_name == "Antonelli"
     assert bundle.player_stats[0].source_team == "Mercedes"
     assert bundle.player_stats[0].stat_values.get("PTS") == 131.0
+
+
+def test_f1_h2h_schedule_reads_teams_when_mapped() -> None:
+    fm = {
+        "event_id": "event_id",
+        "event_name": "event_name",
+        "event_date": "event_date",
+        "session_type": "session_type",
+        "home_team": "home_team",
+        "away_team": "away_team",
+    }
+    detected = DetectedFile(
+        file_path=Path("dummy.xlsx"),
+        format_name="xlsx",
+        source_role=SourceRole.EVENT_SOURCE,
+        sheet_name="F1 Schedule",
+        header_row_index=0,
+        columns=list(fm.values()),
+        field_mappings=fm,
+        confidence=1.0,
+        records=[
+            {
+                "event_id": "F1000002",
+                "event_name": "Monaco Grand Prix - Race",
+                "event_date": "2026-06-08 14:00:00",
+                "session_type": "Race",
+                "home_team": "Leclerc",
+                "away_team": "Hamilton",
+            },
+            {
+                "event_id": "F1000003",
+                "event_name": "Monaco Grand Prix - Race",
+                "event_date": "2026-06-08 14:00:00",
+                "session_type": "Race",
+                "home_team": "",
+                "away_team": "",
+            },
+        ],
+        profile_used=None,
+    )
+    settings = {
+        "date_filter": {"start": "2026-06-01", "end": "2026-06-30"},
+        "inputs": {
+            "packages": {
+                "f1": {
+                    "placeholder_home_team": "Driver_A",
+                    "placeholder_away_team": "Driver_B",
+                },
+            },
+        },
+    }
+    bundle = F1CategoryNormalizer().normalize([detected], settings)
+    assert len(bundle.events) == 2
+    assert bundle.events[0].home_team == "Leclerc"
+    assert bundle.events[0].away_team == "Hamilton"
+    assert bundle.events[1].home_team == "Driver_A"
+    assert bundle.events[1].away_team == "Driver_B"

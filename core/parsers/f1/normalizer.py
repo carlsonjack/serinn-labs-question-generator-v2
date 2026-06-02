@@ -17,7 +17,8 @@ from ..contracts import (
     ValidationIssue,
     ValidationSeverity,
 )
-from ..package_options import field_team_code, placeholder_teams
+from ..field_events import resolve_field_event_teams
+from ..package_options import field_team_code
 from ..registry import register_category_normalizer
 from ..stat_keys import stat_storage_key
 from ..validators import validate_date_filter_results, validate_required_fields
@@ -75,7 +76,6 @@ class F1CategoryNormalizer(CategoryNormalizer):
         opts = _f1_package_options(settings)
         race_vals = opts.get("race_session_values") or ["Race"]
         race_norm = {str(v).strip().lower() for v in race_vals if str(v).strip()}
-        home_ph, away_ph = placeholder_teams(settings, "f1")
         field_code = field_team_code(settings, "f1")
 
         event_file = next(
@@ -128,11 +128,12 @@ class F1CategoryNormalizer(CategoryNormalizer):
 
             eid = str(row.get(fm["event_id"], "")).strip()
             ename = str(row.get(fm["event_name"], "")).strip()
+            home_team, away_team = resolve_field_event_teams(row, fm, settings, "f1")
             events.append(
                 NormalizedEvent(
                     event_id=eid,
-                    home_team=home_ph,
-                    away_team=away_ph,
+                    home_team=home_team,
+                    away_team=away_team,
                     event_datetime=dt.isoformat(),
                     subcategory="F1",
                     event_display=ename or None,

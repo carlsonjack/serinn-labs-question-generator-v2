@@ -269,6 +269,59 @@ def test_top_players_for_field_fedexcup_rank_ascending() -> None:
     assert "Adrien Saddier" not in top
 
 
+def test_golf_h2h_schedule_reads_teams_and_event_ids() -> None:
+    fm = {
+        "event_id": "event_id",
+        "event_date": "event_date",
+        "event_name": "event_name",
+        "event_display": "event_name",
+        "home_team": "home_team",
+        "away_team": "away_team",
+    }
+    detected = DetectedFile(
+        file_path=Path("h2h.xlsx"),
+        format_name="xlsx",
+        source_role=SourceRole.EVENT_SOURCE,
+        sheet_name="Sheet1",
+        header_row_index=0,
+        columns=list(fm.values()),
+        field_mappings=fm,
+        confidence=1.0,
+        records=[
+            {
+                "event_id": "pga-memorial-2026-m01",
+                "event_name": "Memorial Tournament 2026",
+                "event_date": "2026-06-04",
+                "home_team": "1. S. Scheffler",
+                "away_team": "2. Cam. Young",
+            },
+            {
+                "event_id": "pga-memorial-2026-m02",
+                "event_name": "Memorial Tournament 2026",
+                "event_date": "2026-06-04",
+                "home_team": "3. M. Fitzpatrick",
+                "away_team": "5. S.W. Kim",
+            },
+            {
+                "event_id": "pga-single-tournament",
+                "event_name": "Arnold Palmer Invitational",
+                "event_date": "2026-03-05",
+                "home_team": "",
+                "away_team": "",
+            },
+        ],
+        profile_used=None,
+    )
+    bundle = GolfCategoryNormalizer().normalize([detected], _golf_settings())
+    assert len(bundle.events) == 3
+    assert bundle.events[0].event_id == "pga-memorial-2026-m01"
+    assert bundle.events[0].home_team == "1. S. Scheffler"
+    assert bundle.events[0].away_team == "2. Cam. Young"
+    assert bundle.events[1].event_id == "pga-memorial-2026-m02"
+    assert bundle.events[2].home_team == "Golfer_A"
+    assert bundle.events[2].away_team == "Golfer_B"
+
+
 def test_build_prompt_items_field_entity_stat(tmp_path: Path) -> None:
     sched = tmp_path / "schedule.xlsx"
     stats = tmp_path / "stats.xlsx"

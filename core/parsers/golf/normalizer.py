@@ -9,7 +9,8 @@ import pandas as pd
 
 from ..base import CategoryNormalizer
 from ..contracts import DetectedFile, NormalizedBundle, NormalizedEvent, PlayerStatRecord, SourceRole, ValidationIssue, ValidationSeverity
-from ..package_options import field_team_code, placeholder_teams, skip_status_values
+from ..field_events import resolve_field_event_id, resolve_field_event_teams
+from ..package_options import field_team_code, skip_status_values
 from ..registry import register_category_normalizer
 from ..stat_keys import stat_storage_key
 from ..validators import validate_date_filter_results
@@ -74,7 +75,6 @@ class GolfCategoryNormalizer(CategoryNormalizer):
         )
 
         category_key = "golf"
-        home_ph, away_ph = placeholder_teams(settings, category_key)
         skip_status = skip_status_values(settings, category_key)
         field_code = field_team_code(settings, category_key)
         date_filter = settings.get("date_filter") or {}
@@ -109,11 +109,22 @@ class GolfCategoryNormalizer(CategoryNormalizer):
             if not _within_date_range(ts, date_filter):
                 continue
 
-            event_id = _slug(f"{ts.date().isoformat()}-{display}")
+            fallback_id = _slug(f"{ts.date().isoformat()}-{display}")
+            event_id = resolve_field_event_id(row, fm, fallback=fallback_id)
+            home_team, away_team = resolve_field_event_teams(row, fm, settings, category_key)
             metadata = {
                 k: _cell(row, col)
                 for k, col in fm.items()
-                if k not in {"event_date", "start_date", "event_name", "event_display", "event_id"}
+                if k
+                not in {
+                    "event_date",
+                    "start_date",
+                    "event_name",
+                    "event_display",
+                    "event_id",
+                    "home_team",
+                    "away_team",
+                }
                 and col in row
                 and _cell(row, col)
             }
@@ -123,8 +134,8 @@ class GolfCategoryNormalizer(CategoryNormalizer):
             events.append(
                 NormalizedEvent(
                     event_id=event_id,
-                    home_team=home_ph,
-                    away_team=away_ph,
+                    home_team=home_team,
+                    away_team=away_team,
                     event_datetime=ts.isoformat(timespec="seconds"),
                     subcategory="Golf",
                     event_display=display,

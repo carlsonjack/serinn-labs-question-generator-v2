@@ -1,16 +1,16 @@
 category_key: golf
-confidence: 0.125
+confidence: 1.0
 field_mappings:
   event_id: event_id
   event_name: event_name
   event_date: event_date
   home_team: home_team
   away_team: away_team
-file_pattern: schedule.xlsx
-fingerprint: 40d95b0d889b6582e24b72402ad26edb15cdc97172e458144ddd3c835ee690da
+file_pattern: '*Schedule*.xlsx'
+fingerprint: null
 format_name: xlsx
 header_row_index: 0
 normalizer_options: {}
-profile_name: schedule
-sheet_name: pga_2026_schedule
+profile_name: golf_h2h_schedule
+sheet_name: Sheet1
 source_role: event_source
