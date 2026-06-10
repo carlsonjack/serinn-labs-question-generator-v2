@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 from core.config import load_settings, load_settings_disk_only, save_settings_yaml
 from core.csv_export import DEFAULT_OUTPUT_DIR
-from core.data_layout import resolve_inputs_directory
+from core.data_layout import delete_path, materialize_relative, persist_path, resolve_inputs_directory
 from core.input_date_range import infer_date_range_from_excel_paths
 from core.input_slots import (
     clear_category_input_files,
@@ -524,6 +524,7 @@ def create_app() -> Flask:
             with out_path.open("w", encoding="utf-8") as out_f:
                 json.dump(parsed.to_dict(), out_f, indent=2, ensure_ascii=False)
                 out_f.write("\n")
+            persist_path(out_path)
             saved.append({"id": parsed.id, "filename": out_path.name})
 
         for resolved in unlink_resolved:
@@ -531,6 +532,7 @@ def create_app() -> Flask:
             if path.is_file() and path.suffix.lower() == ".json":
                 try:
                     path.unlink()
+                    delete_path(path)
                 except OSError:
                     warnings.append(
                         {
@@ -598,6 +600,7 @@ def create_app() -> Flask:
                 if alt.is_file() and alt != dest:
                     alt.unlink()
             fh.save(str(dest))
+            persist_path(dest)
             saved.append({"slot_id": slot_id, "filename": dest_name})
             if dest_name != configured_name:
                 files_updates[slot_id] = dest_name
@@ -739,6 +742,7 @@ def create_app() -> Flask:
     def download(filename: str) -> Any:
         if not _is_safe_download_name(filename):
             abort(404)
+        materialize_relative(f"outputs/{filename}")
         target = Path(DEFAULT_OUTPUT_DIR) / filename
         try:
             target.resolve().relative_to(Path(DEFAULT_OUTPUT_DIR).resolve())

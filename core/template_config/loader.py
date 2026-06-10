@@ -21,6 +21,9 @@ def index_template_json_paths_by_id(directory: Path) -> dict[str, list[Path]]:
     out: dict[str, list[Path]] = {}
     if not directory.is_dir():
         return out
+    from core.data_layout import materialize_tree
+
+    materialize_tree("templates")
     for path in sorted(directory.glob("*.json")):
         try:
             with path.open(encoding="utf-8") as fh:
@@ -45,6 +48,9 @@ def load_template_dir(directory: Path | None = None) -> dict[str, QuestionTempla
     """
 
     base = directory if directory is not None else default_templates_directory()
+    from core.data_layout import materialize_tree
+
+    materialize_tree("templates")
     if not base.is_dir():
         raise FileNotFoundError(f"Template directory not found: {base}")
 

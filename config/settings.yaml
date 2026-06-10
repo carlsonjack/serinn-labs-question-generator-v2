@@ -6,6 +6,10 @@ topic_import_ids:
   f1: f1-race-winner
   music: music-new-releases-us-2026-06
   stocks: stocks-us-market
+  nhl: nhl-nhl-season-2026-2027
+  nwsl: nwsl-nwsl-season-2026
+  atp: tennis-atp-us-open-2026
+  wta: tennis-wta-us-open-2026
 subcategory: WNBA
 top_n_per_team: 3
 templates_directory: templates
@@ -60,6 +64,9 @@ inputs:
   directory: inputs
   category_key: wnba
   files:
+    ATP:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
     F1:
       schedule: f1_schedule.xlsx
       stats: f1_standings.xlsx
@@ -74,12 +81,21 @@ inputs:
       metric_source: stats.xlsx
     movies:
       releases: movies.xlsx
+    NHL:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+    NWSL:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
     music:
       releases: music.xlsx
     stocks:
       metric_source: top-150-stocks.xlsx
     television:
       event_source: television.xlsx
+    WTA:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
     wnba:
       event_source: schedule.xlsx
       metric_source: stats.xlsx
@@ -110,6 +126,28 @@ inputs:
       ascending_stat_columns:
       - RANK
       - FedExCup Rank
+      skip_status_values:
+      - complete
+      - cancelled
+      - canceled
+    atp:
+      competition_format: field
+      placeholder_home_team: Player_A
+      placeholder_away_team: Player_B
+      field_team_code: FIELD
+      ascending_stat_columns:
+      - RANK
+      skip_status_values:
+      - complete
+      - cancelled
+      - canceled
+    wta:
+      competition_format: field
+      placeholder_home_team: Player_A
+      placeholder_away_team: Player_B
+      field_team_code: FIELD
+      ascending_stat_columns:
+      - RANK
       skip_status_values:
       - complete
       - cancelled

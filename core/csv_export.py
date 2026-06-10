@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+from core.data_layout import bootstrap_if_needed, get_writable_root, persist_path, uses_writable_data_tree
 from core.generation.content import IMPORT_OUTPUT_COLUMNS, ImportQuestionRow
 from core.generation.row_assembler import OUTPUT_COLUMNS, OutputRow
 from core.generation.stocks import StockQuestionRow
@@ -80,6 +80,10 @@ def build_generated_csv_path(
     return base / name
 
 
+def _persist_output(path: Path) -> None:
+    persist_path(path)
+
+
 def write_generated_csv(
     rows: Sequence[OutputRow],
     path: str | Path,
@@ -95,6 +99,7 @@ def write_generated_csv(
             writer.writerow(row.to_dict())
 
     logger.info("Wrote %d row(s) to %s", len(rows), out)
+    _persist_output(out)
     return out
 
 
@@ -121,6 +126,7 @@ def write_import_csv(
         for row in rows:
             writer.writerow(row.to_import_dict())
     logger.info("Wrote %d import row(s) to %s", len(rows), out)
+    _persist_output(out)
     return out
 
 

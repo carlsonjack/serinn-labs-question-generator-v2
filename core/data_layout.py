@@ -5,6 +5,9 @@ The deployed project tree is read-only except ``/tmp``. When ``VERCEL`` is set
 Mutable paths (settings, inputs, outputs, uploaded templates, profile YAML) live under a writable
 root so uploads and saves do not raise OSError. Bundled repo templates are not copied on bootstrap;
 only user uploads populate the writable ``templates/`` directory.
+
+When ``BLOB_READ_WRITE_TOKEN`` (or Vercel OIDC) is configured, mutable files are mirrored to
+Vercel Blob via :mod:`core.blob_store`.
 """
 
 from __future__ import annotations
@@ -34,6 +37,56 @@ def get_writable_root() -> Path:
 
 def uses_writable_data_tree() -> bool:
     return get_writable_root().resolve() != REPO_ROOT.resolve()
+
+
+def materialize_relative(rel_path: str) -> Path:
+    """Return the local path for *rel_path*, hydrating from Blob when enabled."""
+
+    from core.blob_store import materialize, normalize_rel_path
+
+    rel = normalize_rel_path(rel_path)
+    materialize(rel)
+    return get_writable_root() / rel
+
+
+def persist_relative(rel_path: str) -> None:
+    """Upload *rel_path* from the local cache to Blob when enabled."""
+
+    from core.blob_store import persist
+
+    persist(rel_path)
+
+
+def delete_relative(rel_path: str) -> None:
+    """Remove *rel_path* from Blob when enabled."""
+
+    from core.blob_store import delete_blob
+
+    delete_blob(rel_path)
+
+
+def persist_path(path: Path) -> None:
+    """Upload *path* to Blob when it lives under the writable root."""
+
+    from core.blob_store import persist_path as _persist_path
+
+    _persist_path(path)
+
+
+def delete_path(path: Path) -> None:
+    """Remove *path* from Blob when it lives under the writable root."""
+
+    from core.blob_store import delete_path as _delete_path
+
+    _delete_path(path)
+
+
+def materialize_tree(prefix: str = "") -> None:
+    """Hydrate all blobs under *prefix* into the local cache."""
+
+    from core.blob_store import materialize_tree as _materialize_tree
+
+    _materialize_tree(prefix)
 
 
 def resolve_inputs_directory(settings: Mapping[str, Any]) -> Path:
@@ -86,3 +139,7 @@ def bootstrap_if_needed() -> None:
     # Do not copy bundled repo templates — uploads live only in the writable tree.
 
     sentinel.write_text("ok\n", encoding="utf-8")
+
+    from core.blob_store import sync_blob_on_bootstrap
+
+    sync_blob_on_bootstrap()

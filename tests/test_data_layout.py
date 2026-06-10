@@ -81,3 +81,51 @@ def test_bootstrap_seeds_settings_and_upload_works_under_vercel(
 
     dest = get_writable_root() / "inputs" / "game.xlsx"
     assert dest.is_file()
+
+
+def test_bootstrap_syncs_config_from_blob(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    monkeypatch.setenv("BLOB_READ_WRITE_TOKEN", "test-token")
+
+    store: dict[str, bytes] = {}
+
+    class FakeClient:
+        def head(self, blob_key: str) -> None:
+            if blob_key not in store:
+                raise FileNotFoundError(blob_key)
+
+        def upload_file(self, local_path, path, **kwargs):
+            store[path] = Path(local_path).read_bytes()
+
+        def download_file(self, url_or_path, local_path, **kwargs):
+            dest = Path(local_path)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(store[url_or_path])
+
+        def list_objects(self, *, prefix=None, cursor=None, limit=None, mode=None):
+            from tests.test_blob_store import _FakeBlobItem, _FakeListResult
+
+            blobs = [
+                _FakeBlobItem(k)
+                for k in sorted(store)
+                if prefix is None or k.startswith(prefix)
+            ]
+            return _FakeListResult(blobs)
+
+        def delete(self, url_or_path) -> None:
+            store.pop(url_or_path, None)
+
+    import core.blob_store as blob_store
+
+    monkeypatch.setattr(blob_store, "_client", FakeClient())
+
+    from core.data_layout import REPO_ROOT, bootstrap_if_needed, get_writable_root
+
+    repo_settings = REPO_ROOT / "config" / "settings.yaml"
+    store["serinn-labs/config/settings.yaml"] = repo_settings.read_bytes()
+
+    bootstrap_if_needed()
+    local_settings = get_writable_root() / "config" / "settings.yaml"
+    assert local_settings.is_file()
+    assert "ATP" in local_settings.read_text(encoding="utf-8")

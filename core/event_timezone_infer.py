@@ -16,11 +16,10 @@ _ROOT = Path(__file__).resolve().parent.parent
 
 
 def _cache_path() -> Path:
-    from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+    from core.data_layout import bootstrap_if_needed, materialize_relative
 
     bootstrap_if_needed()
-    base = get_writable_root() if uses_writable_data_tree() else _ROOT
-    return base / "config" / "event_team_timezone_cache.json"
+    return materialize_relative("config/event_team_timezone_cache.json")
 
 
 _CHUNK = 40
@@ -51,6 +50,9 @@ def _save_cache(cache: dict[str, str]) -> None:
     sorted_keys = sorted(merged.keys(), key=str.lower)
     ordered = {k: merged[k] for k in sorted_keys}
     path.write_text(json.dumps(ordered, indent=2) + "\n", encoding="utf-8")
+    from core.data_layout import persist_relative
+
+    persist_relative("config/event_team_timezone_cache.json")
 
 
 def _validate_iana(name: str) -> bool:

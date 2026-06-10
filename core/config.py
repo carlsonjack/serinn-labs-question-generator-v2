@@ -8,7 +8,7 @@ from typing import Any
 
 import yaml
 
-from core.data_layout import REPO_ROOT, bootstrap_if_needed, get_writable_root
+from core.data_layout import REPO_ROOT, bootstrap_if_needed, materialize_relative, persist_relative
 
 # Tests may monkeypatch these to redirect settings I/O to temp files.
 _SETTINGS_PATH_OVERRIDE: Path | None = None
@@ -19,14 +19,14 @@ def _settings_path() -> Path:
     if _SETTINGS_PATH_OVERRIDE is not None:
         return _SETTINGS_PATH_OVERRIDE
     bootstrap_if_needed()
-    return get_writable_root() / "config" / "settings.yaml"
+    return materialize_relative("config/settings.yaml")
 
 
 def _settings_local_path() -> Path:
     if _SETTINGS_LOCAL_PATH_OVERRIDE is not None:
         return _SETTINGS_LOCAL_PATH_OVERRIDE
     bootstrap_if_needed()
-    return get_writable_root() / "config" / "settings.local.yaml"
+    return materialize_relative("config/settings.local.yaml")
 
 
 def _load_dotenv() -> None:
@@ -131,3 +131,4 @@ def save_settings_yaml(updates: dict[str, Any]) -> None:
             allow_unicode=True,
             sort_keys=False,
         )
+    persist_relative("config/settings.yaml")

@@ -18,11 +18,10 @@ _TOPIC_ID_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,199}$")
 def default_topic_import_catalog_path() -> Path:
     if _CATALOG_PATH_OVERRIDE is not None:
         return _CATALOG_PATH_OVERRIDE
-    from core.data_layout import bootstrap_if_needed, get_writable_root, uses_writable_data_tree
+    from core.data_layout import bootstrap_if_needed, materialize_relative
 
     bootstrap_if_needed()
-    base = get_writable_root() if uses_writable_data_tree() else _PROJECT_ROOT
-    return base / "config" / "topic_import_ids_catalog.json"
+    return materialize_relative("config/topic_import_ids_catalog.json")
 
 
 def _normalize_catalog_items(raw: Any) -> list[dict[str, str]]:
@@ -116,6 +115,9 @@ def append_topic_import_id_to_catalog(
         json.dumps(entries, indent=2, ensure_ascii=True) + "\n",
         encoding="utf-8",
     )
+    from core.data_layout import persist_relative
+
+    persist_relative("config/topic_import_ids_catalog.json")
     return {
         "ok": True,
         "added": True,

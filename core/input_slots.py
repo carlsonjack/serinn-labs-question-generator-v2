@@ -99,11 +99,20 @@ def present_files_map(
 ) -> dict[str, str]:
     """Return configured slots whose target file exists on disk."""
 
-    return {
-        slot_id: target_name
-        for slot_id, target_name in files_map.items()
-        if (input_dir / target_name).is_file()
-    }
+    from core.data_layout import get_writable_root, materialize_relative
+
+    present: dict[str, str] = {}
+    for slot_id, target_name in files_map.items():
+        try:
+            rel = (input_dir / target_name).resolve().relative_to(
+                get_writable_root().resolve()
+            )
+            materialize_relative(str(rel).replace("\\", "/"))
+        except ValueError:
+            pass
+        if (input_dir / target_name).is_file():
+            present[slot_id] = target_name
+    return present
 
 
 def require_present_input_files(
@@ -191,6 +200,9 @@ def clear_category_input_files(
         path = input_dir / target_name
         if path.is_file():
             path.unlink()
+            from core.data_layout import delete_path
+
+            delete_path(path)
             removed.append(target_name)
     return removed
 
@@ -209,6 +221,9 @@ def clear_unuploaded_category_input_files(
         path = input_dir / target_name
         if path.is_file():
             path.unlink()
+            from core.data_layout import delete_path
+
+            delete_path(path)
             removed.append(target_name)
     return removed
 

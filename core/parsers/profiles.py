@@ -73,6 +73,9 @@ def save_profile(profile: InputProfile) -> Path:
     path = profile_path(profile)
     with path.open("w", encoding="utf-8") as handle:
         yaml.safe_dump(profile.to_dict(), handle, sort_keys=True)
+    from core.data_layout import persist_path
+
+    persist_path(path)
     return path
 
 
@@ -88,6 +91,9 @@ def save_normalization_spec(spec: NormalizationSpec) -> Path:
     path = normalization_spec_path(spec.package_key)
     with path.open("w", encoding="utf-8") as handle:
         yaml.safe_dump(spec.to_dict(), handle, sort_keys=False)
+    from core.data_layout import persist_path
+
+    persist_path(path)
     return path
 
 
@@ -95,6 +101,14 @@ def load_normalization_spec(package_key: str) -> NormalizationSpec | None:
     """Load an approved declarative normalizer profile for *package_key*."""
 
     path = normalization_spec_path(package_key)
+    if not path.is_file():
+        from core.data_layout import get_writable_root, materialize_relative
+
+        try:
+            rel = path.resolve().relative_to(get_writable_root().resolve())
+            materialize_relative(str(rel).replace("\\", "/"))
+        except ValueError:
+            pass
     if not path.is_file():
         return None
     with path.open(encoding="utf-8") as handle:
