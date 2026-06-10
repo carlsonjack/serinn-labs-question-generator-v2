@@ -88,16 +88,25 @@ def materialize(rel_path: str) -> Path | None:
 
     if not blob_should_sync():
         local = _local_path(rel_path)
-        return local if local.is_file() else None
+        return local if local.is_file() and local.stat().st_size > 0 else None
 
     rel = normalize_rel_path(rel_path)
+    if rel.endswith("/"):
+        return None
     local = _local_path(rel)
-    if local.is_file():
+    if local.is_file() and local.stat().st_size > 0:
         return local
 
     blob_key = blob_key_for(rel)
     if not _blob_exists(blob_key):
         return None
+
+    try:
+        meta = _get_client().head(blob_key)
+        if getattr(meta, "size", 1) == 0:
+            return None
+    except Exception:
+        pass
 
     try:
         _get_client().download_file(
@@ -109,8 +118,13 @@ def materialize(rel_path: str) -> Path | None:
         )
     except Exception as exc:
         logger.warning("Blob materialize failed for %s: %s", rel, exc)
-        return local if local.is_file() else None
+        if local.is_file() and local.stat().st_size == 0:
+            local.unlink(missing_ok=True)
+        return local if local.is_file() and local.stat().st_size > 0 else None
 
+    if local.is_file() and local.stat().st_size == 0:
+        local.unlink(missing_ok=True)
+        return None
     return local if local.is_file() else None
 
 
@@ -122,7 +136,7 @@ def persist(rel_path: str) -> None:
 
     rel = normalize_rel_path(rel_path)
     local = _local_path(rel)
-    if not local.is_file():
+    if not local.is_file() or local.stat().st_size == 0:
         return
 
     try:
@@ -191,8 +205,11 @@ def materialize_tree(prefix: str = "") -> None:
     while True:
         result = client.list_objects(prefix=blob_prefix, cursor=cursor)
         for item in result.blobs:
-            rel = rel_path_from_blob_key(item.pathname)
-            if rel:
+            pathname = item.pathname
+            if pathname.endswith("/") or getattr(item, "size", 1) == 0:
+                continue
+            rel = rel_path_from_blob_key(pathname)
+            if rel and not rel.endswith("/"):
                 materialize(rel)
         if not result.has_more:
             break

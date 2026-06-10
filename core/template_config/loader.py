@@ -25,6 +25,8 @@ def index_template_json_paths_by_id(directory: Path) -> dict[str, list[Path]]:
 
     materialize_tree("templates")
     for path in sorted(directory.glob("*.json")):
+        if not path.is_file() or path.stat().st_size == 0:
+            continue
         try:
             with path.open(encoding="utf-8") as fh:
                 raw = json.load(fh)
@@ -56,7 +58,12 @@ def load_template_dir(directory: Path | None = None) -> dict[str, QuestionTempla
 
     out: dict[str, QuestionTemplate] = {}
     for path in sorted(base.glob("*.json")):
-        t = load_template_file(path)
+        if not path.is_file() or path.stat().st_size == 0:
+            continue
+        try:
+            t = load_template_file(path)
+        except (OSError, json.JSONDecodeError, ValueError):
+            continue
         if t.id in out:
             raise ValueError(f"Duplicate template id {t.id!r} in {path} and earlier file")
         out[t.id] = t

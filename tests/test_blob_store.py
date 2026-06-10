@@ -9,9 +9,10 @@ import pytest
 
 
 class _FakeBlobItem:
-    def __init__(self, pathname: str) -> None:
+    def __init__(self, pathname: str, size: int | None = None) -> None:
         self.pathname = pathname
         self.url = f"https://blob.example/{pathname}"
+        self.size = size if size is not None else 1
 
 
 class _FakeListResult:
@@ -32,9 +33,10 @@ def blob_env(monkeypatch, tmp_path):
     store: dict[str, bytes] = {}
 
     class FakeClient:
-        def head(self, blob_key: str) -> None:
+        def head(self, blob_key: str):
             if blob_key not in store:
                 raise FileNotFoundError(blob_key)
+            return MagicMock(size=len(store[blob_key]))
 
         def upload_file(
             self,
@@ -81,7 +83,7 @@ def blob_env(monkeypatch, tmp_path):
 
         def list_objects(self, *, prefix=None, cursor=None, limit=None, mode=None):
             matched = [
-                _FakeBlobItem(k)
+                _FakeBlobItem(k, size=len(store[k]))
                 for k in sorted(store)
                 if prefix is None or k.startswith(prefix)
             ]
@@ -173,6 +175,19 @@ def test_merge_bundled_packages_into_existing_blob_settings(blob_env, monkeypatc
     merged = yaml.safe_load(local_settings.read_text(encoding="utf-8"))
     assert "ATP" in merged["inputs"]["files"]
     assert "mlb" in merged["inputs"]["files"]
+
+
+def test_materialize_tree_skips_zero_byte_blobs(blob_env) -> None:
+    writable, store, fake = blob_env
+    from core.blob_store import materialize_tree
+
+    store["serinn-labs/templates/"] = b""
+    store["serinn-labs/templates/valid.json"] = b'{"id":"t1"}'
+
+    materialize_tree("templates")
+    local = writable / "templates" / "valid.json"
+    assert local.is_file()
+    assert local.read_bytes() == b'{"id":"t1"}'
 
 
 def test_save_settings_yaml_persists_to_blob(blob_env, monkeypatch, tmp_path) -> None:
