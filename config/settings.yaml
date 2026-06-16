@@ -35,7 +35,7 @@ date_rules:
     resolution_offset_hours: 4
     resolution_offset_anchor: expiration
 batch_size: 100
-max_generated_questions: null
+max_generated_questions: 500
 event_generation:
   use_llm: false
 stocks:
@@ -70,6 +70,21 @@ inputs:
     F1:
       schedule: f1_schedule.xlsx
       stats: f1_standings.xlsx
+    NHL:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+    NWSL:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+    UFL:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+    WTA:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
+    XFL:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
     golf:
       event_source: schedule.xlsx
       metric_source: stats.xlsx
@@ -81,21 +96,15 @@ inputs:
       metric_source: stats.xlsx
     movies:
       releases: movies.xlsx
-    NHL:
-      event_source: schedule.xlsx
-      metric_source: stats.xlsx
-    NWSL:
-      event_source: schedule.xlsx
-      metric_source: stats.xlsx
     music:
       releases: music.xlsx
+    comics:
+      event_source: schedule.xlsx
+      metric_source: stats.xlsx
     stocks:
       metric_source: top-150-stocks.xlsx
     television:
       event_source: television.xlsx
-    WTA:
-      event_source: schedule.xlsx
-      metric_source: stats.xlsx
     wnba:
       event_source: schedule.xlsx
       metric_source: stats.xlsx
@@ -191,3 +200,15 @@ templates_enabled:
   music-mc-04: true
   music-award-01: true
   WNBA-007: true
+  WNBA-001: true
+  WNBA-002: true
+  WNBA-003: true
+  WNBA-004: true
+  WNBA-005: true
+  WNBA-006: true
+  WNBA-008: true
+  WNBA-009: true
+  WNBA-110: true
+  WNBA-111: true
+  WNBA-112: true
+  WNBA-113: true

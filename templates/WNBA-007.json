@@ -1,12 +1,15 @@
 {
   "id": "WNBA-007",
   "subcategory": "WNBA",
-  "question_family": "event",
+  "question_family": "entity_stat",
   "question": "Who will win the WNBA Championship?",
   "answer_type": "multiple_choice",
-  "answer_options": "{schedule_teams}",
+  "answer_options": "{entity_options}",
   "priority": 1,
-  "requires_entities": false,
+  "requires_entities": true,
+  "stat_column": "Teams",
+  "top_n_per_team": 20,
+  "notes": "Season-long championship; options = all WNBA teams (team_list). Source answer_type 'single_select'.",
   "_comment": null,
   "resolution_date_rule": "2026-10-21",
   "resolution_date_spec": {

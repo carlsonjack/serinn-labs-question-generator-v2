@@ -1,6 +1,278 @@
 # Serinn Labs — Structured Content Generation
 
-Local Python app that turns sports schedule / stats spreadsheets into upload-ready CSV question rows (MLB, MLS, World Cup–style layouts, F1, etc.). See **`# Epic: Structured Content Generation Sy.md`** for scope, architecture, and delivery checklist.
+Local Python app that turns sports schedule / stats spreadsheets into upload-ready CSV question rows (MLB, MLS, World Cup–style layouts, F1, WNBA, etc.). See **`# Epic: Structured Content Generation Sy.md`** for scope, architecture, and delivery checklist.
+
+---
+
+## Quick start
+
+From the project root:
+
+```bash
+python3.11 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+python main.py
+```
+
+Open the URL printed in the terminal (default [http://127.0.0.1:5000/](http://127.0.0.1:5000/)).
+
+**Windows (PowerShell)** — use these instead of the second line above:
+
+```powershell
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python main.py
+```
+
+**First-time API key:** copy [`.env.example`](.env.example) to `.env` and set your OpenAI key. You own this key and can rotate it anytime in `.env`:
+
+```bash
+cp .env.example .env
+# edit .env → OPENAI_API_KEY=sk-...
+```
+
+The app loads `.env` automatically on startup. An `OPENAI_API_KEY` in the environment or `.env` overrides `openai_api_key` in [`config/settings.yaml`](config/settings.yaml).
+
+In the UI: pick the **input package**, set **date range** / **topic import id** / **subcategory label** as needed, **upload** `.xlsx` files (and run **Save uploads + create normalizer profile** once if you use a new layout), enable templates, then **generate** and download the CSV.
+
+---
+
+## Operations guide
+
+Everything you need to install, run, troubleshoot, back up, and move this system.
+
+### Required software
+
+| Software | Purpose |
+|----------|---------|
+| **Python 3.10+** (3.11 recommended) | Runtime |
+| **pip** | Installs Python packages from `requirements.txt` |
+| **Git** | Clone and update the repository |
+
+No database server, Docker, or Node.js is required for local use.
+
+### Dependency versions
+
+Pinned in [`requirements.txt`](requirements.txt):
+
+| Package | Version range |
+|---------|---------------|
+| openai | ≥ 1.59.0, &lt; 2 |
+| pandas | ≥ 2.0.0, &lt; 3 |
+| openpyxl | ≥ 3.1.0, &lt; 4 |
+| flask | ≥ 3.0.0, &lt; 4 |
+| pyyaml | ≥ 6.0.0, &lt; 7 |
+| python-dateutil | ≥ 2.9.0, &lt; 3 |
+| jinja2 | ≥ 3.1.0, &lt; 4 |
+| python-dotenv | ≥ 1.0.0, &lt; 2 |
+| pytest | ≥ 7.4.0, &lt; 8 (dev/tests only) |
+| vercel | ≥ 0.5.0, &lt; 0.6 (optional; Vercel Blob sync) |
+
+Check your Python version: `python3 --version` or `python --version`. Install from [python.org/downloads](https://www.python.org/downloads/) if needed.
+
+### Supported operating systems
+
+| OS | Supported | Notes |
+|----|-----------|-------|
+| **macOS** | Yes | Primary local workflow. Use `source venv/bin/activate`. |
+| **Windows** | Yes | Use `venv\Scripts\Activate.ps1` (PowerShell) or `venv\Scripts\activate.bat` (cmd). |
+| **Linux** | Yes | Same commands as macOS. |
+
+This is a **local desktop workflow** — you run `python main.py` on your own machine and use the browser UI. An optional **Vercel** deployment exists for hosted use (see [Infrastructure](#infrastructure) below).
+
+### Installing and updating dependencies
+
+**Install (first time or after clone):**
+
+```bash
+python3.11 -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+**Update to latest allowed versions:**
+
+```bash
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt --upgrade
+```
+
+**If the environment is corrupted:** delete the `venv/` folder and recreate it with the install commands above.
+
+### Dependency failures — diagnose and fix
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `python: command not found` | Python not installed or not on PATH | Install Python 3.10+; on macOS try `python3.11` explicitly |
+| `No module named 'flask'` (or similar) | Virtualenv not activated or deps not installed | `source venv/bin/activate` then `pip install -r requirements.txt` |
+| `Requires-Python >=3.10` | Python too old | Upgrade Python |
+| `pip` errors / build failures | Stale pip or network issue | `pip install --upgrade pip` and retry; check internet connection |
+| Permission errors on `pip install` | Installing outside venv | Always activate `venv` first |
+
+### Service startup failures — diagnose and fix
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `Missing config file: config/settings.yaml` | Running from wrong directory or missing config | Run from project root; restore `config/settings.yaml` from git |
+| `Address already in use` | Port 5000 taken | Set `PORT=5001` in `.env` or stop the other process |
+| App exits immediately | Uncaught import error | Read the full traceback; reinstall deps (see above) |
+| Browser cannot connect | Wrong host/port or firewall | Use the exact URL printed by `python main.py`; default is `http://127.0.0.1:5000/` |
+
+Optional env vars (in `.env` or shell): `HOST`, `PORT`, `FLASK_DEBUG` — see [`.env.example`](.env.example).
+
+### Incorrect output — diagnose and fix
+
+After **Generate**, the UI shows a QA summary (row counts, validation failures, duplicates). Download the **output CSV** and any **errors CSV** linked from the run.
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Zero questions generated | **Date filter** excludes all events | Widen `date_filter.start` / `date_filter.end` in settings or the UI |
+| Wrong **topic_import_id** on rows | Step 6 / settings mismatch | Set `topic_import_id` in the UI or [`config/settings.yaml`](config/settings.yaml) |
+| Wrong teams or missing players | Schedule/stats **team label mismatch** | Update [`config/team_aliases/`](config/team_aliases/) for that league |
+| Empty answer options for player questions | Stats column name mismatch | Check template `stat_column` matches the normalized stats header (e.g. `PTS`, `HR`) |
+| Unexpected wording | LLM enabled | Default sports path is local (`event_generation.use_llm: false`); set `true` only if you want OpenAI to polish wording |
+
+See [How to use this properly](#how-to-use-this-properly-simple-map) for how inputs, templates, and export settings connect.
+
+### Normalization failures — diagnose and fix
+
+Normalization turns uploaded `.xlsx` files into parsed events and stats. Failures appear in the UI under **Save uploads + create normalizer profile** or in the generate status line.
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `No event rows in range` | All schedule dates outside **date_filter** | Widen the date window in settings/UI |
+| `All schedule row(s) failed to parse` | Column mapping wrong in normalizer profile | Re-upload; check saved profile under `config/input_profiles/normalizers/` |
+| `No data rows under the detected header` | Wrong sheet or empty file | Confirm the workbook matches the expected layout; check file is `.xlsx` |
+| Stats not joining to events | Team alias missing | Add aliases in `config/team_aliases/<league>.yaml` |
+| Wrong event times | Timezone not set | Set `event_datetime.timezone` in the normalizer profile, or rely on cached team→IANA lookups (requires API key) |
+
+### Upload failures — diagnose and fix
+
+**Input file uploads (schedule/stats):**
+
+| Symptom | Fix |
+|---------|-----|
+| Red error text in the upload area | Read the message; usually wrong file type, missing slot, or save permission issue |
+| Upload succeeds but generate finds no files | Confirm `inputs.category_key` matches the package you configured and files landed in `inputs/` |
+
+**Template uploads (JSON / CSV / Excel):**
+
+| Symptom | Fix |
+|---------|-----|
+| Per-file error in upload feedback | Fix the listed column/validation issue (missing `template_id`, bad `answer_type`, etc.) |
+| `Duplicate template id in upload` | Each template `id` must be unique in one upload batch |
+| `resolution_date_rule` compile error | Set a valid `OPENAI_API_KEY` in `.env`, or author `resolution_date_spec` by hand in JSON |
+| Nothing saved | Every row failed validation — read the error list; see [Template upload files](#template-upload-files-plain-english) |
+
+### Template compatibility issues — diagnose and fix
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Template not offered / zero matches | **`subcategory`** does not match input package | Template `subcategory` must normalize to the same key as `inputs.category_key` (case-insensitive) |
+| Template skipped during generate | Disabled in **`templates_enabled`** | Set that template id to `true` in settings or re-upload to enable |
+| `entity_stat` validation error | Missing `stat_column` or `requires_entities: true` | Fill required columns per [Question family](#question-family--what-each-value-means) |
+| Package alias confusion | Template label ≠ input key | Add `inputs.package_aliases` in settings (e.g. `formula_one: [F1, Formula 1]`) |
+
+### Package persistence — diagnose and fix
+
+An **input package** is the combination of `inputs.category_key`, slot filenames under `inputs.files`, uploaded files on disk, and any saved normalizer profile.
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Settings revert unexpectedly | Edited wrong file | Local truth: `config/settings.yaml` (+ optional gitignored `config/settings.local.yaml`) |
+| Uploaded `.xlsx` missing after restart | Files not saved to `inputs/` | Re-upload; confirm `inputs/` contains the expected filenames |
+| Normalizer profile lost | Profile not saved | Run **Save uploads + create normalizer profile** after upload |
+| **Vercel deploy:** data disappears between requests | Ephemeral `/tmp` without Blob | Link Vercel Blob and set `BLOB_READ_WRITE_TOKEN` (auto-provisioned on Vercel when Blob is linked) |
+
+Locally, mutable data lives under the repo: `inputs/`, `outputs/`, `templates/` (uploaded), `config/settings.yaml`, and `config/input_profiles/`. These paths are gitignored for user data except bundled config/templates in the repo.
+
+### Outages — diagnose and fix
+
+| Service | When it matters | What to do |
+|---------|-----------------|------------|
+| **OpenAI API** | Template `resolution_date_rule` compile, optional LLM wording, timezone inference | Check [platform.openai.com](https://platform.openai.com) status; verify billing/quota; confirm key in `.env` |
+| **Local app** | Always | Restart: `Ctrl+C`, then `python main.py` again |
+| **Vercel** (if deployed) | Hosted UI | Check [vercel-status.com](https://www.vercel-status.com); redeploy from dashboard if needed |
+
+Default **sports generation does not call OpenAI** (`event_generation.use_llm: false`). You can generate schedule/stats questions without a working API key unless you use the optional features above.
+
+### Backup and restore
+
+**What to back up:**
+
+| Path | Contents |
+|------|----------|
+| `.env` | API key and local server settings (not in git) |
+| `config/settings.yaml` | Active configuration |
+| `config/settings.local.yaml` | Optional local overrides (if present) |
+| `config/input_profiles/` | Normalizer profiles |
+| `inputs/` | Uploaded workbooks |
+| `outputs/` | Generated CSVs |
+| `templates/` | Uploaded/custom templates |
+| `config/team_aliases/` | Custom team alias edits |
+
+**Restore:** copy these paths back into a fresh clone, recreate `venv`, run `pip install -r requirements.txt`, and start the app.
+
+**On Vercel with Blob:** user data is mirrored to Vercel Blob when `BLOB_READ_WRITE_TOKEN` is set. Back up via the Vercel dashboard or export blobs; local git clone alone does not include Blob-stored uploads.
+
+### Migrating to another machine
+
+1. Clone or copy the repository.
+2. Copy `.env`, `config/`, `inputs/`, `outputs/`, and `templates/` from the old machine (see backup table).
+3. On the new machine:
+
+   ```bash
+   python3.11 -m venv venv && source venv/bin/activate
+   pip install -r requirements.txt
+   python main.py
+   ```
+
+4. Open the UI and confirm the input package, date range, and a test generate.
+
+Same OS not required — macOS ↔ Windows works if you use the correct venv activation command.
+
+### Infrastructure
+
+| Mode | What runs | Persistence |
+|------|-----------|-------------|
+| **Local (default)** | Flask dev server on your machine (`python main.py`) | Files on disk under the project directory |
+| **Vercel (optional)** | Serverless Python function + static UI | `/tmp` per instance; durable data via **Vercel Blob** when linked |
+
+No load balancer, queue, or separate worker process is required for local operation.
+
+### Databases
+
+**None.** All state is file-based: YAML settings, JSON templates, JSON/YAML profiles, `.xlsx` inputs, and CSV outputs.
+
+### Third-party services
+
+| Service | Required? | Used for |
+|---------|-----------|----------|
+| **OpenAI** | Optional for default sports runs | `resolution_date_rule` compilation on template upload; optional event wording (`event_generation.use_llm: true`); home-team timezone inference when timezone unset |
+| **Vercel Blob** | Only on Vercel deploy with persistence | Mirrors uploads, settings, outputs between serverless invocations |
+| **Vercel hosting** | Optional | Hosted deployment alternative to local |
+
+### Hosting environment
+
+- **Day-to-day operation:** your Mac or Windows PC, localhost browser UI.
+- **Optional production:** Vercel serverless (see `core/data_layout.py` and `core/blob_store.py`).
+
+### Credentials, config, and access
+
+| Item | Required? | Where |
+|------|-----------|-------|
+| **`OPENAI_API_KEY`** | Optional (required for some template/LLM features) | `.env` — **you own and rotate this key** |
+| **`config/settings.yaml`** | Yes | Committed defaults; UI writes changes here |
+| **`config/settings.local.yaml`** | No | Gitignored local overrides |
+| **`.env`** | Recommended | `OPENAI_API_KEY`, `HOST`, `PORT`, `FLASK_DEBUG`; optional `BLOB_READ_WRITE_TOKEN` on Vercel |
+| **[`.env.example`](.env.example)** | Reference | Template for variable names |
+| **Admin / cloud access** | Local: none beyond your machine | Vercel: your Vercel account if deployed |
+
+Never commit real API keys in tracked files. Prefer `.env` for secrets.
+
+---
 
 ## How to use this properly (simple map)
 
@@ -191,6 +463,17 @@ The machine schema lives in [`core/resolution_date_spec.py`](core/resolution_dat
 
 `metadata_field` requires `metadata_key` (snake_case, e.g. `estimated_nomination_date`, `second_weekend_start_date`).
 
+### Sports / events generation (no OpenAI by default)
+
+For schedule + stats packages (MLB, WNBA, MLS, etc.), question text and answer options are filled **locally from templates** unless you opt in to LLM wording:
+
+| Setting | Default | Meaning |
+|---------|---------|---------|
+| `event_generation.use_llm` | `false` | Fill `{home_team}`, `[HOME_TEAM]`, `{entity_options}`, etc. in code — **no API key required** to generate. |
+| `event_generation.use_llm` | `true` | Batched OpenAI calls polish question wording (requires `openai_api_key`). |
+
+OpenAI may still be used for **other** steps: compiling `resolution_date_rule` on template upload, and **home-team timezone inference** when the saved normalizer profile leaves `event_datetime.timezone` unset (e.g. WNBA). Those are separate from event question generation.
+
 ---
 
 ## Team aliases
@@ -228,95 +511,7 @@ Registered field normalizers: `f1`, `golf`.
 
 See [`config/settings.yaml`](config/settings.yaml) for a commented example with both `mlb` and `F1`.
 
-## Requirements
-
-- **Python 3.10+** (check with `python --version` or `python3 --version`)
-- If Python is missing or older than 3.10, install a current release from [python.org/downloads](https://www.python.org/downloads/)
-
-## Setup
-
-### 1. Virtual environment
-
-From the project root:
-
-```bash
-python -m venv venv
-```
-
-### 2. Activate the virtual environment
-
-**macOS / Linux:**
-
-```bash
-source venv/bin/activate
-```
-
-**Windows (Command Prompt):**
-
-```cmd
-venv\Scripts\activate.bat
-```
-
-**Windows (PowerShell):**
-
-```powershell
-venv\Scripts\Activate.ps1
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. OpenAI API key
-
-**Preferred:** set the environment variable so secrets are not stored in files tracked by git:
-
-**macOS / Linux:**
-
-```bash
-export OPENAI_API_KEY="sk-..."
-```
-
-**Windows (Command Prompt):**
-
-```cmd
-set OPENAI_API_KEY=sk-...
-```
-
-**Windows (PowerShell):**
-
-```powershell
-$env:OPENAI_API_KEY = "sk-..."
-```
-
-If `OPENAI_API_KEY` is set, it overrides any key in [`config/settings.yaml`](config/settings.yaml).
-
-**Optional:** copy values you want to override into `config/settings.local.yaml` (gitignored). Use that file for local tweaks such as `model` or `date_filter`. Do **not** commit real API keys in `settings.yaml` or any tracked file.
-
-See also [`.env.example`](.env.example) for variable names you can set manually (this project does not load `.env` automatically unless you add a loader later).
-
-## Run
-
-```bash
-python main.py
-```
-
-Open the URL printed in the terminal (default [http://127.0.0.1:5000/](http://127.0.0.1:5000/)). Optional environment variables: `HOST`, `PORT`, `FLASK_DEBUG` (see `.env.example`).
-
-In the UI: pick the **input package**, set **date range** / **topic import id** / **subcategory label** as needed, **upload** `.xlsx` files (and run **Save uploads + create normalizer profile** once if you use a new layout), enable templates, then **generate** and download the CSV.
-
-### Sports / events generation (no OpenAI by default)
-
-For schedule + stats packages (MLB, WNBA, MLS, etc.), question text and answer options are filled **locally from templates** unless you opt in to LLM wording:
-
-| Setting | Default | Meaning |
-|---------|---------|---------|
-| `event_generation.use_llm` | `false` | Fill `{home_team}`, `[HOME_TEAM]`, `{entity_options}`, etc. in code — **no API key required** to generate. |
-| `event_generation.use_llm` | `true` | Previous behavior: batched OpenAI calls polish question wording (requires `openai_api_key`). |
-
-OpenAI may still be used for **other** steps: compiling `resolution_date_rule` on template upload, and **home-team timezone inference** when the saved normalizer profile leaves `event_datetime.timezone` unset (e.g. WNBA). Those are separate from event question generation.
+---
 
 ## Adding a new client category
 
@@ -335,11 +530,11 @@ The shared matrix intentionally uses mocked generation. This proves parser/templ
 
 | Command | Purpose |
 |--------|---------|
-| `.venv/bin/python -m pytest` | Full default suite. Exhaustive/live checks are skipped unless explicitly enabled. |
-| `.venv/bin/python -m pytest -m integration` | Parser registry, bundle loading, and deterministic pipeline matrix tests. |
-| `.venv/bin/python -m pytest -m "not needs_local_inputs and not live_openai and not exhaustive"` | CI-safe gate excluding local client files, live OpenAI, and exhaustive-only cases. |
-| `RUN_EXHAUSTIVE_TESTS=1 .venv/bin/python -m pytest -m exhaustive` | Pre-delivery edge-case matrix expansion. |
-| `RUN_LIVE_OPENAI_TESTS=1 OPENAI_API_KEY=... .venv/bin/python -m pytest -m live_openai` | Optional live provider smoke tests when such tests exist. |
+| `venv/bin/python -m pytest` | Full default suite. Exhaustive/live checks are skipped unless explicitly enabled. |
+| `venv/bin/python -m pytest -m integration` | Parser registry, bundle loading, and deterministic pipeline matrix tests. |
+| `venv/bin/python -m pytest -m "not needs_local_inputs and not live_openai and not exhaustive"` | CI-safe gate excluding local client files, live OpenAI, and exhaustive-only cases. |
+| `RUN_EXHAUSTIVE_TESTS=1 venv/bin/python -m pytest -m exhaustive` | Pre-delivery edge-case matrix expansion. |
+| `RUN_LIVE_OPENAI_TESTS=1 OPENAI_API_KEY=... venv/bin/python -m pytest -m live_openai` | Optional live provider smoke tests when such tests exist. |
 
 Factories for `.xlsx` files live in [`tests/fixtures/workbooks.py`](tests/fixtures/workbooks.py). Add new vertical checks beside [`tests/integration/test_f1_bundle_load.py`](tests/integration/test_f1_bundle_load.py).
 
